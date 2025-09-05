@@ -1,0 +1,2 @@
+# openchart
+Diagrams for all
