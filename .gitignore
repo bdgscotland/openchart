@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Testing and screenshots
+.playwright-mcp/
+playwright-report/
+test-results/
+*.png
+*.jpg
+*.jpeg
+screenshots/
+
+# Temporary files
+*.tmp
+*.temp
+.env.local
+.env

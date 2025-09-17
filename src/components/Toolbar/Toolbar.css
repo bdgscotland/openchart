@@ -1,375 +1,263 @@
-/* Import CSS variables from App.css */
+/* Professional Vertical Toolbar - 64px Wide */
 .toolbar {
-  width: 200px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-right: 1px solid var(--glass-border);
-  padding: 0.75rem;
+  width: 64px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-default);
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   height: 100%;
-  overflow-y: auto;
+  overflow: visible;
   box-sizing: border-box;
-  box-shadow: var(--shadow-lg);
   position: relative;
-  animation: slideInLeft 0.8s var(--spring) 0.1s both;
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.toolbar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 1px;
-  height: 100%;
-  background: linear-gradient(180deg, 
-    transparent 0%, 
-    var(--accent-primary) 25%, 
-    var(--accent-secondary) 75%, 
-    transparent 100%);
-  animation: shimmerVertical 4s ease-in-out infinite;
-}
-
-@keyframes shimmerVertical {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.8; }
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  z-index: 100;
 }
 
 .toolbar-section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  background: var(--primary-surface);
-  border: 1px solid var(--primary-border);
-  border-radius: 12px;
-  padding: 0.75rem;
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-md);
-  position: relative;
-  overflow: hidden;
-  transition: all var(--transition-normal);
+  gap: var(--space-2);
+  width: 100%;
 }
 
-.toolbar-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    var(--accent-primary) 0%, 
-    var(--accent-secondary) 100%);
-  opacity: 0.8;
-}
-
-.toolbar-section:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(0, 212, 255, 0.3);
-}
-
-.toolbar-section h3 {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--primary-text);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  position: relative;
-}
-
-.toolbar-section h3::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    var(--primary-border) 0%, 
-    transparent 100%);
-}
-
-/* Tools Grid */
+/* Professional Tool Grid - Single Column */
 .tool-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.4rem;
-}
-
-.tool-button {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+/* Professional Tool Buttons */
+.tool-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
-  border: 1px solid var(--primary-border);
+  padding: 0;
+  border: 1px solid transparent;
   border-radius: 8px;
-  background: var(--primary-surface);
+  background: transparent;
   cursor: pointer;
-  transition: all var(--transition-normal);
-  min-height: 50px;
+  transition: all var(--transition-fast);
   position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(5px);
+  overflow: visible;
+  color: var(--primary-text-secondary);
+}
+
+/* Hover State */
+.tool-button:hover {
+  background: var(--primary-surface-hover);
+  border-color: var(--border-hover);
+  color: var(--primary-text);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Active State - Professional Blue */
+.tool-button.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+
+.tool-button.active:hover {
+  background: var(--accent-primary-hover);
+  border-color: var(--accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Icon Styling */
+.tool-icon {
+  stroke-width: 2;
+  transition: all var(--transition-fast);
+}
+
+.tool-button:hover .tool-icon {
+  stroke-width: 2.5;
+}
+
+.tool-button.active .tool-icon {
+  stroke-width: 2.5;
+}
+
+/* Tooltips */
+.tool-button::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--surface);
+  color: var(--primary-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 6px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+  pointer-events: none;
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
 }
 
 .tool-button::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(0, 212, 255, 0.1) 0%, 
-    rgba(139, 92, 246, 0.1) 100%);
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 6px 4px 0;
+  border-color: transparent var(--surface) transparent transparent;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  visibility: hidden;
+  transition: all var(--transition-normal);
+  pointer-events: none;
+  z-index: 1000;
 }
 
-.tool-button:hover {
-  border-color: var(--accent-primary);
-  background: var(--primary-surface-hover);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
-}
-
+.tool-button:hover::after,
 .tool-button:hover::before {
   opacity: 1;
+  visibility: visible;
+  transition-delay: 500ms;
 }
 
-.tool-button.active {
-  border-color: var(--accent-primary);
-  background: var(--primary-surface-active);
-  box-shadow: 
-    var(--shadow-md), 
-    0 0 25px rgba(0, 212, 255, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transform: scale(1.05);
+/* Focus States */
+.tool-button:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
-.tool-button.active::before {
-  opacity: 0.8;
-}
-
-.tool-button:active {
-  transform: translateY(-1px) scale(0.98);
-  transition: transform 0.1s ease;
-}
-
-.tool-icon {
-  font-size: 1.2rem;
-  margin-bottom: 0.25rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  transition: all var(--transition-fast);
-}
-
-.tool-button:hover .tool-icon {
-  transform: scale(1.1);
-  filter: drop-shadow(0 4px 8px rgba(0, 212, 255, 0.4));
-}
-
-.tool-button.active .tool-icon {
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 10px var(--accent-primary));
-}
-
-.tool-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--primary-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: color var(--transition-fast);
-}
-
-.tool-button:hover .tool-label,
-.tool-button.active .tool-label {
-  color: var(--primary-text);
-}
-
-/* Button Groups */
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.toolbar-button {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--primary-border);
-  border-radius: 8px;
-  background: var(--primary-surface);
-  color: var(--primary-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 0.75rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.75rem;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(5px);
-}
-
-.toolbar-button::before {
+/* Dividers between tool groups */
+.tool-grid::after {
   content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(0, 212, 255, 0.1) 50%, 
-    transparent 100%);
-  transition: left 0.4s ease;
+  height: 1px;
+  background: var(--border-default);
+  margin: var(--space-2) 0;
+  opacity: 0.5;
 }
 
-.toolbar-button:hover:not(:disabled) {
-  background: var(--primary-surface-hover);
-  border-color: var(--accent-primary);
-  color: var(--primary-text);
-  transform: translateY(-1px) translateX(3px);
-  box-shadow: var(--shadow-sm);
+/* Remove divider from last section */
+.toolbar-section:last-child .tool-grid::after {
+  display: none;
 }
 
-.toolbar-button:hover:not(:disabled)::before {
-  left: 100%;
+/* Professional entrance animation */
+.toolbar {
+  animation: slideInFromLeft 300ms var(--spring);
 }
 
-.toolbar-button:active:not(:disabled) {
-  transform: translateY(0) translateX(1px);
-  transition: transform 0.1s ease;
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
-.toolbar-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  background: var(--primary-surface);
-  color: var(--primary-text-tertiary);
+/* Tool button staggered entrance */
+.tool-button {
+  animation: fadeInScale 200ms var(--spring) both;
 }
 
-.toolbar-button.small {
-  padding: 0.625rem 0.875rem;
-  font-size: 0.8rem;
-  gap: 0.5rem;
-}
+.tool-button:nth-child(1) { animation-delay: 50ms; }
+.tool-button:nth-child(2) { animation-delay: 100ms; }
+.tool-button:nth-child(3) { animation-delay: 150ms; }
+.tool-button:nth-child(4) { animation-delay: 200ms; }
+.tool-button:nth-child(5) { animation-delay: 250ms; }
+.tool-button:nth-child(6) { animation-delay: 300ms; }
+.tool-button:nth-child(7) { animation-delay: 350ms; }
+.tool-button:nth-child(8) { animation-delay: 400ms; }
+.tool-button:nth-child(9) { animation-delay: 450ms; }
+.tool-button:nth-child(10) { animation-delay: 500ms; }
+.tool-button:nth-child(11) { animation-delay: 550ms; }
 
-/* Enhanced scrollbar for toolbar */
-.toolbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.toolbar::-webkit-scrollbar-track {
-  background: var(--primary-surface);
-  border-radius: 3px;
-}
-
-.toolbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, 
-    var(--accent-primary) 0%, 
-    var(--accent-secondary) 100%);
-  border-radius: 3px;
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
-}
-
-.toolbar::-webkit-scrollbar-thumb:hover {
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-}
-
-/* Floating action effects */
-.toolbar-section:nth-child(1) { animation-delay: 0.1s; }
-.toolbar-section:nth-child(2) { animation-delay: 0.2s; }
-.toolbar-section:nth-child(3) { animation-delay: 0.3s; }
-.toolbar-section:nth-child(4) { animation-delay: 0.4s; }
-
-.toolbar-section {
-  animation: floatIn 0.8s var(--spring) both;
-}
-
-@keyframes floatIn {
+@keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: translateX(-30px) translateY(20px);
+    transform: scale(0.8) translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateX(0) translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
-/* Premium focus states */
-.tool-button:focus-visible,
-.toolbar-button:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 3px;
-  border-radius: 12px;
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
   .toolbar {
-    width: 240px;
-    padding: 1rem;
-    gap: 1rem;
-  }
-  
-  .toolbar-section {
-    padding: 1rem;
-  }
-  
-  .tool-grid {
-    grid-template-columns: 1fr;
+    width: 56px;
+    padding: var(--space-2);
   }
   
   .tool-button {
-    flex-direction: row;
-    justify-content: flex-start;
-    min-height: 60px;
-    padding: 0.875rem;
+    width: 36px;
+    height: 36px;
   }
   
   .tool-icon {
-    margin-bottom: 0;
-    margin-right: 0.75rem;
-    font-size: 1.25rem;
-  }
-  
-  .tool-label {
-    text-align: left;
+    width: 18px;
+    height: 18px;
   }
 }
 
-@media (max-width: 480px) {
-  .toolbar {
-    width: 200px;
-    padding: 0.75rem;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tool-button {
+    border-width: 2px;
   }
   
-  .toolbar-section {
-    padding: 0.875rem;
-    gap: 0.75rem;
+  .tool-button.active {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .toolbar,
+  .tool-button,
+  .tool-icon,
+  .tool-button::after,
+  .tool-button::before {
+    animation: none;
+    transition: none;
   }
   
-  .toolbar-section h3 {
-    font-size: 0.8rem;
+  .tool-button:hover {
+    transform: none;
   }
+}
+
+/* Accessibility improvements */
+.tool-button[aria-pressed="true"] {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
+.tool-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--primary-text-disabled);
+}
+
+.tool-button:disabled:hover {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
 }

@@ -1,0 +1,198 @@
+/* React Flow Canvas Styling */
+.flow-canvas-wrapper {
+  width: 100%;
+  height: 100%;
+  background: #0a0a0b;
+  position: relative;
+}
+
+/* Override React Flow defaults for dark theme */
+.react-flow {
+  background: #0a0a0b;
+}
+
+.react-flow__renderer {
+  background: #0a0a0b;
+}
+
+/* Custom node styling */
+.shape-node-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Connection handles */
+.connection-handle {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 2px solid #0066ff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.shape-node-container:hover .connection-handle {
+  opacity: 1;
+}
+
+.react-flow__handle-connecting {
+  opacity: 1 !important;
+  background: #0066ff !important;
+}
+
+/* Edge styling */
+.react-flow__edge-path {
+  stroke: #6b7280;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #0066ff;
+  stroke-width: 3;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #0066ff;
+  stroke-width: 2.5;
+}
+
+/* Controls styling */
+.flow-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(17, 17, 20, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.flow-controls button {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flow-controls button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #0066ff;
+}
+
+.flow-controls button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Panel styling */
+.flow-panel {
+  background: rgba(17, 17, 20, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.flow-stats {
+  color: #a1a1aa;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* MiniMap styling */
+.flow-minimap {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(17, 17, 20, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.flow-minimap .react-flow__minimap-mask {
+  fill: rgba(0, 0, 0, 0.7);
+}
+
+.flow-minimap .react-flow__minimap-node {
+  fill: #ffffff;
+  stroke: #6b7280;
+  stroke-width: 1;
+}
+
+/* Selection box */
+.react-flow__selection {
+  background: rgba(0, 102, 255, 0.1);
+  border: 1px solid #0066ff;
+}
+
+/* Background dots */
+.react-flow__background pattern circle {
+  fill: rgba(255, 255, 255, 0.05);
+}
+
+/* Node selection */
+.react-flow__node.selected {
+  outline: none !important;
+}
+
+/* Smooth animations */
+.react-flow__node {
+  transition: transform 0.2s ease;
+}
+
+.react-flow__node:active {
+  cursor: grabbing;
+}
+
+/* Attribution removal (for pro version) */
+.react-flow__attribution {
+  display: none;
+}
+
+/* Resize handles */
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #0066ff;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.resize-handle-nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+
+.resize-handle-ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+
+.resize-handle-sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+
+.resize-handle-se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}

@@ -1,7 +1,14 @@
 # OpenChart Development Configuration
 
 ## 🎯 Project Overview
-OpenChart is an open-source, git-backed diagramming platform built with React + TypeScript + Canvas API. This is a Lucidchart alternative focused on transparency, portability, and version control.
+OpenChart is an open-source, git-backed diagramming platform built with React + TypeScript + React Flow. This is a Lucidchart alternative focused on transparency, portability, and version control.
+
+## ⚠️ IMPORTANT: Development Guidelines
+- **NEVER claim this is production-ready** - It's an early prototype
+- **Be honest about limitations** - Many features are incomplete or missing
+- **Keep it real** - This is a work in progress, not a Lucidchart killer
+- **Focus on what works** - Basic diagramming, save/load, simple shapes
+- **Acknowledge what doesn't** - No real resize, limited edge types, no undo/redo yet
 
 ## 🛠️ Required Development Tools
 
@@ -10,11 +17,35 @@ OpenChart is an open-source, git-backed diagramming platform built with React + 
 - **Context7 MCP**: ALWAYS use for up-to-date third-party library documentation  
 - **Sequential Thinking MCP**: ALWAYS use for any decision-making processes
 - **Playwright MCP**: ALWAYS use for frontend testing and browser automation
+- **openchart-data-persistence Agent**: ALWAYS use when:
+  - Adding new features that need to be saved/loaded
+  - Modifying node or edge properties
+  - Debugging save/load issues
+  - Changing the canvas state management
+  - Testing diagram persistence
+  - Updating React Flow integration
+
+### Data Persistence Agent Usage
+
+**MUST use openchart-data-persistence agent for:**
+- ANY changes to node/edge structure or properties
+- Before merging features that add new visual elements
+- When React Flow is updated or reconfigured  
+- If save/load functionality appears broken
+- Adding new shape types or connection types
+- Implementing features like layers, groups, or templates
+
+**The agent will:**
+- Ensure all new properties are serialized
+- Test save/load round-trip integrity
+- Update JSON schema documentation
+- Verify React Flow state synchronization
+- Add migration logic if schema changes
 
 ### Technology Stack
 - **Frontend**: React + TypeScript + Vite
-- **Canvas Rendering**: Konva.js or Fabric.js
-- **State Management**: Zustand
+- **Canvas Rendering**: React Flow (NOT Konva.js anymore)
+- **State Management**: React state + React Flow internal state
 - **Version Control**: isomorphic-git
 - **File Format**: JSON schema for diagrams
 - **Testing**: Playwright for E2E, Jest for unit tests
@@ -82,13 +113,27 @@ src/
 
 ## 🚀 Development Commands
 
-### Setup & Development
+### Quick Start
+```bash
+./start.sh               # Complete startup with checks (RECOMMENDED)
+```
+
+### Manual Commands
 ```bash
 npm install              # Install dependencies
 npm run dev             # Start development server
 npm run build           # Production build
 npm run preview         # Preview production build
 ```
+
+### Startup Script Details
+The `start.sh` script performs the following:
+1. Verifies Node.js 18+ is installed
+2. Installs/updates dependencies if needed
+3. Runs TypeScript type checking
+4. Runs ESLint for code quality
+5. Cleans previous build artifacts
+6. Starts the Vite development server on http://localhost:5173
 
 ### Testing Commands
 ```bash
@@ -141,9 +186,9 @@ npm run format          # Prettier formatting
 ### Primary Dependencies
 - **React**: Component framework
 - **TypeScript**: Type safety
-- **Konva.js/Fabric.js**: Canvas manipulation
-- **Zustand**: Lightweight state management
-- **isomorphic-git**: Git operations in browser
+- **React Flow**: Node-based diagramming engine
+- **Lucide React**: Professional icon library
+- **html-to-image**: Export functionality
 - **Vite**: Build tool and dev server
 
 ### Testing Dependencies  
@@ -178,11 +223,11 @@ mcp__serena__find_symbol --name_path="Canvas/handleMouseDown" --include_body=tru
 mcp__serena__find_referencing_symbols --name_path="Canvas" --relative_path="src/components/Canvas/Canvas.tsx"
 ```
 
-### Researching Konva.js API
+### Researching React Flow API
 ```bash
-# Get Konva documentation
-mcp__context7__resolve-library-id --libraryName="konva"
-mcp__context7__get-library-docs --context7CompatibleLibraryID="/konvajs/konva" --topic="canvas shapes"
+# Get React Flow documentation
+mcp__context7__resolve-library-id --libraryName="reactflow"
+mcp__context7__get-library-docs --context7CompatibleLibraryID="/reactflow/reactflow" --topic="nodes edges"
 ```
 
 ### Testing Canvas Interactions
