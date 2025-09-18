@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { ToolbarComponent, type DrawingTool } from './components/Toolbar/ToolbarComponent';
 import { FlowCanvas } from './components/Canvas/FlowCanvas';
 import { MenuBar } from './components/MenuBar/MenuBar';
@@ -11,6 +11,9 @@ function App() {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [canUndo] = useState(false);
   const [canRedo] = useState(false);
+  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+  const [copiedNodes, setCopiedNodes] = useState<any[]>([]);
+  const flowRef = useRef<any>(null);
 
   // Menu handlers
   const handleNewDiagram = useCallback(() => {
@@ -19,7 +22,14 @@ function App() {
   }, []);
 
   const handleSaveDiagram = useCallback(() => {
-    const diagram = { nodes, edges };
+    // Get viewport from React Flow instance
+    const viewport = flowRef.current?.getViewport() || { x: 0, y: 0, zoom: 1 };
+    const diagram = { 
+      nodes, 
+      edges,
+      viewport,
+      version: '1.0.0'
+    };
     const dataStr = JSON.stringify(diagram, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
@@ -31,26 +41,47 @@ function App() {
   }, [nodes, edges]);
 
   const handleLoadDiagram = useCallback(() => {
+    console.log('Load Diagram clicked');
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    input.onchange = (e) => {
+    input.style.cssText = 'position: fixed; top: -1000px; left: -1000px;';
+    
+    input.addEventListener('change', (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const diagram = JSON.parse(e.target?.result as string);
+            console.log('Loading diagram:', diagram);
             setNodes(diagram.nodes || []);
             setEdges(diagram.edges || []);
+            // Restore viewport if available
+            if (diagram.viewport && flowRef.current) {
+              setTimeout(() => {
+                flowRef.current.setViewport(diagram.viewport);
+              }, 100);
+            }
           } catch (error) {
+            console.error('Error loading diagram:', error);
             alert('Error loading diagram: Invalid file format');
           }
+          // Clean up
+          document.body.removeChild(input);
         };
         reader.readAsText(file);
+      } else {
+        // Clean up if no file selected
+        document.body.removeChild(input);
       }
-    };
-    input.click();
+    });
+    
+    document.body.appendChild(input);
+    // Use setTimeout to ensure the element is in the DOM before clicking
+    setTimeout(() => {
+      input.click();
+    }, 10);
   }, []);
 
   const handleExportPNG = useCallback(async () => {
@@ -212,6 +243,152 @@ function App() {
     console.log('Redo not yet implemented');
   }, []);
 
+  const handleToggleGrid = useCallback(() => {
+    if (flowRef.current?.toggleGrid) {
+      flowRef.current.toggleGrid();
+    }
+  }, []);
+
+  const handleToggleRulers = useCallback(() => {
+    // TODO: Implement rulers
+    console.log('Rulers not yet implemented');
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent shortcuts when typing in input fields
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Delete selected nodes
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+        if (selectedNodeIds.length > 0) {
+          setNodes(nodes => nodes.filter(n => !selectedNodeIds.includes(n.id)));
+          setEdges(edges => edges.filter(e => 
+            !selectedNodeIds.includes(e.source) && !selectedNodeIds.includes(e.target)
+          ));
+        }
+      }
+
+      // Copy (Ctrl+C / Cmd+C)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        e.preventDefault();
+        const selectedNodesToCopy = nodes.filter(n => n.selected);
+        if (selectedNodesToCopy.length > 0) {
+          setCopiedNodes(selectedNodesToCopy);
+        }
+      }
+
+      // Paste (Ctrl+V / Cmd+V)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        e.preventDefault();
+        if (copiedNodes.length > 0) {
+          const pasteOffset = 50;
+          const newNodes = copiedNodes.map((node, index) => ({
+            ...node,
+            id: `${node.id}_copy_${Date.now()}_${index}`,
+            position: {
+              x: node.position.x + pasteOffset,
+              y: node.position.y + pasteOffset,
+            },
+            selected: false,
+          }));
+          setNodes(nodes => [...nodes.map(n => ({ ...n, selected: false })), ...newNodes]);
+        }
+      }
+
+      // Select All (Ctrl+A / Cmd+A)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        setNodes(nodes => nodes.map(n => ({ ...n, selected: true })));
+      }
+
+      // Save (Ctrl+S / Cmd+S)
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveDiagram();
+      }
+
+      // New (Ctrl+N / Cmd+N)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        if (confirm('Create a new diagram? Any unsaved changes will be lost.')) {
+          handleNewDiagram();
+        }
+      }
+
+      // Open (Ctrl+O / Cmd+O)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+        e.preventDefault();
+        handleLoadDiagram();
+      }
+
+      // Undo (Ctrl+Z / Cmd+Z)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+
+      // Redo (Ctrl+Shift+Z / Cmd+Shift+Z or Ctrl+Y / Cmd+Y)
+      if (((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z') || 
+          ((e.ctrlKey || e.metaKey) && e.key === 'y')) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [nodes, edges, copiedNodes, handleSaveDiagram, handleNewDiagram, handleLoadDiagram, handleUndo, handleRedo]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      if (nodes.length > 0 || edges.length > 0) {
+        const viewport = flowRef.current?.getViewport() || { x: 0, y: 0, zoom: 1 };
+        const diagram = { 
+          nodes, 
+          edges,
+          viewport,
+          version: '1.0.0',
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('openchart-autosave', JSON.stringify(diagram));
+        console.log('Auto-saved diagram');
+      }
+    }, 30000); // Auto-save every 30 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [nodes, edges]);
+
+  // Load auto-saved diagram on mount
+  useEffect(() => {
+    const autosaved = localStorage.getItem('openchart-autosave');
+    if (autosaved && nodes.length === 0 && edges.length === 0) {
+      try {
+        const diagram = JSON.parse(autosaved);
+        const lastSaved = new Date(diagram.timestamp);
+        const minutesAgo = Math.floor((Date.now() - lastSaved.getTime()) / 60000);
+        
+        if (confirm(`Found auto-saved diagram from ${minutesAgo} minutes ago. Would you like to restore it?`)) {
+          setNodes(diagram.nodes || []);
+          setEdges(diagram.edges || []);
+          if (diagram.viewport && flowRef.current) {
+            setTimeout(() => {
+              flowRef.current.setViewport(diagram.viewport);
+            }, 100);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load auto-saved diagram:', error);
+      }
+    }
+  }, []); // Only run on mount
+
   return (
     <div className="app">
       <MenuBar
@@ -226,6 +403,8 @@ function App() {
         onRedo={handleRedo}
         canUndo={canUndo}
         canRedo={canRedo}
+        onToggleGrid={handleToggleGrid}
+        onToggleRulers={handleToggleRulers}
       />
       
       <header className="app-header">
@@ -244,6 +423,7 @@ function App() {
           />
           <div className="canvas-area">
             <FlowCanvas
+              ref={flowRef}
               initialNodes={nodes}
               initialEdges={edges}
               onNodesChange={setNodes}

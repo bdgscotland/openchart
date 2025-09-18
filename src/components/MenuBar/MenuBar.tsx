@@ -13,6 +13,8 @@ export interface MenuBarProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onToggleGrid?: () => void;
+  onToggleRulers?: () => void;
 }
 
 interface MenuItem {
@@ -36,6 +38,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onRedo,
   canUndo,
   canRedo,
+  onToggleGrid,
+  onToggleRulers,
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
@@ -92,8 +96,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({
       { label: 'Zoom to Fit', onClick: () => {}, shortcut: 'Ctrl+0' },
       { label: 'Actual Size', onClick: () => {}, shortcut: 'Ctrl+1' },
       { separator: true, label: '' },
-      { label: 'Show Grid', onClick: () => {} },
-      { label: 'Show Rulers', onClick: () => {} },
+      { label: 'Show Grid', onClick: onToggleGrid || (() => {}) },
+      { label: 'Show Rulers', onClick: onToggleRulers || (() => {}) },
     ],
   };
 

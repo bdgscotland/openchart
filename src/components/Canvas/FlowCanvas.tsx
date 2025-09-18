@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useMemo, useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useCallback, useRef, useMemo, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
 import ReactFlow, {
   Controls,
   Background,
@@ -233,57 +233,38 @@ const ShapeNode: React.FC<NodeProps> = ({ data, selected, id }) => {
 
   return (
     <div className="shape-node-container" onDoubleClick={handleDoubleClick}>
+      {/* Single handle per position that acts as both source AND target */}
       <Handle
-        type="target"
+        type="source"
         position={Position.Top}
         id="top"
-        className="connection-handle"
+        isConnectable={true}
+        isConnectableStart={true}
+        isConnectableEnd={true}
       />
       <Handle
         type="source"
-        position={Position.Top}
-        id="top-source"
-        className="connection-handle"
-        style={{ top: -2 }}
-      />
-      <Handle
-        type="target"
         position={Position.Right}
         id="right"
-        className="connection-handle"
+        isConnectable={true}
+        isConnectableStart={true}
+        isConnectableEnd={true}
       />
       <Handle
         type="source"
-        position={Position.Right}
-        id="right-source"
-        className="connection-handle"
-        style={{ right: -2 }}
-      />
-      <Handle
-        type="target"
         position={Position.Bottom}
         id="bottom"
-        className="connection-handle"
+        isConnectable={true}
+        isConnectableStart={true}
+        isConnectableEnd={true}
       />
       <Handle
         type="source"
-        position={Position.Bottom}
-        id="bottom-source"
-        className="connection-handle"
-        style={{ bottom: -2 }}
-      />
-      <Handle
-        type="target"
         position={Position.Left}
         id="left"
-        className="connection-handle"
-      />
-      <Handle
-        type="source"
-        position={Position.Left}
-        id="left-source"
-        className="connection-handle"
-        style={{ left: -2 }}
+        isConnectable={true}
+        isConnectableStart={true}
+        isConnectableEnd={true}
       />
       
       {getShapeElement()}
@@ -312,12 +293,12 @@ interface FlowCanvasProps {
   initialEdges?: any[];
 }
 
-const FlowCanvasContent: React.FC<FlowCanvasProps> = ({
+const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
   onNodesChange,
   onEdgesChange,
   initialNodes = [],
   initialEdges = [],
-}) => {
+}, ref) => {
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
   
@@ -330,11 +311,32 @@ const FlowCanvasContent: React.FC<FlowCanvasProps> = ({
     setEdges(initialEdges);
   }, [initialEdges, setEdges]);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { project } = useReactFlow();
+  const { project, getViewport, setViewport } = useReactFlow();
   const [nodeId, setNodeId] = useState(1);
+  const [showGrid, setShowGrid] = useState(true);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string } | null>(null);
+  
+  // Expose viewport methods to parent
+  useImperativeHandle(ref, () => ({
+    getViewport,
+    setViewport,
+    toggleGrid: () => setShowGrid(prev => !prev),
+  }), [getViewport, setViewport]);
 
   const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    (params: any) => {
+      const newEdge = {
+        ...params,
+        type: 'smoothstep',
+        label: 'Label',
+        labelStyle: { fill: '#ffffff', fontWeight: 500 },
+        labelBgStyle: { fill: '#1a1a1a', fillOpacity: 0.9 },
+        labelBgPadding: [8, 4],
+        labelBgBorderRadius: 4,
+        data: { label: 'Label' },
+      };
+      setEdges((eds) => addEdge(newEdge, eds));
+    },
     [setEdges]
   );
 
@@ -388,6 +390,84 @@ const FlowCanvasContent: React.FC<FlowCanvasProps> = ({
     event.dataTransfer.dropEffect = 'copy';
   }, []);
 
+  // Handle right-click context menu
+  const onNodeContextMenu = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      event.preventDefault();
+      setContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        nodeId: node.id,
+      });
+    },
+    []
+  );
+
+  const onPaneContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
+      if (reactFlowBounds) {
+        const position = project({
+          x: event.clientX - reactFlowBounds.left,
+          y: event.clientY - reactFlowBounds.top,
+        });
+        setContextMenu({
+          x: event.clientX,
+          y: event.clientY,
+        });
+      }
+    },
+    [project]
+  );
+
+  // Close context menu on click
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  // Handle context menu actions
+  const handleContextMenuAction = useCallback(
+    (action: string) => {
+      if (contextMenu?.nodeId) {
+        switch (action) {
+          case 'delete':
+            setNodes((nds) => nds.filter((n) => n.id !== contextMenu.nodeId));
+            setEdges((eds) => eds.filter((e) => 
+              e.source !== contextMenu.nodeId && e.target !== contextMenu.nodeId
+            ));
+            break;
+          case 'duplicate':
+            const nodeToDuplicate = nodes.find(n => n.id === contextMenu.nodeId);
+            if (nodeToDuplicate) {
+              const newNode = {
+                ...nodeToDuplicate,
+                id: `node_${nodeId}`,
+                position: {
+                  x: nodeToDuplicate.position.x + 50,
+                  y: nodeToDuplicate.position.y + 50,
+                },
+                selected: false,
+              };
+              setNodes((nds) => [...nds, newNode]);
+              setNodeId(nodeId + 1);
+            }
+            break;
+          case 'bring-front':
+            // Implementation for z-index manipulation would go here
+            break;
+          case 'send-back':
+            // Implementation for z-index manipulation would go here
+            break;
+        }
+      }
+      setContextMenu(null);
+    },
+    [contextMenu, nodes, nodeId, setNodes, setEdges]
+  );
+
   // Update parent when nodes or edges change
   React.useEffect(() => {
     onNodesChange?.(nodes);
@@ -407,7 +487,10 @@ const FlowCanvasContent: React.FC<FlowCanvasProps> = ({
         onConnect={onConnect}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onNodeContextMenu={onNodeContextMenu}
+        onContextMenu={onPaneContextMenu}
         nodeTypes={nodeTypes}
+        connectionMode="loose"
         fitView
         attributionPosition="bottom-left"
         proOptions={{ hideAttribution: true }}
@@ -415,14 +498,31 @@ const FlowCanvasContent: React.FC<FlowCanvasProps> = ({
           style: { stroke: '#6b7280', strokeWidth: 2 },
           type: 'smoothstep',
           animated: false,
+          labelStyle: { fill: '#ffffff', fontWeight: 500 },
+          labelBgStyle: { fill: '#1a1a1a', fillOpacity: 0.9 },
+          labelBgPadding: [8, 4] as [number, number],
+          labelBgBorderRadius: 4,
+        }}
+        onEdgeDoubleClick={(event, edge) => {
+          // Allow edge label editing
+          const newLabel = prompt('Enter edge label:', edge.label || '');
+          if (newLabel !== null) {
+            setEdges((eds) =>
+              eds.map((e) =>
+                e.id === edge.id ? { ...e, label: newLabel } : e
+              )
+            );
+          }
         }}
       >
-        <Background 
-          variant={BackgroundVariant.Dots} 
-          gap={20} 
-          size={1} 
-          color="rgba(255, 255, 255, 0.05)"
-        />
+        {showGrid && (
+          <Background 
+            variant={BackgroundVariant.Dots} 
+            gap={20} 
+            size={1} 
+            color="rgba(255, 255, 255, 0.05)"
+          />
+        )}
         <Controls 
           className="flow-controls"
           showZoom={true}
@@ -434,6 +534,96 @@ const FlowCanvasContent: React.FC<FlowCanvasProps> = ({
             Nodes: {nodes.length} | Edges: {edges.length}
           </div>
         </Panel>
+        {/* Context Menu */}
+        {contextMenu && (
+          <div
+            style={{
+              position: 'fixed',
+              top: contextMenu.y,
+              left: contextMenu.x,
+              background: 'rgba(17, 17, 20, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              padding: '4px',
+              zIndex: 1000,
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {contextMenu.nodeId ? (
+              <>
+                <div
+                  className="context-menu-item"
+                  onClick={() => handleContextMenuAction('duplicate')}
+                  style={{
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  Duplicate
+                </div>
+                <div
+                  className="context-menu-item"
+                  onClick={() => handleContextMenuAction('delete')}
+                  style={{
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  Delete
+                </div>
+                <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.1)', margin: '4px 0' }} />
+                <div
+                  className="context-menu-item"
+                  onClick={() => handleContextMenuAction('bring-front')}
+                  style={{
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  Bring to Front
+                </div>
+                <div
+                  className="context-menu-item"
+                  onClick={() => handleContextMenuAction('send-back')}
+                  style={{
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  Send to Back
+                </div>
+              </>
+            ) : (
+              <div
+                style={{
+                  padding: '8px 16px',
+                  color: '#6b7280',
+                  fontSize: '14px',
+                }}
+              >
+                Right-click on a shape for options
+              </div>
+            )}
+          </div>
+        )}
         <MiniMap 
           className="flow-minimap"
           nodeColor={(node) => node.selected ? '#0066ff' : '#ffffff'}
@@ -444,12 +634,12 @@ const FlowCanvasContent: React.FC<FlowCanvasProps> = ({
       </ReactFlow>
     </div>
   );
-};
+});
 
-export const FlowCanvas: React.FC<FlowCanvasProps> = (props) => {
+export const FlowCanvas = forwardRef<any, FlowCanvasProps>((props, ref) => {
   return (
     <ReactFlowProvider>
-      <FlowCanvasContent {...props} />
+      <FlowCanvasContent ref={ref} {...props} />
     </ReactFlowProvider>
   );
-};
+});
