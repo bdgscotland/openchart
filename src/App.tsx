@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { ToolbarComponent, type DrawingTool } from './components/Toolbar/ToolbarComponent';
 import { FlowCanvas } from './components/Canvas/FlowCanvas';
+import useShapeCreation from './components/Canvas/hooks/useShapeCreation';
 import { MenuBar } from './components/MenuBar/MenuBar';
 // React Flow types are imported but typed as any for flexibility
 import './App.css';
@@ -14,6 +15,12 @@ function App() {
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [copiedNodes, setCopiedNodes] = useState<any[]>([]);
   const flowRef = useRef<any>(null);
+
+  // Shape creation hook
+  const { handleCanvasClick } = useShapeCreation({
+    selectedTool,
+    onNodesChange: setNodes,
+  });
 
   // Menu handlers
   const handleNewDiagram = useCallback(() => {
@@ -333,6 +340,10 @@ function App() {
 
   // Load auto-saved diagram on mount
   useEffect(() => {
+    // Prevent duplicate dialogs in React StrictMode
+    if (sessionStorage.getItem('openchart-recovery-shown')) return;
+    sessionStorage.setItem('openchart-recovery-shown', 'true');
+    
     const autosaved = localStorage.getItem('openchart-autosave');
     if (autosaved && nodes.length === 0 && edges.length === 0) {
       try {
@@ -429,10 +440,19 @@ function App() {
           <div className="canvas-area">
             <FlowCanvas
               ref={flowRef}
-              initialNodes={nodes}
-              initialEdges={edges}
+              nodes={nodes}
+              edges={edges}
               onNodesChange={setNodes}
               onEdgesChange={setEdges}
+              onConnect={(connection) => {
+                const newEdge = {
+                  ...connection,
+                  id: `edge-${Date.now()}`,
+                  type: 'default',
+                };
+                setEdges(edges => [...edges, newEdge]);
+              }}
+              onPaneClick={handleCanvasClick}
             />
           </div>
         </div>
