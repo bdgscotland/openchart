@@ -232,7 +232,15 @@ const ShapeNode: React.FC<NodeProps> = ({ data, selected, id }) => {
   };
 
   return (
-    <div className="shape-node-container" onDoubleClick={handleDoubleClick}>
+    <div 
+      className="shape-node-container" 
+      onDoubleClick={handleDoubleClick}
+      style={{ 
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        zIndex: data.zIndex || 0 
+      }}>
       {/* Single handle per position that acts as both source AND target */}
       <Handle
         type="source"
@@ -303,13 +311,18 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
   
   // Update nodes and edges when initial props change (for loading)
+  // Only update if they're actually different to avoid infinite loops
   React.useEffect(() => {
-    setNodes(initialNodes);
-  }, [initialNodes, setNodes]);
+    if (JSON.stringify(nodes) !== JSON.stringify(initialNodes)) {
+      setNodes(initialNodes);
+    }
+  }, [initialNodes]);
   
   React.useEffect(() => {
-    setEdges(initialEdges);
-  }, [initialEdges, setEdges]);
+    if (JSON.stringify(edges) !== JSON.stringify(initialEdges)) {
+      setEdges(initialEdges);
+    }
+  }, [initialEdges]);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { project, getViewport, setViewport } = useReactFlow();
   const [nodeId, setNodeId] = useState(1);
@@ -356,6 +369,11 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
         y: event.clientY - reactFlowBounds.top,
       });
 
+      // Get the highest z-index for new nodes
+      const maxZIndex = nodes.length > 0 
+        ? Math.max(0, ...nodes.map(n => n.data?.zIndex || 0))
+        : 0;
+      
       const newNode = {
         id: `node_${nodeId}`,
         type: 'shape',
@@ -363,6 +381,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
         data: {
           label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${nodeId}`,
           shape: type,
+          zIndex: maxZIndex + 1, // New nodes go on top
           onTextChange: (newText: string) => {
             setNodes((nds) =>
               nds.map((node) =>
@@ -394,6 +413,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
   const onNodeContextMenu = useCallback(
     (event: React.MouseEvent, node: Node) => {
       event.preventDefault();
+      event.stopPropagation();
+      
+      // Use the native event's clientX and clientY for accurate cursor position
       setContextMenu({
         x: event.clientX,
         y: event.clientY,
@@ -439,9 +461,12 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
               e.source !== contextMenu.nodeId && e.target !== contextMenu.nodeId
             ));
             break;
+            
           case 'duplicate':
             const nodeToDuplicate = nodes.find(n => n.id === contextMenu.nodeId);
             if (nodeToDuplicate) {
+              // Get the highest z-index
+              const maxZIndex = Math.max(0, ...nodes.map(n => n.data?.zIndex || 0));
               const newNode = {
                 ...nodeToDuplicate,
                 id: `node_${nodeId}`,
@@ -449,17 +474,91 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
                   x: nodeToDuplicate.position.x + 50,
                   y: nodeToDuplicate.position.y + 50,
                 },
+                data: {
+                  ...nodeToDuplicate.data,
+                  zIndex: maxZIndex + 1,
+                },
                 selected: false,
               };
               setNodes((nds) => [...nds, newNode]);
               setNodeId(nodeId + 1);
             }
             break;
+            
           case 'bring-front':
-            // Implementation for z-index manipulation would go here
+            setNodes((nds) => {
+              const maxZIndex = Math.max(0, ...nds.map(n => n.data?.zIndex || 0));
+              return nds.map(node => 
+                node.id === contextMenu.nodeId
+                  ? { ...node, data: { ...node.data, zIndex: maxZIndex + 1 } }
+                  : node
+              );
+            });
             break;
+            
           case 'send-back':
-            // Implementation for z-index manipulation would go here
+            setNodes((nds) => {
+              const minZIndex = Math.min(0, ...nds.map(n => n.data?.zIndex || 0));
+              return nds.map(node => 
+                node.id === contextMenu.nodeId
+                  ? { ...node, data: { ...node.data, zIndex: minZIndex - 1 } }
+                  : node
+              );
+            });
+            break;
+            
+          case 'bring-forward':
+            setNodes((nds) => {
+              const currentNode = nds.find(n => n.id === contextMenu.nodeId);
+              if (!currentNode) return nds;
+              
+              const currentZ = currentNode.data?.zIndex || 0;
+              // Find the next higher z-index
+              const higherZIndexes = nds
+                .map(n => n.data?.zIndex || 0)
+                .filter(z => z > currentZ)
+                .sort((a, b) => a - b);
+              
+              if (higherZIndexes.length > 0) {
+                const nextZ = higherZIndexes[0];
+                return nds.map(node => {
+                  if (node.id === contextMenu.nodeId) {
+                    return { ...node, data: { ...node.data, zIndex: nextZ + 0.5 } };
+                  } else if ((node.data?.zIndex || 0) === nextZ) {
+                    return { ...node, data: { ...node.data, zIndex: currentZ } };
+                  }
+                  return node;
+                });
+              }
+              return nds;
+            });
+            break;
+            
+          case 'send-backward':
+            setNodes((nds) => {
+              const currentNode = nds.find(n => n.id === contextMenu.nodeId);
+              if (!currentNode) return nds;
+              
+              const currentZ = currentNode.data?.zIndex || 0;
+              // Find the next lower z-index
+              const lowerZIndexes = nds
+                .map(n => n.data?.zIndex || 0)
+                .filter(z => z < currentZ)
+                .sort((a, b) => b - a);
+              
+              if (lowerZIndexes.length > 0) {
+                const nextZ = lowerZIndexes[0];
+                return nds.map(node => {
+                  if (node.id === contextMenu.nodeId) {
+                    return { ...node, data: { ...node.data, zIndex: nextZ - 0.5 } };
+                  } else if ((node.data?.zIndex || 0) === nextZ) {
+                    return { ...node, data: { ...node.data, zIndex: currentZ } };
+                  }
+                  return node;
+                });
+              }
+              return nds;
+            });
             break;
         }
       }
@@ -468,22 +567,36 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
     [contextMenu, nodes, nodeId, setNodes, setEdges]
   );
 
-  // Update parent when nodes or edges change
-  React.useEffect(() => {
-    onNodesChange?.(nodes);
-  }, [nodes, onNodesChange]);
+  // Notify parent of changes through callbacks
+  const handleNodesChange = useCallback((changes: any) => {
+    onNodesChangeInternal(changes);
+    // Only notify parent with the actual nodes array when needed
+    if (onNodesChange) {
+      setNodes((currentNodes) => {
+        onNodesChange(currentNodes);
+        return currentNodes;
+      });
+    }
+  }, [onNodesChangeInternal, onNodesChange, setNodes]);
 
-  React.useEffect(() => {
-    onEdgesChange?.(edges);
-  }, [edges, onEdgesChange]);
+  const handleEdgesChange = useCallback((changes: any) => {
+    onEdgesChangeInternal(changes);
+    // Only notify parent with the actual edges array when needed
+    if (onEdgesChange) {
+      setEdges((currentEdges) => {
+        onEdgesChange(currentEdges);
+        return currentEdges;
+      });
+    }
+  }, [onEdgesChangeInternal, onEdgesChange, setEdges]);
 
   return (
     <div className="flow-canvas-wrapper" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChangeInternal}
-        onEdgesChange={onEdgesChangeInternal}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
         onDrop={onDrop}
         onDragOver={onDragOver}
@@ -539,13 +652,13 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
           <div
             style={{
               position: 'fixed',
-              top: contextMenu.y,
-              left: contextMenu.x,
+              top: Math.min(contextMenu.y, window.innerHeight - 200),
+              left: Math.min(contextMenu.x, window.innerWidth - 200),
               background: 'rgba(17, 17, 20, 0.95)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
               padding: '4px',
-              zIndex: 1000,
+              zIndex: 10000,
               backdropFilter: 'blur(10px)',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
             }}
@@ -595,6 +708,34 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>(({
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   Bring to Front
+                </div>
+                <div
+                  className="context-menu-item"
+                  onClick={() => handleContextMenuAction('bring-forward')}
+                  style={{
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  Bring Forward
+                </div>
+                <div
+                  className="context-menu-item"
+                  onClick={() => handleContextMenuAction('send-backward')}
+                  style={{
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  Send Backward
                 </div>
                 <div
                   className="context-menu-item"

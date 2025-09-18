@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test File Input</title></head>
+<body>
+<button onclick="testLoad()">Test Load</button>
+<script>
+function testLoad() {
+    console.log('Button clicked');
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+        console.log('File selected:', e.target.files[0]);
+    };
+    input.click();
+    console.log('Click triggered');
+}
+</script>
+</body>
+</html>

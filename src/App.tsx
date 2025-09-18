@@ -40,48 +40,14 @@ function App() {
     URL.revokeObjectURL(url);
   }, [nodes, edges]);
 
+  // Keep a ref to the file input to reuse it
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  
   const handleLoadDiagram = useCallback(() => {
-    console.log('Load Diagram clicked');
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.style.cssText = 'position: fixed; top: -1000px; left: -1000px;';
-    
-    input.addEventListener('change', (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const diagram = JSON.parse(e.target?.result as string);
-            console.log('Loading diagram:', diagram);
-            setNodes(diagram.nodes || []);
-            setEdges(diagram.edges || []);
-            // Restore viewport if available
-            if (diagram.viewport && flowRef.current) {
-              setTimeout(() => {
-                flowRef.current.setViewport(diagram.viewport);
-              }, 100);
-            }
-          } catch (error) {
-            console.error('Error loading diagram:', error);
-            alert('Error loading diagram: Invalid file format');
-          }
-          // Clean up
-          document.body.removeChild(input);
-        };
-        reader.readAsText(file);
-      } else {
-        // Clean up if no file selected
-        document.body.removeChild(input);
-      }
-    });
-    
-    document.body.appendChild(input);
-    // Use setTimeout to ensure the element is in the DOM before clicking
-    setTimeout(() => {
-      input.click();
-    }, 10);
+    // Trigger the file input - works in regular browsers
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   }, []);
 
   const handleExportPNG = useCallback(async () => {
@@ -219,12 +185,12 @@ function App() {
           },
         ]);
         setEdges([
-          { id: 'e1-2', source: '1', sourceHandle: 'bottom-source', target: '2', targetHandle: 'top', type: 'smoothstep' },
-          { id: 'e2-3', source: '2', sourceHandle: 'bottom-source', target: '3', targetHandle: 'top', type: 'smoothstep' },
-          { id: 'e3-4', source: '3', sourceHandle: 'left-source', target: '4', targetHandle: 'top', type: 'smoothstep', label: 'Yes' },
-          { id: 'e3-5', source: '3', sourceHandle: 'right-source', target: '5', targetHandle: 'top', type: 'smoothstep', label: 'No' },
-          { id: 'e4-6', source: '4', sourceHandle: 'bottom-source', target: '6', targetHandle: 'left', type: 'smoothstep' },
-          { id: 'e5-6', source: '5', sourceHandle: 'bottom-source', target: '6', targetHandle: 'right', type: 'smoothstep' },
+          { id: 'e1-2', source: '1', sourceHandle: 'bottom', target: '2', targetHandle: 'top', type: 'smoothstep' },
+          { id: 'e2-3', source: '2', sourceHandle: 'bottom', target: '3', targetHandle: 'top', type: 'smoothstep' },
+          { id: 'e3-4', source: '3', sourceHandle: 'left', target: '4', targetHandle: 'top', type: 'smoothstep', label: 'Yes' },
+          { id: 'e3-5', source: '3', sourceHandle: 'right', target: '5', targetHandle: 'top', type: 'smoothstep', label: 'No' },
+          { id: 'e4-6', source: '4', sourceHandle: 'bottom', target: '6', targetHandle: 'left', type: 'smoothstep' },
+          { id: 'e5-6', source: '5', sourceHandle: 'bottom', target: '6', targetHandle: 'right', type: 'smoothstep' },
         ]);
         break;
       default:
@@ -391,6 +357,45 @@ function App() {
 
   return (
     <div className="app">
+      {/* File input for loading diagrams - using label trick for better compatibility */}
+      <label htmlFor="file-upload-input" style={{ display: 'none' }}>
+        <input
+          id="file-upload-input"
+          type="file"
+          ref={fileInputRef}
+          accept=".json,application/json"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = (event: ProgressEvent<FileReader>) => {
+              try {
+                const content = event.target?.result as string;
+                const diagram = JSON.parse(content);
+                
+                setNodes(diagram.nodes || []);
+                setEdges(diagram.edges || []);
+                
+                if (diagram.viewport && flowRef.current) {
+                  setTimeout(() => {
+                    flowRef.current.setViewport(diagram.viewport);
+                  }, 100);
+                }
+              } catch (error) {
+                alert('Error loading diagram: Invalid JSON format');
+              }
+              
+              // Clear the input value so the same file can be selected again
+              e.target.value = '';
+            };
+            
+            reader.readAsText(file);
+          }
+        }}
+        />
+      </label>
       <MenuBar
         onNewDiagram={handleNewDiagram}
         onSaveDiagram={handleSaveDiagram}

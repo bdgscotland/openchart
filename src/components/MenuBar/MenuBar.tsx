@@ -110,7 +110,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   };
 
   const handleMenuItemClick = (item: MenuItem) => {
-    if (item.onClick && !item.disabled) {
+    if (item.onClick && !item.disabled && !item.submenu) {
       item.onClick();
       setActiveMenu(null);
     }
@@ -135,15 +135,25 @@ export const MenuBar: React.FC<MenuBarProps> = ({
         key={key}
         className={`menu-item ${item.disabled ? 'disabled' : ''} ${item.submenu ? 'has-submenu' : ''}`}
         onClick={() => handleMenuItemClick(item)}
-        onMouseEnter={() => setHoveredMenu(item.label)}
-        onMouseLeave={() => setHoveredMenu(null)}
+        onMouseEnter={() => item.submenu && setHoveredMenu(item.label)}
+        onMouseLeave={(e) => {
+          // Don't close if moving to submenu
+          const relatedTarget = e.relatedTarget as HTMLElement;
+          if (!relatedTarget?.closest('.submenu')) {
+            setTimeout(() => setHoveredMenu(null), 100);
+          }
+        }}
       >
         <span className="menu-item-label">{item.label}</span>
         {item.shortcut && <span className="menu-item-shortcut">{item.shortcut}</span>}
         {item.submenu && <span className="menu-item-arrow">▶</span>}
         
         {item.submenu && hoveredMenu === item.label && (
-          <div className="submenu">
+          <div 
+            className="submenu"
+            onMouseEnter={() => setHoveredMenu(item.label)}
+            onMouseLeave={() => setHoveredMenu(null)}
+          >
             {item.submenu.map((subItem, subKey) => renderMenuItem(subItem, subKey))}
           </div>
         )}
