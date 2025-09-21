@@ -40,12 +40,28 @@ export const useShapeHandlers = ({
   }, [nodes, onNodesChange]);
 
   const handleConnect = useCallback((connection: Connection) => {
+    console.log('🔗 handleConnect called with:', connection);
+    
+    if (!connection.source || !connection.target) {
+      console.log('🚫 Missing source or target');
+      return;
+    }
+
     const newEdge = {
-      ...connection,
       id: `edge-${Date.now()}`,
+      source: connection.source,
+      target: connection.target,
+      sourceHandle: connection.sourceHandle,
+      targetHandle: connection.targetHandle,
       type: 'default',
+      markerEnd: { type: 'arrow' }
     };
-    onEdgesChange([...edges, newEdge]);
+    console.log('🔗 Creating edge:', newEdge);
+    
+    // Add the new edge to the existing edges array
+    const updatedEdges = [...edges, newEdge];
+    console.log('🔗 Updated edges array:', updatedEdges);
+    onEdgesChange(updatedEdges);
   }, [edges, onEdgesChange]);
 
   const handleDeleteNodes = useCallback((nodeIds: string[]) => {

@@ -50,7 +50,6 @@ export interface FlowCanvasProps {
   showControls?: boolean;
 }
 
-
 const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const {
     nodes: initialNodes,
@@ -74,7 +73,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const [isDragging, setIsDragging] = useState(false);
   
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { fitView, getViewport, setViewport, getNodes, getEdges, project } = useReactFlow();
+  const { fitView, getViewport, setViewport, getNodes, getEdges, screenToFlowPosition } = useReactFlow();
 
   // Use our custom shape handlers hook
   const {
@@ -108,10 +107,19 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const handleNodesChange = useCallback((changes: any) => {
     onNodesChangeInternal(changes);
     
-    // Don't sync to external state during drag operations to prevent position reversion
+    // Only sync to external state if not dragging and if the changes are significant
+    // This prevents excessive re-renders during drag operations
     if (!isDragging) {
-      const updatedNodes = applyNodeChanges(changes, nodes);
-      onNodesChange(updatedNodes);
+      // Debounce external state updates to improve performance
+      const hasSignificantChanges = changes.some((change: any) => 
+        change.type === 'add' || change.type === 'remove' || 
+        (change.type === 'position' && !change.dragging)
+      );
+      
+      if (hasSignificantChanges) {
+        const updatedNodes = applyNodeChanges(changes, nodes);
+        onNodesChange(updatedNodes);
+      }
     }
   }, [onNodesChangeInternal, onNodesChange, nodes, isDragging]);
 
@@ -128,32 +136,72 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
   // Handle new connections
   const handleConnect = useCallback((connection: Connection) => {
-    handleConnectInternal(connection);
+    console.log('🔗 FlowCanvas handleConnect called with:', connection);
+    
+    // Create the edge using React Flow's addEdge utility
+    const newEdge = {
+      id: `edge-${Date.now()}`,
+      source: connection.source!,
+      target: connection.target!,
+      sourceHandle: connection.sourceHandle,
+      targetHandle: connection.targetHandle,
+      type: 'default',
+      markerEnd: { type: MarkerType.Arrow }
+    };
+    
+    console.log('🔗 Creating new edge:', newEdge);
+    
+    // Update edges using React Flow's state management
+    setEdges((eds) => {
+      const updatedEdges = [...eds, newEdge];
+      console.log('🔗 Updated edges in FlowCanvas:', updatedEdges);
+      
+      // Also sync to external state
+      setTimeout(() => {
+        onEdgesChange(updatedEdges);
+      }, 0);
+      
+      return updatedEdges;
+    });
+    
+    // Call external onConnect callback
     onConnect(connection);
-  }, [handleConnectInternal, onConnect]);
+  }, [setEdges, onEdgesChange, onConnect]);
 
   // Handle drag and drop from toolbar
   const onDrop = useCallback((event: React.DragEvent) => {
     event.preventDefault();
+    console.log('🎯 onDrop called - React Flow handler');
 
     const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
     const shapeType = event.dataTransfer.getData('shapeTool');
 
+    console.log('🎯 Shape type:', shapeType);
+    console.log('🎯 React Flow bounds:', reactFlowBounds);
+
     if (!shapeType || !reactFlowBounds) {
+      console.log('🚫 Missing shapeType or reactFlowBounds');
       return;
     }
 
-    const position = project({
-      x: event.clientX - reactFlowBounds.left,
-      y: event.clientY - reactFlowBounds.top,
+    // Use the new screenToFlowPosition instead of deprecated project
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
     });
+
+    console.log('🎯 Position calculated:', position);
 
     // Import the shape factory at runtime to avoid circular imports
     import('./shapes').then(({ createShapeNode, isValidShapeType }) => {
+      console.log('🎯 Shape module imported successfully');
+      
       if (!isValidShapeType(shapeType)) {
-        console.warn(`Invalid shape type: ${shapeType}`);
+        console.warn(`❌ Invalid shape type: ${shapeType}`);
         return;
       }
+
+      console.log('✅ Shape type is valid:', shapeType);
 
       const newNode = createShapeNode({
         id: `node-${Date.now()}`,
@@ -170,9 +218,25 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         },
       });
 
-      setNodes((nds) => nds.concat(newNode));
+      console.log('🎯 New node created:', newNode);
+      
+      // Update local state and immediately sync to external state
+      setNodes((nds) => {
+        const updatedNodes = nds.concat(newNode);
+        console.log('🎯 Updated nodes array:', updatedNodes);
+        
+        // Immediately call the external onNodesChange callback
+        setTimeout(() => {
+          console.log('🎯 Calling external onNodesChange with:', updatedNodes);
+          onNodesChange(updatedNodes);
+        }, 0);
+        
+        return updatedNodes;
+      });
+    }).catch((error) => {
+      console.error('❌ Error importing shapes module:', error);
     });
-  }, [project, setNodes]);
+  }, [screenToFlowPosition, setNodes, onNodesChange]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -248,15 +312,10 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         onConnect={handleConnect}
         onNodeClick={onNodeClick}
         onNodeDoubleClick={onNodeDoubleClick}
-        onNodeDrag={(event, node) => {
-          console.log('🎯 onNodeDrag triggered!', { nodeId: node.id, position: node.position });
-        }}
         onNodeDragStart={(event, node) => {
-          console.log('🚀 onNodeDragStart triggered!', { nodeId: node.id, position: node.position });
           setIsDragging(true);
         }}
         onNodeDragStop={(event, node) => {
-          console.log('🛑 onNodeDragStop triggered!', { nodeId: node.id, position: node.position });
           setIsDragging(false);
           
           // Sync to external state after drag is complete

@@ -95,62 +95,57 @@ export const BaseShape: React.FC<BaseShapeProps & {
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Simplified connection handles - each acts as both source and target */}
+      {/* Connection handles - both source and target for each position */}
       <Handle 
         type="source" 
         position={Position.Top} 
         id="top"
         isConnectable={true}
-        style={{ 
-          background: '#555',
-          width: '10px',
-          height: '10px',
-          top: '-5px',
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }} 
       />
+      <Handle 
+        type="target" 
+        position={Position.Top} 
+        id="top"
+        isConnectable={true}
+      />
+      
       <Handle 
         type="source" 
         position={Position.Left} 
         id="left"
         isConnectable={true}
-        style={{ 
-          background: '#555',
-          width: '10px',
-          height: '10px',
-          left: '-5px',
-          top: '50%',
-          transform: 'translateY(-50%)'
-        }} 
       />
+      <Handle 
+        type="target" 
+        position={Position.Left} 
+        id="left"
+        isConnectable={true}
+      />
+      
       <Handle 
         type="source" 
         position={Position.Right} 
         id="right"
         isConnectable={true}
-        style={{ 
-          background: '#555',
-          width: '10px',
-          height: '10px',
-          right: '-5px',
-          top: '50%',
-          transform: 'translateY(-50%)'
-        }} 
       />
+      <Handle 
+        type="target" 
+        position={Position.Right} 
+        id="right"
+        isConnectable={true}
+      />
+      
       <Handle 
         type="source" 
         position={Position.Bottom} 
         id="bottom"
         isConnectable={true}
-        style={{ 
-          background: '#555',
-          width: '10px',
-          height: '10px',
-          bottom: '-5px',
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }} 
+      />
+      <Handle 
+        type="target" 
+        position={Position.Bottom} 
+        id="bottom"
+        isConnectable={true}
       />
       
       {/* Shape content with config applied */}
