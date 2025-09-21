@@ -95,16 +95,17 @@ export const BaseShape: React.FC<BaseShapeProps & {
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Connection handles - single handles that act as both source and target */}
+      {/* Simplified connection handles - each acts as both source and target */}
       <Handle 
         type="source" 
         position={Position.Top} 
         id="top"
+        isConnectable={true}
         style={{ 
           background: '#555',
-          width: '8px',
-          height: '8px',
-          top: '-4px',
+          width: '10px',
+          height: '10px',
+          top: '-5px',
           left: '50%',
           transform: 'translateX(-50%)'
         }} 
@@ -113,11 +114,12 @@ export const BaseShape: React.FC<BaseShapeProps & {
         type="source" 
         position={Position.Left} 
         id="left"
+        isConnectable={true}
         style={{ 
           background: '#555',
-          width: '8px',
-          height: '8px',
-          left: '-4px',
+          width: '10px',
+          height: '10px',
+          left: '-5px',
           top: '50%',
           transform: 'translateY(-50%)'
         }} 
@@ -126,11 +128,12 @@ export const BaseShape: React.FC<BaseShapeProps & {
         type="source" 
         position={Position.Right} 
         id="right"
+        isConnectable={true}
         style={{ 
           background: '#555',
-          width: '8px',
-          height: '8px',
-          right: '-4px',
+          width: '10px',
+          height: '10px',
+          right: '-5px',
           top: '50%',
           transform: 'translateY(-50%)'
         }} 
@@ -139,69 +142,12 @@ export const BaseShape: React.FC<BaseShapeProps & {
         type="source" 
         position={Position.Bottom} 
         id="bottom"
+        isConnectable={true}
         style={{ 
           background: '#555',
-          width: '8px',
-          height: '8px',
-          bottom: '-4px',
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }} 
-      />
-      
-      {/* Target handles for connections */}
-      <Handle 
-        type="target" 
-        position={Position.Top} 
-        id="target-top"
-        style={{ 
-          background: 'transparent',
-          border: 'none',
-          width: '8px',
-          height: '8px',
-          top: '-4px',
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }} 
-      />
-      <Handle 
-        type="target" 
-        position={Position.Left} 
-        id="target-left"
-        style={{ 
-          background: 'transparent',
-          border: 'none',
-          width: '8px',
-          height: '8px',
-          left: '-4px',
-          top: '50%',
-          transform: 'translateY(-50%)'
-        }} 
-      />
-      <Handle 
-        type="target" 
-        position={Position.Right} 
-        id="target-right"
-        style={{ 
-          background: 'transparent',
-          border: 'none',
-          width: '8px',
-          height: '8px',
-          right: '-4px',
-          top: '50%',
-          transform: 'translateY(-50%)'
-        }} 
-      />
-      <Handle 
-        type="target" 
-        position={Position.Bottom} 
-        id="target-bottom"
-        style={{ 
-          background: 'transparent',
-          border: 'none',
-          width: '8px',
-          height: '8px',
-          bottom: '-4px',
+          width: '10px',
+          height: '10px',
+          bottom: '-5px',
           left: '50%',
           transform: 'translateX(-50%)'
         }} 

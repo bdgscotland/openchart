@@ -445,12 +445,9 @@ function App() {
               onNodesChange={setNodes}
               onEdgesChange={setEdges}
               onConnect={(connection) => {
-                const newEdge = {
-                  ...connection,
-                  id: `edge-${Date.now()}`,
-                  type: 'default',
-                };
-                setEdges(edges => [...edges, newEdge]);
+                // Edge creation is handled internally by React Flow and useShapeHandlers
+                // Don't create duplicate edges here - just log for debugging
+                console.log('🔗 Connection created:', connection);
               }}
               onPaneClick={handleCanvasClick}
             />

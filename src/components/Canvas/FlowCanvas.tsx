@@ -88,14 +88,21 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     onEdgesChange: setEdges,
   });
 
-  // Initialize internal state on mount only
+  // Initialize internal state on mount and when external state changes
   useEffect(() => {
-    setNodes(initialNodes);
-  }, [setNodes]); // Only on mount, not when initialNodes change
+    // Only update if the node count changed (new nodes added/removed)
+    // Don't update during drag operations to prevent interference
+    if (!isDragging && nodes.length !== initialNodes.length) {
+      setNodes(initialNodes);
+    }
+  }, [initialNodes, setNodes, isDragging, nodes.length]);
 
   useEffect(() => {
-    setEdges(initialEdges);
-  }, [setEdges]); // Only on mount, not when initialEdges change
+    // Update edges when external state changes
+    if (edges.length !== initialEdges.length) {
+      setEdges(initialEdges);
+    }
+  }, [initialEdges, setEdges, edges.length]);
 
   // Handle nodes change with external callback
   const handleNodesChange = useCallback((changes: any) => {
@@ -111,9 +118,13 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   // Handle edges change with external callback
   const handleEdgesChange = useCallback((changes: any) => {
     onEdgesChangeInternal(changes);
-    const updatedEdges = applyEdgeChanges(changes, edges);
-    onEdgesChange(updatedEdges);
-  }, [onEdgesChangeInternal, onEdgesChange, edges]);
+    
+    // Use getEdges() to get the most current edge state instead of stale closure
+    setTimeout(() => {
+      const currentEdges = getEdges();
+      onEdgesChange(currentEdges);
+    }, 0);
+  }, [onEdgesChangeInternal, onEdgesChange, getEdges]);
 
   // Handle new connections
   const handleConnect = useCallback((connection: Connection) => {
