@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState, memo } from 'react';
-import { Handle, Position } from 'reactflow';
-import type { NodeProps } from 'reactflow';
+import { Handle, Position } from '@xyflow/react';
+import type { NodeProps } from '@xyflow/react';
 import { useDebounce } from '../../../hooks/useDebounce';
 
 export interface BaseShapeProps extends NodeProps {

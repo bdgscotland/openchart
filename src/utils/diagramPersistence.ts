@@ -1,5 +1,5 @@
-import { Node, Edge, Viewport } from 'reactflow';
-import { PresetStorage } from '../components/PropertyPanel/StylePresets/utils/presetStorage';
+import { Node, Edge, Viewport } from '@xyflow/react';
+import { presetStorage } from '../components/PropertyPanel/StylePresets/utils/presetStorage';
 import { getRecentColors } from '../components/PropertyPanel/ColorPicker/colorUtils';
 import {
   DiagramData,
@@ -13,7 +13,6 @@ import {
 } from '../types/diagramSchema';
 
 class DiagramPersistence {
-  private presetStorage = new PresetStorage();
 
   /**
    * Export diagram data including all property panel configurations
@@ -149,13 +148,13 @@ class DiagramPersistence {
   private async collectPropertyPanelData(): Promise<PropertyPanelData> {
     try {
       // Get style presets data
-      const stylePresets = await this.presetStorage.getPresets();
-      const collections = await this.presetStorage.getCollections();
-      const themes = await this.presetStorage.getThemes();
-      const favorites = await this.presetStorage.getFavorites();
-      const recentlyUsed = await this.presetStorage.getRecentlyUsed();
-      const currentTheme = await this.presetStorage.getCurrentTheme();
-      const presetSettings = await this.presetStorage.getSettings();
+      const stylePresets = await presetStorage.getPresets();
+      const collections = await presetStorage.getCollections();
+      const themes = await presetStorage.getThemes();
+      const favorites = await presetStorage.getFavorites();
+      const recentlyUsed = await presetStorage.getRecentlyUsed();
+      const currentTheme = await presetStorage.getCurrentTheme();
+      const presetSettings = await presetStorage.getSettings();
 
       // Get color picker data
       const recentColors = getRecentColors();
@@ -213,7 +212,7 @@ class DiagramPersistence {
           settings: data.presetSettings,
           version: '1.0.0',
         };
-        await this.presetStorage.restoreFromBackup(backupData);
+        await presetStorage.restoreFromBackup(backupData);
         restoredFeatures.push('Style Presets & Themes');
       }
 

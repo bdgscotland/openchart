@@ -1,6 +1,6 @@
 import { useCallback, useRef, useMemo } from 'react'
-import type { Edge, Connection } from 'reactflow'
-import { MarkerType } from 'reactflow'
+import type { Edge, Connection } from '@xyflow/react'
+import { MarkerType } from '@xyflow/react'
 
 interface ConnectionPoolStats {
   poolSize: number

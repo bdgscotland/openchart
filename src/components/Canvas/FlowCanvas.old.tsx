@@ -14,8 +14,8 @@ import ReactFlow, {
   MiniMap,
   ConnectionMode,
   MarkerType,
-} from 'reactflow';
-import type { Node, Edge, NodeProps, Connection } from 'reactflow';
+} from '@xyflow/react';
+import type { Node, Edge, NodeProps, Connection } from '@xyflow/react';
 import { toPng, toSvg } from 'html-to-image';
 import 'reactflow/dist/style.css';
 import './FlowCanvas.css';

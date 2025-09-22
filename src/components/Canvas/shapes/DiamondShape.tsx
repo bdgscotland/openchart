@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position } from '@xyflow/react';
 import type { BaseShapeProps } from './BaseShape';
 
 export const DiamondShape: React.FC<BaseShapeProps> = ({ data, selected }) => {

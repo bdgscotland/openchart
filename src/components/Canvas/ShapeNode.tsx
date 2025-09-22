@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import type { NodeProps } from 'reactflow';
+import type { NodeProps } from '@xyflow/react';
 import { getShapeComponent, isValidShapeType } from './shapes';
 import type { BaseShapeProps } from './shapes/BaseShape';
 

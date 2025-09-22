@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Node } from 'reactflow';
+import type { Node } from '@xyflow/react';
 import type { DrawingTool } from '../../Toolbar/ToolbarComponent';
 import { createShapeNode, isValidShapeType } from '../shapes';
 

@@ -7,8 +7,8 @@ import { PropertyPanel } from './components/PropertyPanel/PropertyPanel';
 import { useCanvasState } from './hooks/useCanvasState';
 import { createEmptyDiagram } from './utils/diagramFactory';
 // React Flow types are imported but typed as any for flexibility
-import type { Node, Edge } from 'reactflow';
-import { MarkerType } from 'reactflow';
+import type { Node, Edge } from '@xyflow/react';
+import { MarkerType } from '@xyflow/react';
 import './App.css';
 
 function App() {

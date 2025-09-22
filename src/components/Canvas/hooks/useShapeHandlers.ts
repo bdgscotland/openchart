@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Node, Edge, Connection } from 'reactflow';
+import type { Node, Edge, Connection } from '@xyflow/react';
 
 interface UseShapeHandlersOptions {
   nodes: Node[];
