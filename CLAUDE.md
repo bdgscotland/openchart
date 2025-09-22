@@ -1,249 +1,352 @@
-# OpenChart Development Configuration
+# Claude Code Configuration - SPARC Development Environment
 
-## 🎯 Project Overview
-OpenChart is an open-source, git-backed diagramming platform built with React + TypeScript + React Flow. This is a Lucidchart alternative focused on transparency, portability, and version control.
+## 🚨 CRITICAL: CONCURRENT EXECUTION & FILE MANAGEMENT
 
-## ⚠️ IMPORTANT: Development Guidelines
-- **NEVER claim this is production-ready** - It's an early prototype
-- **Be honest about limitations** - Many features are incomplete or missing
-- **Keep it real** - This is a work in progress, not a Lucidchart killer
-- **Focus on what works** - Basic diagramming, save/load, simple shapes
-- **Acknowledge what doesn't** - No real resize, limited edge types, no undo/redo yet
+**ABSOLUTE RULES**:
+1. ALL operations MUST be concurrent/parallel in a single message
+2. **NEVER save working files, text/mds and tests to the root folder**
+3. ALWAYS organize files in appropriate subdirectories
+4. **USE CLAUDE CODE'S TASK TOOL** for spawning agents concurrently, not just MCP
 
-## 🛠️ Required Development Tools
+### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
-### Core Tool Requirements
-- **Serena MCP**: ALWAYS use for semantic code retrieval and editing operations
-- **Context7 MCP**: ALWAYS use for up-to-date third-party library documentation  
-- **Sequential Thinking MCP**: ALWAYS use for any decision-making processes
-- **Playwright MCP**: ALWAYS use for frontend testing and browser automation
-- **openchart-data-persistence Agent**: ALWAYS use when:
-  - Adding new features that need to be saved/loaded
-  - Modifying node or edge properties
-  - Debugging save/load issues
-  - Changing the canvas state management
-  - Testing diagram persistence
-  - Updating React Flow integration
+**MANDATORY PATTERNS:**
+- **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
+- **Task tool (Claude Code)**: ALWAYS spawn ALL agents in ONE message with full instructions
+- **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
+- **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
+- **Memory operations**: ALWAYS batch ALL memory store/retrieve in ONE message
 
-### Data Persistence Agent Usage
+### 🎯 CRITICAL: Claude Code Task Tool for Agent Execution
 
-**MUST use openchart-data-persistence agent for:**
-- ANY changes to node/edge structure or properties
-- Before merging features that add new visual elements
-- When React Flow is updated or reconfigured  
-- If save/load functionality appears broken
-- Adding new shape types or connection types
-- Implementing features like layers, groups, or templates
+**Claude Code's Task tool is the PRIMARY way to spawn agents:**
+```javascript
+// ✅ CORRECT: Use Claude Code's Task tool for parallel agent execution
+[Single Message]:
+  Task("Research agent", "Analyze requirements and patterns...", "researcher")
+  Task("Coder agent", "Implement core features...", "coder")
+  Task("Tester agent", "Create comprehensive tests...", "tester")
+  Task("Reviewer agent", "Review code quality...", "reviewer")
+  Task("Architect agent", "Design system architecture...", "system-architect")
+```
 
-**The agent will:**
-- Ensure all new properties are serialized
-- Test save/load round-trip integrity
-- Update JSON schema documentation
-- Verify React Flow state synchronization
-- Add migration logic if schema changes
+**MCP tools are ONLY for coordination setup:**
+- `mcp__claude-flow__swarm_init` - Initialize coordination topology
+- `mcp__claude-flow__agent_spawn` - Define agent types for coordination
+- `mcp__claude-flow__task_orchestrate` - Orchestrate high-level workflows
 
-### Technology Stack
-- **Frontend**: React + TypeScript + Vite
-- **Canvas Rendering**: React Flow (NOT Konva.js anymore)
-- **State Management**: React state + React Flow internal state
-- **Version Control**: isomorphic-git
-- **File Format**: JSON schema for diagrams
-- **Testing**: Playwright for E2E, Jest for unit tests
+### 📁 File Organization Rules
 
-## 📋 Development Workflow
+**NEVER save to root folder. Use these directories:**
+- `/src` - Source code files
+- `/tests` - Test files
+- `/docs` - Documentation and markdown files
+- `/config` - Configuration files
+- `/scripts` - Utility scripts
+- `/examples` - Example code
 
-### Code Analysis & Retrieval
+## Project Overview
+
+This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology with Claude-Flow orchestration for systematic Test-Driven Development.
+
+## SPARC Commands
+
+### Core Commands
+- `npx claude-flow sparc modes` - List available modes
+- `npx claude-flow sparc run <mode> "<task>"` - Execute specific mode
+- `npx claude-flow sparc tdd "<feature>"` - Run complete TDD workflow
+- `npx claude-flow sparc info <mode>` - Get mode details
+
+### Batchtools Commands
+- `npx claude-flow sparc batch <modes> "<task>"` - Parallel execution
+- `npx claude-flow sparc pipeline "<task>"` - Full pipeline processing
+- `npx claude-flow sparc concurrent <mode> "<tasks-file>"` - Multi-task processing
+
+### Build Commands
+- `npm run build` - Build project
+- `npm run test` - Run tests
+- `npm run lint` - Linting
+- `npm run typecheck` - Type checking
+
+## SPARC Workflow Phases
+
+1. **Specification** - Requirements analysis (`sparc run spec-pseudocode`)
+2. **Pseudocode** - Algorithm design (`sparc run spec-pseudocode`)
+3. **Architecture** - System design (`sparc run architect`)
+4. **Refinement** - TDD implementation (`sparc tdd`)
+5. **Completion** - Integration (`sparc run integration`)
+
+## Code Style & Best Practices
+
+- **Modular Design**: Files under 500 lines
+- **Environment Safety**: Never hardcode secrets
+- **Test-First**: Write tests before implementation
+- **Clean Architecture**: Separate concerns
+- **Documentation**: Keep updated
+
+## 🚀 Available Agents (54 Total)
+
+### Core Development
+`coder`, `reviewer`, `tester`, `planner`, `researcher`
+
+### Swarm Coordination
+`hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`, `collective-intelligence-coordinator`, `swarm-memory-manager`
+
+### Consensus & Distributed
+`byzantine-coordinator`, `raft-manager`, `gossip-coordinator`, `consensus-builder`, `crdt-synchronizer`, `quorum-manager`, `security-manager`
+
+### Performance & Optimization
+`perf-analyzer`, `performance-benchmarker`, `task-orchestrator`, `memory-coordinator`, `smart-agent`
+
+### GitHub & Repository
+`github-modes`, `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`, `workflow-automation`, `project-board-sync`, `repo-architect`, `multi-repo-swarm`
+
+### SPARC Methodology
+`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`, `refinement`
+
+### Specialized Development
+`backend-dev`, `mobile-dev`, `ml-developer`, `cicd-engineer`, `api-docs`, `system-architect`, `code-analyzer`, `base-template-generator`
+
+### Testing & Validation
+`tdd-london-swarm`, `production-validator`
+
+### Migration & Planning
+`migration-planner`, `swarm-init`
+
+## 🎯 Claude Code vs MCP Tools
+
+### Claude Code Handles ALL EXECUTION:
+- **Task tool**: Spawn and run agents concurrently for actual work
+- File operations (Read, Write, Edit, MultiEdit, Glob, Grep)
+- Code generation and programming
+- Bash commands and system operations
+- Implementation work
+- Project navigation and analysis
+- TodoWrite and task management
+- Git operations
+- Package management
+- Testing and debugging
+
+### MCP Tools ONLY COORDINATE:
+- Swarm initialization (topology setup)
+- Agent type definitions (coordination patterns)
+- Task orchestration (high-level planning)
+- Memory management
+- Neural features
+- Performance tracking
+- GitHub integration
+
+**KEY**: MCP coordinates the strategy, Claude Code's Task tool executes with real agents.
+
+## 🚀 Quick Setup
+
 ```bash
-# Use Serena for all code operations
-mcp__serena__get_symbols_overview     # Understand file structure
-mcp__serena__find_symbol             # Find specific functions/classes  
-mcp__serena__find_referencing_symbols # Track dependencies
-mcp__serena__search_for_pattern      # Search code patterns
+# Add MCP servers (Claude Flow required, others optional)
+claude mcp add claude-flow npx claude-flow@alpha mcp start
+claude mcp add ruv-swarm npx ruv-swarm mcp start  # Optional: Enhanced coordination
+claude mcp add flow-nexus npx flow-nexus@latest mcp start  # Optional: Cloud features
 ```
 
-### Documentation & Research
-```bash  
-# Use Context7 for third-party docs
-mcp__context7__resolve-library-id    # Find library documentation
-mcp__context7__get-library-docs      # Get up-to-date API docs
+## MCP Tool Categories
+
+### Coordination
+`swarm_init`, `agent_spawn`, `task_orchestrate`
+
+### Monitoring
+`swarm_status`, `agent_list`, `agent_metrics`, `task_status`, `task_results`
+
+### Memory & Neural
+`memory_usage`, `neural_status`, `neural_train`, `neural_patterns`
+
+### GitHub Integration
+`github_swarm`, `repo_analyze`, `pr_enhance`, `issue_triage`, `code_review`
+
+### System
+`benchmark_run`, `features_detect`, `swarm_monitor`
+
+### Flow-Nexus MCP Tools (Optional Advanced Features)
+Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
+
+**Key MCP Tool Categories:**
+- **Swarm & Agents**: `swarm_init`, `swarm_scale`, `agent_spawn`, `task_orchestrate`
+- **Sandboxes**: `sandbox_create`, `sandbox_execute`, `sandbox_upload` (cloud execution)
+- **Templates**: `template_list`, `template_deploy` (pre-built project templates)
+- **Neural AI**: `neural_train`, `neural_patterns`, `seraphina_chat` (AI assistant)
+- **GitHub**: `github_repo_analyze`, `github_pr_manage` (repository management)
+- **Real-time**: `execution_stream_subscribe`, `realtime_subscribe` (live monitoring)
+- **Storage**: `storage_upload`, `storage_list` (cloud file management)
+
+**Authentication Required:**
+- Register: `mcp__flow-nexus__user_register` or `npx flow-nexus@latest register`
+- Login: `mcp__flow-nexus__user_login` or `npx flow-nexus@latest login`
+- Access 70+ specialized MCP tools for advanced orchestration
+
+## 🚀 Agent Execution Flow with Claude Code
+
+### The Correct Pattern:
+
+1. **Optional**: Use MCP tools to set up coordination topology
+2. **REQUIRED**: Use Claude Code's Task tool to spawn agents that do actual work
+3. **REQUIRED**: Each agent runs hooks for coordination
+4. **REQUIRED**: Batch all operations in single messages
+
+### Example Full-Stack Development:
+
+```javascript
+// Single message with all agent spawning via Claude Code's Task tool
+[Parallel Agent Execution]:
+  Task("Backend Developer", "Build REST API with Express. Use hooks for coordination.", "backend-dev")
+  Task("Frontend Developer", "Create React UI. Coordinate with backend via memory.", "coder")
+  Task("Database Architect", "Design PostgreSQL schema. Store schema in memory.", "code-analyzer")
+  Task("Test Engineer", "Write Jest tests. Check memory for API contracts.", "tester")
+  Task("DevOps Engineer", "Setup Docker and CI/CD. Document in memory.", "cicd-engineer")
+  Task("Security Auditor", "Review authentication. Report findings via hooks.", "reviewer")
+  
+  // All todos batched together
+  TodoWrite { todos: [...8-10 todos...] }
+  
+  // All file operations together
+  Write "backend/server.js"
+  Write "frontend/App.jsx"
+  Write "database/schema.sql"
 ```
 
-### Decision Making
+## 📋 Agent Coordination Protocol
+
+### Every Agent Spawned via Task Tool MUST:
+
+**1️⃣ BEFORE Work:**
 ```bash
-# Use Sequential Thinking for complex decisions
-mcp__sequential-thinking__sequentialthinking  # Break down complex problems
+npx claude-flow@alpha hooks pre-task --description "[task]"
+npx claude-flow@alpha hooks session-restore --session-id "swarm-[id]"
 ```
 
-### Frontend Testing
+**2️⃣ DURING Work:**
 ```bash
-# Use Playwright for all browser testing
-mcp__playwright__browser_navigate    # Navigate to app
-mcp__playwright__browser_snapshot    # Capture UI state
-mcp__playwright__browser_click       # Interact with elements
-mcp__playwright__browser_type        # Input text/data
+npx claude-flow@alpha hooks post-edit --file "[file]" --memory-key "swarm/[agent]/[step]"
+npx claude-flow@alpha hooks notify --message "[what was done]"
 ```
 
-## 🏗️ Project Structure & Conventions
-
-### Directory Structure
-```
-src/
-├── components/
-│   ├── Canvas/           # Core canvas rendering
-│   ├── Toolbar/          # Shape palette & tools
-│   ├── PropertyPanel/    # Shape properties editor
-│   └── GitPanel/         # Git operations UI
-├── core/
-│   ├── schema/           # JSON diagram schema
-│   ├── shapes/           # Shape definitions
-│   ├── commands/         # Undo/redo system
-│   └── git/             # Git integration
-├── hooks/               # React hooks
-├── utils/               # Helper functions
-└── types/               # TypeScript definitions
-```
-
-### Code Style Guidelines
-- Use TypeScript strict mode
-- Functional components with hooks
-- Zustand for state management
-- JSON schema validation for diagrams
-- Command pattern for undo/redo
-- Git-first file operations
-
-## 🚀 Development Commands
-
-### 🔥 ALWAYS Use start.sh
+**3️⃣ AFTER Work:**
 ```bash
-./start.sh               # REQUIRED - Only way to start development
+npx claude-flow@alpha hooks post-task --task-id "[task]"
+npx claude-flow@alpha hooks session-end --export-metrics true
 ```
 
-**IMPORTANT**: We ALWAYS use `start.sh` for development startup. This is the standard workflow.
+## 🎯 Concurrent Execution Examples
 
-### Why start.sh?
-The startup script ensures:
-1. ✅ Node.js 18+ version verification
-2. 📦 Dependencies are installed/updated automatically
-3. 🔍 TypeScript type checking runs first
-4. 🧹 ESLint validates code quality
-5. 🗑️ Previous build artifacts are cleaned
-6. 🚀 Vite dev server starts on http://localhost:5173
-7. ⚠️ Graceful handling of warnings (continues with info)
+### ✅ CORRECT WORKFLOW: MCP Coordinates, Claude Code Executes
 
-### Manual Commands (For CI/Build Only)
-```bash
-npm run build           # Production build (CI/deployment)
-npm run preview         # Preview production build
-npm run lint            # Run ESLint manually
-npm run type-check      # Run TypeScript checking manually
+```javascript
+// Step 1: MCP tools set up coordination (optional, for complex tasks)
+[Single Message - Coordination Setup]:
+  mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 6 }
+  mcp__claude-flow__agent_spawn { type: "researcher" }
+  mcp__claude-flow__agent_spawn { type: "coder" }
+  mcp__claude-flow__agent_spawn { type: "tester" }
+
+// Step 2: Claude Code Task tool spawns ACTUAL agents that do the work
+[Single Message - Parallel Agent Execution]:
+  // Claude Code's Task tool spawns real agents concurrently
+  Task("Research agent", "Analyze API requirements and best practices. Check memory for prior decisions.", "researcher")
+  Task("Coder agent", "Implement REST endpoints with authentication. Coordinate via hooks.", "coder")
+  Task("Database agent", "Design and implement database schema. Store decisions in memory.", "code-analyzer")
+  Task("Tester agent", "Create comprehensive test suite with 90% coverage.", "tester")
+  Task("Reviewer agent", "Review code quality and security. Document findings.", "reviewer")
+  
+  // Batch ALL todos in ONE call
+  TodoWrite { todos: [
+    {id: "1", content: "Research API patterns", status: "in_progress", priority: "high"},
+    {id: "2", content: "Design database schema", status: "in_progress", priority: "high"},
+    {id: "3", content: "Implement authentication", status: "pending", priority: "high"},
+    {id: "4", content: "Build REST endpoints", status: "pending", priority: "high"},
+    {id: "5", content: "Write unit tests", status: "pending", priority: "medium"},
+    {id: "6", content: "Integration tests", status: "pending", priority: "medium"},
+    {id: "7", content: "API documentation", status: "pending", priority: "low"},
+    {id: "8", content: "Performance optimization", status: "pending", priority: "low"}
+  ]}
+  
+  // Parallel file operations
+  Bash "mkdir -p app/{src,tests,docs,config}"
+  Write "app/package.json"
+  Write "app/src/server.js"
+  Write "app/tests/server.test.js"
+  Write "app/docs/API.md"
 ```
 
-**Note**: Manual `npm run dev` should NOT be used for regular development. Always use `./start.sh`.
-
-### Testing Commands
-```bash
-npm run test            # Run unit tests
-npm run test:e2e        # Run Playwright E2E tests
-npm run test:watch      # Watch mode for tests
+### ❌ WRONG (Multiple Messages):
+```javascript
+Message 1: mcp__claude-flow__swarm_init
+Message 2: Task("agent 1")
+Message 3: TodoWrite { todos: [single todo] }
+Message 4: Write "file.js"
+// This breaks parallel coordination!
 ```
 
-### Code Quality
-```bash
-npm run lint            # ESLint
-npm run type-check      # TypeScript checking
-npm run format          # Prettier formatting
-```
+## Performance Benefits
 
-## 📐 Core Features Implementation
+- **84.8% SWE-Bench solve rate**
+- **32.3% token reduction**
+- **2.8-4.4x speed improvement**
+- **27+ neural models**
 
-### Canvas Operations (Priority 1)
-- Basic shapes: rectangle, circle, diamond, arrow
-- Mouse interactions: drag, resize, select
-- Multi-select operations
-- Undo/redo command pattern
+## Hooks Integration
 
-### File Operations (Priority 2) 
-- Save/load JSON diagrams
-- Export to PNG, SVG, PDF
-- Import from Lucidchart JSON
+### Pre-Operation
+- Auto-assign agents by file type
+- Validate commands for safety
+- Prepare resources automatically
+- Optimize topology by complexity
+- Cache searches
 
-### Git Integration (Priority 3)
-- Diagram versioning with Git
-- Visual diff for diagrams  
-- Commit/push from UI
-- Branch switching support
+### Post-Operation
+- Auto-format code
+- Train neural patterns
+- Update memory
+- Analyze performance
+- Track token usage
 
-### Testing Strategy
-- **Unit Tests**: Core diagram operations, shape logic
-- **Integration Tests**: File I/O, Git operations
-- **E2E Tests**: User workflows with Playwright
-- **Performance Tests**: Canvas rendering with 500+ shapes
+### Session Management
+- Generate summaries
+- Persist state
+- Track metrics
+- Restore context
+- Export workflows
 
-## 🎯 Success Metrics
-- Load/save operations < 100ms
-- Render 500 shapes at 60fps  
-- Git operations < 2 seconds
-- Zero data loss on crashes
-- 100% export compatibility
+## Advanced Features (v2.0.0)
 
-## 📚 Key Libraries & Documentation
+- 🚀 Automatic Topology Selection
+- ⚡ Parallel Execution (2.8-4.4x speed)
+- 🧠 Neural Training
+- 📊 Bottleneck Analysis
+- 🤖 Smart Auto-Spawning
+- 🛡️ Self-Healing Workflows
+- 💾 Cross-Session Memory
+- 🔗 GitHub Integration
 
-### Primary Dependencies
-- **React**: Component framework
-- **TypeScript**: Type safety
-- **React Flow**: Node-based diagramming engine
-- **Lucide React**: Professional icon library
-- **html-to-image**: Export functionality
-- **Vite**: Build tool and dev server
+## Integration Tips
 
-### Testing Dependencies  
-- **Playwright**: E2E browser testing
-- **Jest**: Unit testing framework
-- **@testing-library/react**: React component testing
+1. Start with basic swarm init
+2. Scale agents gradually
+3. Use memory for context
+4. Monitor progress regularly
+5. Train patterns from success
+6. Enable hooks automation
+7. Use GitHub tools first
 
-## ⚙️ Configuration Notes
+## Support
 
-### Development Environment
-- Node.js 18+ required
-- Git installed and configured
-- Modern browser (Chrome/Firefox/Safari)
-
-### Build Configuration
-- Vite for fast HMR and bundling
-- TypeScript strict mode enabled
-- ESLint + Prettier for code quality
-- Path aliases configured for clean imports
-
-## 🔧 Tool Usage Examples
-
-### Analyzing Canvas Component
-```bash
-# First understand the structure
-mcp__serena__get_symbols_overview --relative_path="src/components/Canvas"
-
-# Find specific canvas methods
-mcp__serena__find_symbol --name_path="Canvas/handleMouseDown" --include_body=true
-
-# Check for references
-mcp__serena__find_referencing_symbols --name_path="Canvas" --relative_path="src/components/Canvas/Canvas.tsx"
-```
-
-### Researching React Flow API
-```bash
-# Get React Flow documentation
-mcp__context7__resolve-library-id --libraryName="reactflow"
-mcp__context7__get-library-docs --context7CompatibleLibraryID="/reactflow/reactflow" --topic="nodes edges"
-```
-
-### Testing Canvas Interactions
-```bash
-# Navigate to app and test canvas
-mcp__playwright__browser_navigate --url="http://localhost:5173"
-mcp__playwright__browser_snapshot
-mcp__playwright__browser_click --element="canvas" --ref="canvas-element"
-mcp__playwright__browser_drag --startElement="shape1" --endElement="position2"
-```
+- Documentation: https://github.com/ruvnet/claude-flow
+- Issues: https://github.com/ruvnet/claude-flow/issues
+- Flow-Nexus Platform: https://flow-nexus.ruv.io (registration required for cloud features)
 
 ---
 
-**Remember**: Always use the specified MCP tools (serena, context7, sequential-thinking, playwright) for their respective domains. This ensures consistent, high-quality development practices for the OpenChart project.
+Remember: **Claude Flow coordinates, Claude Code creates!**
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+Never save working files, text/mds and tests to the root folder.

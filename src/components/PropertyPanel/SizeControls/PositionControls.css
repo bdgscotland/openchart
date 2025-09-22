@@ -1,0 +1,225 @@
+.position-controls {
+  background: #111827;
+  border-radius: 8px;
+  padding: 16px;
+  color: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  margin-top: 12px;
+}
+
+.position-controls__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.position-controls__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin: 0;
+}
+
+.position-controls__multi-note {
+  font-size: 10px;
+  color: #6b7280;
+  background: #374151;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-style: italic;
+}
+
+.position-controls__inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.position-controls__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.position-controls__label {
+  color: #9ca3af;
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.position-controls__input-wrapper {
+  position: relative;
+}
+
+.position-controls__input {
+  width: 100%;
+  height: 32px;
+  padding: 6px 24px 6px 8px;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  background: #1f2937;
+  color: #f9fafb;
+  font-size: 13px;
+  transition: all 0.15s ease;
+  -moz-appearance: textfield; /* Hide Firefox spinner */
+}
+
+.position-controls__input::-webkit-outer-spin-button,
+.position-controls__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.position-controls__input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.position-controls__steppers {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.position-controls__stepper {
+  width: 16px;
+  height: 13px;
+  padding: 0;
+  border: none;
+  background: #374151;
+  color: #9ca3af;
+  font-size: 8px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.position-controls__stepper:hover {
+  background: #4b5563;
+  color: #f3f4f6;
+}
+
+.position-controls__stepper:active {
+  background: #6b7280;
+}
+
+.position-controls__stepper--up {
+  border-bottom: 1px solid #1f2937;
+}
+
+.position-controls__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.position-controls__action-button {
+  height: 28px;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  background: #1f2937;
+  color: #f3f4f6;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 6px;
+}
+
+.position-controls__action-button:hover {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.position-controls__action-button:active {
+  background: #4b5563;
+}
+
+.position-controls__hints {
+  border-top: 1px solid #374151;
+  padding-top: 8px;
+}
+
+.position-controls__hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 9px;
+}
+
+.position-controls__hint:last-child {
+  margin-bottom: 0;
+}
+
+.position-controls__hint-key {
+  background: #374151;
+  color: #d1d5db;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 8px;
+  font-weight: 500;
+  border: 1px solid #4b5563;
+}
+
+.position-controls__hint-desc {
+  color: #9ca3af;
+  flex: 1;
+  text-align: right;
+  margin-left: 6px;
+}
+
+/* Focus states for accessibility */
+.position-controls__action-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Animation for value changes */
+.position-controls__input {
+  transition: all 0.15s ease, box-shadow 0.1s ease;
+}
+
+.position-controls__input:focus {
+  background: #374151;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .position-controls {
+    padding: 12px;
+  }
+
+  .position-controls__inputs {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .position-controls__actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .position-controls__action-button {
+    height: 32px;
+    font-size: 11px;
+  }
+}

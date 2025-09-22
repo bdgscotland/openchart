@@ -1,6 +1,7 @@
 // Command System - Professional undo/redo for OpenChart
 export * from './Command';
 export * from './CommandManager';
+export * from './BulkStyleCommand';
 
 // Re-export commonly used classes
 export {
@@ -16,3 +17,12 @@ export {
   globalCommandManager,
   KeyboardShortcuts,
 } from './CommandManager';
+
+export {
+  BulkStyleCommand,
+  AlignElementsCommand,
+  DistributeElementsCommand,
+  type BulkStyleUpdate,
+  type AlignmentOperation,
+  type DistributionOperation,
+} from './BulkStyleCommand';

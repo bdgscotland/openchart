@@ -1,0 +1,537 @@
+/* Texture Picker Styles */
+.texture-picker {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  width: 320px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Header */
+.texture-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #334155;
+  background: #1e293b;
+}
+
+.texture-picker__title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #f1f5f9;
+}
+
+.texture-picker__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.texture-picker__action {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.texture-picker__action:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+/* Preview */
+.texture-picker__preview {
+  padding: 24px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.texture-preview {
+  border: 2px solid #334155;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%),
+              linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 4px 4px;
+}
+
+.texture-preview--small {
+  width: 40px;
+  height: 30px;
+}
+
+.texture-preview--medium {
+  width: 80px;
+  height: 60px;
+}
+
+.texture-preview--large {
+  width: 120px;
+  height: 80px;
+}
+
+.texture-preview__element {
+  width: 100%;
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+/* Tabs */
+.texture-picker__tabs {
+  display: flex;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.texture-picker__tab {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.texture-picker__tab:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.texture-picker__tab.active {
+  background: #0f172a;
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* Content */
+.texture-picker__content {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Pattern Controls */
+.pattern-controls {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pattern-controls__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pattern-controls__label,
+.texture-picker__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pattern-controls__type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.pattern-controls__type-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: #334155;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 10px;
+}
+
+.pattern-controls__type-button:hover {
+  background: #475569;
+  color: #f1f5f9;
+}
+
+.pattern-controls__type-button.active {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.pattern-controls__type-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.pattern-controls__type-name {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Slider Controls */
+.pattern-controls__size,
+.pattern-controls__opacity,
+.pattern-controls__rotation,
+.texture-picker__size,
+.texture-picker__opacity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pattern-controls__size-slider,
+.pattern-controls__opacity-slider,
+.pattern-controls__rotation-slider,
+.texture-picker__size-slider,
+.texture-picker__opacity-slider {
+  flex: 1;
+  height: 6px;
+  background: #334155;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.pattern-controls__size-slider::-webkit-slider-thumb,
+.pattern-controls__opacity-slider::-webkit-slider-thumb,
+.pattern-controls__rotation-slider::-webkit-slider-thumb,
+.texture-picker__size-slider::-webkit-slider-thumb,
+.texture-picker__opacity-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.pattern-controls__size-slider::-moz-range-thumb,
+.pattern-controls__opacity-slider::-moz-range-thumb,
+.pattern-controls__rotation-slider::-moz-range-thumb,
+.texture-picker__size-slider::-moz-range-thumb,
+.texture-picker__opacity-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+.pattern-controls__size-input,
+.pattern-controls__opacity-input,
+.pattern-controls__rotation-input,
+.texture-picker__size-input,
+.texture-picker__opacity-input {
+  width: 60px;
+  padding: 4px 6px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 11px;
+  text-align: center;
+}
+
+.pattern-controls__unit,
+.texture-picker__unit {
+  font-size: 10px;
+  color: #64748b;
+  min-width: 20px;
+}
+
+/* Pattern Start */
+.texture-picker__pattern-start {
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.texture-picker__pattern-start p {
+  margin: 0 0 16px 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.texture-picker__pattern-types {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.texture-picker__pattern-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: #334155;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 11px;
+}
+
+.texture-picker__pattern-button:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: scale(1.02);
+}
+
+.texture-picker__pattern-preview {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.texture-picker__pattern-name {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Image Upload */
+.image-upload {
+  padding: 16px;
+}
+
+.image-upload__area {
+  position: relative;
+  border: 2px dashed #334155;
+  border-radius: 8px;
+  padding: 32px 16px;
+  text-align: center;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.image-upload__area:hover,
+.image-upload__area.drag-over {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.image-upload__area.uploading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.image-upload__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.image-upload__icon {
+  color: #94a3b8;
+}
+
+.image-upload__text {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.image-upload__input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.image-upload__input:disabled {
+  cursor: not-allowed;
+}
+
+/* Image Controls */
+.texture-picker__image-controls {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.texture-picker__current-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #1e293b;
+  border-radius: 6px;
+  border: 1px solid #334155;
+}
+
+.texture-picker__image-preview {
+  max-width: 120px;
+  max-height: 80px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.texture-picker__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Presets */
+.texture-picker__presets {
+  padding: 16px;
+  border-top: 1px solid #334155;
+  background: #1e293b;
+}
+
+.texture-picker__presets-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.texture-picker__presets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.texture-picker__preset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.texture-picker__preset:hover {
+  background: #334155;
+}
+
+.texture-picker__preset-name {
+  font-size: 10px;
+  color: #94a3b8;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+/* CSS Output */
+.texture-picker__css {
+  padding: 16px;
+  border-top: 1px solid #334155;
+  background: #1e293b;
+}
+
+.texture-picker__css-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.texture-picker__css-output {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  color: #94a3b8;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  word-break: break-all;
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+/* Focus States */
+.pattern-controls__size-input:focus,
+.pattern-controls__opacity-input:focus,
+.pattern-controls__rotation-input:focus,
+.texture-picker__size-input:focus,
+.texture-picker__opacity-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Scrollbar */
+.texture-picker::-webkit-scrollbar,
+.texture-picker__content::-webkit-scrollbar,
+.texture-picker__css-output::-webkit-scrollbar {
+  width: 6px;
+}
+
+.texture-picker::-webkit-scrollbar-track,
+.texture-picker__content::-webkit-scrollbar-track,
+.texture-picker__css-output::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+.texture-picker::-webkit-scrollbar-thumb,
+.texture-picker__content::-webkit-scrollbar-thumb,
+.texture-picker__css-output::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+.texture-picker::-webkit-scrollbar-thumb:hover,
+.texture-picker__content::-webkit-scrollbar-thumb:hover,
+.texture-picker__css-output::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .texture-picker {
+    width: 280px;
+  }
+
+  .pattern-controls__type-grid,
+  .texture-picker__pattern-types {
+    grid-template-columns: 1fr;
+  }
+
+  .texture-picker__presets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

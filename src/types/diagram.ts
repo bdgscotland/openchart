@@ -35,9 +35,16 @@ export interface ElementStyle {
   opacity?: number;
   fontSize?: number;
   fontFamily?: string;
-  fontWeight?: 'normal' | 'bold';
-  fontStyle?: 'normal' | 'italic';
-  textAlign?: 'left' | 'center' | 'right';
+  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+  fontStyle?: 'normal' | 'italic' | 'oblique';
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  textDecoration?: 'none' | 'underline' | 'overline' | 'line-through' | 'underline overline';
+  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  lineHeight?: number | string;
+  letterSpacing?: number | string;
+  wordSpacing?: number | string;
+  textShadow?: string;
+  color?: string; // Text color separate from fill
   cornerRadius?: number;
 }
 
@@ -133,6 +140,12 @@ export const DEFAULT_ELEMENT_STYLE: ElementStyle = {
   fontWeight: 'normal',
   fontStyle: 'normal',
   textAlign: 'center',
+  textDecoration: 'none',
+  textTransform: 'none',
+  lineHeight: 1.4,
+  letterSpacing: 'normal',
+  wordSpacing: 'normal',
+  color: '#000000',
 };
 
 export const DEFAULT_CONNECTION_STYLE = {

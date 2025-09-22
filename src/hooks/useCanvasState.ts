@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { DiagramSchema, DiagramElement, Point, Size } from '../types/diagram';
-import { 
+import type { DiagramSchema, DiagramElement, Point, Size, ElementStyle } from '../types/diagram';
+import {
   updateDiagramTimestamp,
   addElementToDiagram,
-  removeElementFromDiagram 
+  removeElementFromDiagram
 } from '../core/schema';
 import {
   CommandManager,
@@ -12,8 +12,14 @@ import {
   MoveElementCommand,
   ResizeElementCommand,
   UpdateElementCommand,
+  BulkStyleCommand,
+  AlignElementsCommand,
+  DistributeElementsCommand,
   KeyboardShortcuts,
   type CommandManagerState,
+  type BulkStyleUpdate,
+  type AlignmentOperation,
+  type DistributionOperation,
 } from '../core/commands';
 
 interface CanvasState {
@@ -239,9 +245,9 @@ export function useCanvasState(initialDiagram: DiagramSchema) {
     setState(prev => {
       const updatedElements = prev.diagram.elements.map(element =>
         element.id === elementId
-          ? { 
-              ...element, 
-              style: { ...element.style, ...styleUpdates } 
+          ? {
+              ...element,
+              style: { ...element.style, ...styleUpdates }
             }
           : element
       );
@@ -256,11 +262,102 @@ export function useCanvasState(initialDiagram: DiagramSchema) {
     });
   }, []);
 
+  // Bulk style update with command system
+  const bulkUpdateStyles = useCallback((update: BulkStyleUpdate) => {
+    const bulkCommand = new BulkStyleCommand(update, `Update ${update.elementIds.length} element(s)`);
+    const newDiagram = commandManager.executeCommand(bulkCommand, state.diagram);
+    setState(prev => ({ ...prev, diagram: newDiagram }));
+  }, [commandManager, state.diagram]);
+
+  // Align elements with command system
+  const alignElements = useCallback((operation: AlignmentOperation) => {
+    const alignCommand = new AlignElementsCommand(operation, `Align ${operation.elementIds.length} element(s)`);
+    const newDiagram = commandManager.executeCommand(alignCommand, state.diagram);
+    setState(prev => ({ ...prev, diagram: newDiagram }));
+  }, [commandManager, state.diagram]);
+
+  // Distribute elements with command system
+  const distributeElements = useCallback((operation: DistributionOperation) => {
+    const distributeCommand = new DistributeElementsCommand(operation, `Distribute ${operation.elementIds.length} element(s)`);
+    const newDiagram = commandManager.executeCommand(distributeCommand, state.diagram);
+    setState(prev => ({ ...prev, diagram: newDiagram }));
+  }, [commandManager, state.diagram]);
+
+  // Find and replace text across elements
+  const findAndReplaceText = useCallback((searchText: string, replaceText: string, matchCase = false) => {
+    const elementsToUpdate = state.diagram.elements.filter(el => {
+      if (!el.text) return false;
+      const text = matchCase ? el.text : el.text.toLowerCase();
+      const search = matchCase ? searchText : searchText.toLowerCase();
+      return text.includes(search);
+    });
+
+    if (elementsToUpdate.length === 0) return;
+
+    const updatedElements = state.diagram.elements.map(element => {
+      if (!elementsToUpdate.some(el => el.id === element.id) || !element.text) {
+        return element;
+      }
+
+      const text = matchCase ? element.text : element.text.toLowerCase();
+      const search = matchCase ? searchText : searchText.toLowerCase();
+
+      let newText = element.text;
+      if (matchCase) {
+        newText = newText.replace(new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), replaceText);
+      } else {
+        newText = newText.replace(new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), replaceText);
+      }
+
+      return { ...element, text: newText };
+    });
+
+    setState(prev => ({
+      ...prev,
+      diagram: updateDiagramTimestamp({
+        ...prev.diagram,
+        elements: updatedElements,
+      }),
+    }));
+  }, [state.diagram]);
+
+  // Batch update multiple element positions (for alignment/distribution)
+  const batchUpdatePositions = useCallback((updates: Array<{ elementId: string; position: Point }>) => {
+    setState(prev => {
+      const updatedElements = prev.diagram.elements.map(element => {
+        const update = updates.find(u => u.elementId === element.id);
+        return update ? { ...element, position: update.position } : element;
+      });
+
+      return {
+        ...prev,
+        diagram: updateDiagramTimestamp({
+          ...prev.diagram,
+          elements: updatedElements,
+        }),
+      };
+    });
+  }, []);
+
+  // Copy style from one element to others
+  const copyStyleToElements = useCallback((sourceElementId: string, targetElementIds: string[]) => {
+    const sourceElement = state.diagram.elements.find(el => el.id === sourceElementId);
+    if (!sourceElement) return;
+
+    const styleUpdate: BulkStyleUpdate = {
+      elementIds: targetElementIds,
+      styleUpdates: sourceElement.style,
+      mode: 'replace',
+    };
+
+    bulkUpdateStyles(styleUpdate);
+  }, [state.diagram.elements, bulkUpdateStyles]);
+
   return {
     // State
     diagram: state.diagram,
     selectedElementIds: state.selectedElementIds,
-    selectedElements: state.diagram.elements.filter(el => 
+    selectedElements: state.diagram.elements.filter(el =>
       state.selectedElementIds.includes(el.id)
     ),
     isDrawing: state.isDrawing,
@@ -280,6 +377,14 @@ export function useCanvasState(initialDiagram: DiagramSchema) {
     updateElementText,
     updateElementStyle,
 
+    // Bulk Operations
+    bulkUpdateStyles,
+    alignElements,
+    distributeElements,
+    findAndReplaceText,
+    batchUpdatePositions,
+    copyStyleToElements,
+
     // Command System
     undo,
     redo,
@@ -289,5 +394,6 @@ export function useCanvasState(initialDiagram: DiagramSchema) {
     // Convenience methods
     deleteSelected: () => removeElements(state.selectedElementIds),
     hasSelection: state.selectedElementIds.length > 0,
+    isMultiSelect: state.selectedElementIds.length > 1,
   };
 }

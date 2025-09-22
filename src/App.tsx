@@ -1,20 +1,155 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { ToolbarComponent, type DrawingTool } from './components/Toolbar/ToolbarComponent';
 import { FlowCanvas } from './components/Canvas/FlowCanvas';
 import useShapeCreation from './components/Canvas/hooks/useShapeCreation';
 import { MenuBar } from './components/MenuBar/MenuBar';
+import { PropertyPanel } from './components/PropertyPanel/PropertyPanel';
+import { useCanvasState } from './hooks/useCanvasState';
+import { createEmptyDiagram } from './utils/diagramFactory';
 // React Flow types are imported but typed as any for flexibility
+import type { Node, Edge } from 'reactflow';
+import { MarkerType } from 'reactflow';
 import './App.css';
 
 function App() {
   const [selectedTool, setSelectedTool] = useState<DrawingTool>('select');
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [canUndo] = useState(false);
-  const [canRedo] = useState(false);
-  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [copiedNodes, setCopiedNodes] = useState<any[]>([]);
+  const [showPropertyPanel, setShowPropertyPanel] = useState(true);
   const flowRef = useRef<any>(null);
+
+  // Initialize diagram state for PropertyPanel
+  const initialDiagram = createEmptyDiagram('OpenChart Diagram');
+  const canvasState = useCanvasState(initialDiagram);
+
+  // Convert React Flow nodes to diagram elements for PropertyPanel
+  // Use useMemo to ensure selectedElements updates when nodes change
+  const selectedElements = useMemo(() => {
+    const currentlySelectedNodes = nodes.filter(node => node.selected);
+    const elements = currentlySelectedNodes.map(node => {
+      // Get complete style from node.data.style with proper defaults
+      const nodeStyle = node.data?.style || {};
+      const completeStyle = {
+        fill: nodeStyle.fill || node.data?.backgroundColor || '#f0f9ff',
+        stroke: node.selected ? '#0066ff' : (nodeStyle.stroke || node.data?.borderColor || '#d1d5db'),
+        strokeWidth: nodeStyle.strokeWidth || 2,
+        opacity: nodeStyle.opacity !== undefined ? nodeStyle.opacity : 1,
+        fontSize: nodeStyle.fontSize || 14,
+        fontFamily: nodeStyle.fontFamily || 'Arial, sans-serif',
+        fontWeight: nodeStyle.fontWeight || 'normal' as const,
+        fontStyle: nodeStyle.fontStyle || 'normal' as const,
+        textAlign: nodeStyle.textAlign || 'center' as const,
+        cornerRadius: nodeStyle.cornerRadius || 8,
+        color: nodeStyle.color || '#000000',
+        textDecoration: nodeStyle.textDecoration || 'none',
+        textTransform: nodeStyle.textTransform || 'none',
+        lineHeight: nodeStyle.lineHeight || 1.4,
+        letterSpacing: nodeStyle.letterSpacing || 'normal',
+        wordSpacing: nodeStyle.wordSpacing || 'normal',
+        ...nodeStyle // Preserve any additional style properties
+      };
+
+      return {
+        id: node.id,
+        type: (node.data?.shape || 'rectangle') as any,
+        position: node.position,
+        size: {
+          width: node.data?.width || node.style?.width || 120,
+          height: node.data?.height || node.style?.height || 80
+        },
+        style: completeStyle,
+        text: node.data?.label || '',
+        visible: true,
+        locked: false,
+        zIndex: node.zIndex || 0,
+        properties: {} // Extensible properties
+      };
+    });
+    console.log('🔄 selectedElements recomputed:', elements);
+    return elements;
+  }, [nodes]); // Recompute when nodes change
+
+  // PropertyPanel callback handlers that update React Flow nodes
+  const handleUpdateElementStyle = useCallback((elementId: string, styleUpdates: any) => {
+    console.log('🎨 handleUpdateElementStyle called:', { elementId, styleUpdates });
+
+    setNodes(currentNodes => {
+      return currentNodes.map(node => {
+        if (node.id === elementId) {
+          // Get current style and merge with updates
+          const currentStyle = node.data?.style || {};
+          const newStyle = { ...currentStyle, ...styleUpdates };
+
+          // Create a completely new node object to force React Flow re-render
+          const updatedNode = {
+            ...node,
+            // Force React Flow to detect change with a new data object
+            data: {
+              ...node.data,
+              style: newStyle,
+              // Also update legacy properties for backward compatibility
+              backgroundColor: newStyle.fill || node.data?.backgroundColor,
+              borderColor: newStyle.stroke || node.data?.borderColor,
+              // Add a timestamp to force re-render
+              lastStyleUpdate: Date.now(),
+            },
+          };
+
+          console.log('🎨 Node updated with new style:', {
+            id: updatedNode.id,
+            oldStyle: currentStyle,
+            newStyle,
+            timestamp: updatedNode.data.lastStyleUpdate
+          });
+
+          return updatedNode;
+        }
+        return node;
+      });
+    });
+  }, []);
+
+  const handleUpdateElementText = useCallback((elementId: string, text: string) => {
+    console.log('🎨 handleUpdateElementText called:', { elementId, text });
+
+    setNodes(currentNodes => {
+      return currentNodes.map(node => {
+        if (node.id === elementId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              label: text,
+              // Add timestamp to force re-render
+              lastTextUpdate: Date.now(),
+            }
+          };
+        }
+        return node;
+      });
+    });
+  }, []);
+
+  const handleUpdateElementPosition = useCallback((elementId: string, x: number, y: number) => {
+    setNodes(nodes => nodes.map(node =>
+      node.id === elementId
+        ? { ...node, position: { x, y } }
+        : node
+    ));
+  }, []);
+
+  const handleUpdateElementSize = useCallback((elementId: string, width: number, height: number) => {
+    setNodes(nodes => nodes.map(node =>
+      node.id === elementId
+        ? {
+            ...node,
+            data: { ...node.data, width, height },
+            style: { ...node.style, width, height }
+          }
+        : node
+    ));
+  }, []);
 
   // Shape creation hook
   const { handleCanvasClick } = useShapeCreation({
@@ -207,14 +342,12 @@ function App() {
   }, []);
 
   const handleUndo = useCallback(() => {
-    // TODO: Implement undo with React Flow
-    console.log('Undo not yet implemented');
-  }, []);
+    canvasState.undo();
+  }, [canvasState]);
 
   const handleRedo = useCallback(() => {
-    // TODO: Implement redo with React Flow
-    console.log('Redo not yet implemented');
-  }, []);
+    canvasState.redo();
+  }, [canvasState]);
 
   const handleToggleGrid = useCallback(() => {
     if (flowRef.current?.toggleGrid) {
@@ -323,8 +456,8 @@ function App() {
     const autoSaveInterval = setInterval(() => {
       if (nodes.length > 0 || edges.length > 0) {
         const viewport = flowRef.current?.getViewport() || { x: 0, y: 0, zoom: 1 };
-        const diagram = { 
-          nodes, 
+        const diagram = {
+          nodes,
           edges,
           viewport,
           version: '1.0.0',
@@ -337,6 +470,34 @@ function App() {
 
     return () => clearInterval(autoSaveInterval);
   }, [nodes, edges]);
+
+  // Debug function for testing PropertyPanel integration
+  useEffect(() => {
+    (window as any).testPropertyPanel = () => {
+      console.log('🧪 Testing PropertyPanel Integration...');
+      console.log('📊 Current nodes:', nodes);
+      console.log('🎯 Selected elements:', selectedElements);
+
+      if (nodes.length > 0) {
+        const firstNode = nodes[0];
+        console.log('🎨 Testing style update on first node:', firstNode.id);
+
+        handleUpdateElementStyle(firstNode.id, {
+          fill: '#ff0000',
+          stroke: '#0000ff',
+          strokeWidth: 4,
+          fontSize: 18,
+          opacity: 0.8
+        });
+
+        console.log('✅ Style update called - check if shapes update visually!');
+      } else {
+        console.log('❌ No nodes found - add a shape first!');
+      }
+    };
+
+    console.log('🔧 Debug function added: window.testPropertyPanel()');
+  }, [nodes, selectedElements, handleUpdateElementStyle]);
 
   // Load auto-saved diagram on mount
   useEffect(() => {
@@ -383,6 +544,7 @@ function App() {
     }
   }, []); // Only run on mount
 
+
   return (
     <div className="app">
       {/* File input for loading diagrams - using label trick for better compatibility */}
@@ -397,12 +559,12 @@ function App() {
           const file = e.target.files?.[0];
           if (file) {
             const reader = new FileReader();
-            
+
             reader.onload = (event: ProgressEvent<FileReader>) => {
               try {
                 const content = event.target?.result as string;
                 const diagram = JSON.parse(content);
-                
+
                 // Re-attach onTextChange callbacks to loaded nodes
                 const nodesWithCallbacks = (diagram.nodes || []).map((node: any) => ({
                   ...node,
@@ -422,7 +584,7 @@ function App() {
 
                 setNodes(nodesWithCallbacks);
                 setEdges(diagram.edges || []);
-                
+
                 if (diagram.viewport && flowRef.current) {
                   setTimeout(() => {
                     flowRef.current.setViewport(diagram.viewport);
@@ -431,11 +593,11 @@ function App() {
               } catch (error) {
                 alert('Error loading diagram: Invalid JSON format');
               }
-              
+
               // Clear the input value so the same file can be selected again
               e.target.value = '';
             };
-            
+
             reader.readAsText(file);
           }
         }}
@@ -451,8 +613,8 @@ function App() {
         onLoadExample={handleLoadExample}
         onUndo={handleUndo}
         onRedo={handleRedo}
-        canUndo={canUndo}
-        canRedo={canRedo}
+        canUndo={canvasState.canUndo}
+        canRedo={canvasState.canRedo}
         onToggleGrid={handleToggleGrid}
         onToggleRulers={handleToggleRulers}
       />
@@ -479,13 +641,38 @@ function App() {
               onNodesChange={setNodes}
               onEdgesChange={setEdges}
               onConnect={(connection) => {
-                // Edge creation is handled internally by React Flow and useShapeHandlers
-                // Don't create duplicate edges here - just log for debugging
                 console.log('🔗 Connection created:', connection);
+                // Create the edge when nodes are connected
+                const newEdge = {
+                  id: `edge-${connection.source}-${connection.target}-${Date.now()}`,
+                  source: connection.source,
+                  target: connection.target,
+                  sourceHandle: connection.sourceHandle,
+                  targetHandle: connection.targetHandle,
+                  type: 'smoothstep',
+                  animated: false,
+                  style: { stroke: '#94a3b8', strokeWidth: 2 },
+                  markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    width: 20,
+                    height: 20,
+                    color: '#94a3b8',
+                  },
+                };
+                setEdges(currentEdges => [...currentEdges, newEdge]);
               }}
               onPaneClick={handleCanvasClick}
             />
           </div>
+          <PropertyPanel
+            selectedElements={selectedElements}
+            onUpdateElementStyle={handleUpdateElementStyle}
+            onUpdateElementText={handleUpdateElementText}
+            onUpdateElementPosition={handleUpdateElementPosition}
+            onUpdateElementSize={handleUpdateElementSize}
+            isVisible={showPropertyPanel}
+            onToggleVisibility={() => setShowPropertyPanel(!showPropertyPanel)}
+          />
         </div>
       </main>
     </div>

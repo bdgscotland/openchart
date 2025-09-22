@@ -1,0 +1,125 @@
+.text-spacing {
+  width: 100%;
+}
+
+.spacing-group {
+  margin-bottom: 16px;
+}
+
+.spacing-group:last-child {
+  margin-bottom: 0;
+}
+
+.spacing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-primary, #212529);
+  margin: 0;
+}
+
+.mode-toggle {
+  display: flex;
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-border, #dee2e6);
+}
+
+.mode-button {
+  padding: 2px 8px;
+  background: var(--color-bg-primary, #ffffff);
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text-secondary, #6c757d);
+}
+
+.mode-button:hover {
+  background: var(--color-bg-hover, #e9ecef);
+  color: var(--color-text-primary, #212529);
+}
+
+.mode-button.active {
+  background: var(--color-primary, #0066cc);
+  color: white;
+}
+
+.preset-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.preset-button {
+  padding: 6px 10px;
+  background: var(--color-bg-secondary, #f8f9fa);
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text-primary, #212529);
+}
+
+.preset-button:hover {
+  background: var(--color-bg-hover, #e9ecef);
+  border-color: var(--color-border-hover, #adb5bd);
+}
+
+.preset-button.active {
+  background: var(--color-primary, #0066cc);
+  color: white;
+  border-color: var(--color-primary, #0066cc);
+}
+
+.custom-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spacing-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--color-bg-primary, #ffffff);
+}
+
+.spacing-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #0066cc);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha, rgba(0, 102, 204, 0.1));
+}
+
+.input-hint {
+  font-size: 10px;
+  color: var(--color-text-secondary, #6c757d);
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 320px) {
+  .preset-buttons {
+    flex-direction: column;
+  }
+
+  .preset-button {
+    width: 100%;
+  }
+
+  .spacing-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

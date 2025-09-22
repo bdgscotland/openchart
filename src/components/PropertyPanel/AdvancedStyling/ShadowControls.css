@@ -1,0 +1,462 @@
+/* Shadow Controls Styles */
+.shadow-controls {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  width: 320px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Header */
+.shadow-controls__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #334155;
+  background: #1e293b;
+}
+
+.shadow-controls__title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #f1f5f9;
+}
+
+.shadow-controls__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shadow-controls__action {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shadow-controls__action:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+/* Preview */
+.shadow-preview {
+  padding: 24px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shadow-preview__background {
+  width: 120px;
+  height: 80px;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.shadow-preview__element {
+  width: 60px;
+  height: 40px;
+  background: #ffffff;
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease;
+}
+
+/* Shadow List */
+.shadow-controls__list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.shadow-controls__list-actions {
+  padding: 12px 16px;
+  border-top: 1px solid #334155;
+  text-align: center;
+}
+
+.shadow-controls__clear {
+  background: #ef4444;
+  border: none;
+  border-radius: 4px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  transition: all 0.15s ease;
+}
+
+.shadow-controls__clear:hover {
+  background: #dc2626;
+}
+
+/* Empty State */
+.shadow-controls__empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: #64748b;
+}
+
+.shadow-controls__empty p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+.shadow-controls__add-first {
+  background: #3b82f6;
+  border: none;
+  border-radius: 4px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: all 0.15s ease;
+}
+
+.shadow-controls__add-first:hover {
+  background: #2563eb;
+}
+
+/* Shadow Editor */
+.shadow-editor {
+  border-bottom: 1px solid #334155;
+  background: #0f172a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.shadow-editor:last-child {
+  border-bottom: none;
+}
+
+.shadow-editor:hover {
+  background: #1e293b;
+}
+
+.shadow-editor--selected {
+  background: #1e293b;
+  border-left: 3px solid #3b82f6;
+}
+
+.shadow-editor--hidden {
+  opacity: 0.5;
+}
+
+.shadow-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #334155;
+}
+
+.shadow-editor__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #f1f5f9;
+}
+
+.shadow-editor__badge {
+  background: #3b82f6;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  text-transform: uppercase;
+}
+
+.shadow-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shadow-editor__action {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shadow-editor__action:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.shadow-editor__remove:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* Controls */
+.shadow-editor__controls {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shadow-editor__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shadow-editor__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shadow-editor__offset,
+.shadow-editor__blur-spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.shadow-editor__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shadow-editor__input-label {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shadow-editor__input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 12px;
+  text-align: center;
+}
+
+.shadow-editor__input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.shadow-editor__color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shadow-editor__color-swatch {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.shadow-editor__color-swatch:hover {
+  transform: scale(1.1);
+}
+
+.shadow-editor__color-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 11px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.shadow-editor__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.shadow-editor__checkbox-input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #3b82f6;
+}
+
+.shadow-editor__checkbox-label {
+  font-size: 12px;
+  color: #f1f5f9;
+}
+
+.shadow-editor__color-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1001;
+  margin-top: 4px;
+}
+
+/* Presets */
+.shadow-controls__presets {
+  padding: 16px;
+  border-top: 1px solid #334155;
+  background: #1e293b;
+}
+
+.shadow-controls__presets-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shadow-controls__presets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.shadow-controls__preset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.shadow-controls__preset:hover {
+  background: #334155;
+}
+
+.shadow-controls__preset-preview {
+  width: 40px;
+  height: 30px;
+  background: #ffffff;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.shadow-controls__preset:hover .shadow-controls__preset-preview {
+  transform: scale(1.1);
+}
+
+.shadow-controls__preset-name {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+/* CSS Output */
+.shadow-controls__css {
+  padding: 16px;
+  border-top: 1px solid #334155;
+  background: #1e293b;
+}
+
+.shadow-controls__css-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shadow-controls__css-output {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  color: #94a3b8;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  word-break: break-all;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+/* Scrollbar */
+.shadow-controls::-webkit-scrollbar,
+.shadow-controls__list::-webkit-scrollbar,
+.shadow-controls__css-output::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shadow-controls::-webkit-scrollbar-track,
+.shadow-controls__list::-webkit-scrollbar-track,
+.shadow-controls__css-output::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+.shadow-controls::-webkit-scrollbar-thumb,
+.shadow-controls__list::-webkit-scrollbar-thumb,
+.shadow-controls__css-output::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+.shadow-controls::-webkit-scrollbar-thumb:hover,
+.shadow-controls__list::-webkit-scrollbar-thumb:hover,
+.shadow-controls__css-output::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .shadow-controls {
+    width: 280px;
+  }
+
+  .shadow-controls__presets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .shadow-editor__offset,
+  .shadow-editor__blur-spread {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

@@ -1,0 +1,50 @@
+.text-alignment {
+  width: 100%;
+}
+
+.alignment-buttons {
+  display: flex;
+  gap: 1px;
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-border, #dee2e6);
+}
+
+.alignment-button {
+  flex: 1;
+  padding: 8px;
+  background: var(--color-bg-primary, #ffffff);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: var(--color-text-secondary, #6c757d);
+}
+
+.alignment-button:hover {
+  background: var(--color-bg-hover, #e9ecef);
+  color: var(--color-text-primary, #212529);
+}
+
+.alignment-button.active {
+  background: var(--color-primary, #0066cc);
+  color: white;
+}
+
+.alignment-button:focus {
+  outline: none;
+  z-index: 1;
+  position: relative;
+  box-shadow: 0 0 0 3px var(--color-primary-alpha, rgba(0, 102, 204, 0.1));
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-primary, #212529);
+}

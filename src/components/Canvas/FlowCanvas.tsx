@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useImperativeHandle, forwardRef, useEffect, useMemo } from 'react';
 import ReactFlow, {
   Controls,
   Background,
@@ -22,13 +22,14 @@ import './FlowCanvas.css';
 
 import ShapeNode from './ShapeNode';
 import useShapeHandlers from './hooks/useShapeHandlers';
+import { useConnectionPool } from '../../hooks/useConnectionPool';
 
-// Node types registry - defined outside component to avoid re-creation
+// Memoized node types registry - defined outside component to avoid re-creation
 const nodeTypes = {
   shape: ShapeNode,
 };
 
-// Default edge options - defined outside component to avoid re-creation
+// Memoized default edge options - defined outside component to avoid re-creation
 const defaultEdgeOptions = {
   type: 'default',
   markerEnd: { type: MarkerType.Arrow },
@@ -75,6 +76,15 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { fitView, getViewport, setViewport, getNodes, getEdges, screenToFlowPosition } = useReactFlow();
 
+  // Use connection pool for optimized edge creation
+  const {
+    addConnection: addPooledConnection,
+    removeConnection,
+    hasConnection,
+    getPoolStats,
+    cleanup: cleanupConnectionPool
+  } = useConnectionPool(edges, setEdges, 100);
+
   // Use our custom shape handlers hook
   const {
     handleConnect: handleConnectInternal,
@@ -89,12 +99,26 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
   // Initialize internal state on mount and when external state changes
   useEffect(() => {
-    // Only update if the node count changed (new nodes added/removed)
+    // Update if nodes changed (count, style, or data changes)
     // Don't update during drag operations to prevent interference
-    if (!isDragging && nodes.length !== initialNodes.length) {
-      setNodes(initialNodes);
+    if (!isDragging) {
+      // Check if we should sync by comparing timestamps or forcing sync
+      const shouldSync = nodes.length !== initialNodes.length ||
+        initialNodes.some(initialNode => {
+          const currentNode = nodes.find(n => n.id === initialNode.id);
+          return !currentNode ||
+            currentNode.data?.lastStyleUpdate !== initialNode.data?.lastStyleUpdate ||
+            currentNode.data?.lastTextUpdate !== initialNode.data?.lastTextUpdate ||
+            currentNode.data?.label !== initialNode.data?.label ||
+            JSON.stringify(currentNode.data?.style) !== JSON.stringify(initialNode.data?.style);
+        });
+
+      if (shouldSync) {
+        console.log('🔄 FlowCanvas syncing nodes from parent:', initialNodes);
+        setNodes(initialNodes);
+      }
     }
-  }, [initialNodes, setNodes, isDragging, nodes.length]);
+  }, [initialNodes, setNodes, isDragging, nodes]);
 
   useEffect(() => {
     // Update edges when external state changes
@@ -103,25 +127,44 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     }
   }, [initialEdges, setEdges, edges.length]);
 
-  // Handle nodes change with external callback
+  // Performance-optimized node changes with requestAnimationFrame
+  const animationFrameRef = useRef<number | null>(null);
+
   const handleNodesChange = useCallback((changes: any) => {
     onNodesChangeInternal(changes);
-    
+
     // Only sync to external state if not dragging and if the changes are significant
     // This prevents excessive re-renders during drag operations
     if (!isDragging) {
-      // Debounce external state updates to improve performance
-      const hasSignificantChanges = changes.some((change: any) => 
-        change.type === 'add' || change.type === 'remove' || 
-        (change.type === 'position' && !change.dragging)
-      );
-      
-      if (hasSignificantChanges) {
-        const updatedNodes = applyNodeChanges(changes, nodes);
-        onNodesChange(updatedNodes);
+      // Cancel previous animation frame to debounce updates
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
+
+      // Use requestAnimationFrame for smooth performance
+      animationFrameRef.current = requestAnimationFrame(() => {
+        const hasSignificantChanges = changes.some((change: any) =>
+          change.type === 'add' || change.type === 'remove' ||
+          (change.type === 'position' && !change.dragging)
+        );
+
+        if (hasSignificantChanges) {
+          const updatedNodes = applyNodeChanges(changes, nodes);
+          onNodesChange(updatedNodes);
+        }
+      });
     }
   }, [onNodesChangeInternal, onNodesChange, nodes, isDragging]);
+
+  // Cleanup animation frame and connection pool on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      cleanupConnectionPool();
+    };
+  }, [cleanupConnectionPool]);
 
   // Handle edges change with external callback
   const handleEdgesChange = useCallback((changes: any) => {
@@ -134,39 +177,22 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     }, 0);
   }, [onEdgesChangeInternal, onEdgesChange, getEdges]);
 
-  // Handle new connections
+  // Handle new connections with connection pooling
   const handleConnect = useCallback((connection: Connection) => {
     console.log('🔗 FlowCanvas handleConnect called with:', connection);
-    
-    // Create the edge using React Flow's addEdge utility
-    const newEdge = {
-      id: `edge-${Date.now()}`,
-      source: connection.source!,
-      target: connection.target!,
-      sourceHandle: connection.sourceHandle,
-      targetHandle: connection.targetHandle,
-      type: 'default',
-      markerEnd: { type: MarkerType.Arrow }
-    };
-    
-    console.log('🔗 Creating new edge:', newEdge);
-    
-    // Update edges using React Flow's state management
-    setEdges((eds) => {
-      const updatedEdges = [...eds, newEdge];
-      console.log('🔗 Updated edges in FlowCanvas:', updatedEdges);
-      
-      // Also sync to external state
-      setTimeout(() => {
-        onEdgesChange(updatedEdges);
-      }, 0);
-      
-      return updatedEdges;
-    });
-    
+
+    // Check if connection already exists to prevent duplicates
+    if (hasConnection(connection.source!, connection.target!)) {
+      console.log('🚫 Connection already exists, skipping');
+      return;
+    }
+
+    // Use connection pool for optimized batch processing
+    addPooledConnection(connection);
+
     // Call external onConnect callback
     onConnect(connection);
-  }, [setEdges, onEdgesChange, onConnect]);
+  }, [addPooledConnection, hasConnection, onConnect]);
 
   // Handle drag and drop from toolbar
   const onDrop = useCallback((event: React.DragEvent) => {
@@ -317,7 +343,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         }}
         onNodeDragStop={(event, node) => {
           setIsDragging(false);
-          
+
           // Sync to external state after drag is complete
           setTimeout(() => {
             const updatedNodes = getNodes();
@@ -344,6 +370,11 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
+        selectNodesOnDrag={false}
+        selectionOnDrag={true}
+        multiSelectionKeyCode={null}
+        selectionKeyCode={null}
+        deleteKeyCode="Delete"
         nodeDragThreshold={0}
         connectionMode={ConnectionMode.Loose}
         defaultEdgeOptions={defaultEdgeOptions}

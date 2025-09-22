@@ -1,0 +1,350 @@
+/* BulkStyleControls - CSS for bulk styling operations */
+
+.bulk-style-controls {
+  width: 100%;
+  background: var(--bg-secondary, #f8f9fa);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bulk-controls-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-primary, #ffffff);
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary, #2c3e50);
+}
+
+.bulk-controls-message {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-secondary, #6c757d);
+  font-size: 14px;
+}
+
+.bulk-section {
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.bulk-section:last-child {
+  border-bottom: none;
+}
+
+.bulk-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-primary, #ffffff);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bulk-section-header:hover {
+  background: var(--bg-hover, #f5f5f5);
+}
+
+.bulk-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-primary, #2c3e50);
+}
+
+.bulk-section-content {
+  padding: 16px;
+  background: var(--bg-secondary, #f8f9fa);
+}
+
+/* Update Mode Selector */
+.update-mode-selector {
+  margin-bottom: 16px;
+}
+
+.update-mode-selector label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-secondary, #6c757d);
+}
+
+.update-mode-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+/* Property Toggles */
+.property-toggles {
+  margin-bottom: 16px;
+}
+
+.property-toggles-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.property-toggles-header span {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-secondary, #6c757d);
+}
+
+.toggle-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-actions button {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 3px;
+  background: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-actions button:hover {
+  background: var(--bg-hover, #f5f5f5);
+}
+
+.property-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.property-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.property-toggle:hover {
+  background: var(--bg-hover, #f5f5f5);
+}
+
+.property-toggle.enabled {
+  background: var(--bg-accent, #e3f2fd);
+  border-color: var(--accent-color, #2196f3);
+  color: var(--accent-color, #2196f3);
+}
+
+.property-toggle input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Color Controls */
+.color-controls-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.color-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.color-control label {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-secondary, #6c757d);
+}
+
+.color-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-input-group input[type="color"] {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.relative-adjustments {
+  border-top: 1px solid var(--border-color, #e0e0e0);
+  padding-top: 16px;
+}
+
+.relative-adjustments h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+}
+
+.adjustment-controls label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary, #6c757d);
+}
+
+.adjustment-controls input[type="range"] {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-secondary, #f8f9fa);
+  outline: none;
+  border-radius: 2px;
+}
+
+.adjustment-controls span {
+  min-width: 40px;
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Alignment Controls */
+.alignment-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.control-group h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+}
+
+.button-group {
+  display: flex;
+  gap: 4px;
+}
+
+.alignment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 44px;
+}
+
+.alignment-btn:hover:not(:disabled) {
+  background: var(--bg-hover, #f5f5f5);
+  border-color: var(--accent-color, #2196f3);
+}
+
+.alignment-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Find & Replace */
+.find-replace-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-secondary, #6c757d);
+}
+
+.find-input,
+.replace-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.find-replace-options {
+  margin: 8px 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.find-replace-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.replace-btn {
+  padding: 8px 16px;
+  background: var(--accent-color, #2196f3);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.replace-btn:hover:not(:disabled) {
+  background: var(--accent-color-dark, #1976d2);
+}
+
+.replace-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .property-toggle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-wrap: wrap;
+  }
+
+  .alignment-btn {
+    flex: 1;
+    min-width: 60px;
+  }
+}
