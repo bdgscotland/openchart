@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenChart Save/Load Functionality Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .test-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #007bff;
+            border-radius: 0 4px 4px 0;
+        }
+        .test-step.completed {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+        .test-step.failed {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button.success {
+            background: #28a745;
+        }
+        .test-button.danger {
+            background: #dc3545;
+        }
+        .test-results {
+            background: #f1f3f4;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pending { background: #ffc107; }
+        .status-running { background: #17a2b8; }
+        .status-success { background: #28a745; }
+        .status-failed { background: #dc3545; }
+        .schema-preview {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 11px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #b8daff;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 OpenChart Save/Load Functionality Test</h1>
+
+        <div class="info">
+            <strong>Instructions:</strong> This test suite verifies that all shape properties, styles, connections, and metadata are correctly preserved during save/load operations. Open the main OpenChart application in another tab and follow the test steps below.
+        </div>
+
+        <div class="warning">
+            <strong>Prerequisites:</strong> Make sure you have the OpenChart application running at <a href="http://localhost:5173" target="_blank">http://localhost:5173</a> (or your development server URL).
+        </div>
+
+        <!-- Test 1: Shape Creation and Styling -->
+        <div class="test-section">
+            <h2>📝 Test 1: Shape Creation and Styling</h2>
+            <div class="test-step" id="test1-step1">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 1:</strong> Create various shapes with different styles
+                <button class="test-button" onclick="runTest1Step1()">Run Step 1</button>
+            </div>
+            <div class="test-step" id="test1-step2">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 2:</strong> Modify shape properties using PropertyPanel
+                <button class="test-button" onclick="runTest1Step2()">Run Step 2</button>
+            </div>
+            <div class="test-results" id="test1-results"></div>
+        </div>
+
+        <!-- Test 2: Connection Testing -->
+        <div class="test-section">
+            <h2>🔗 Test 2: Connection Creation and Persistence</h2>
+            <div class="test-step" id="test2-step1">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 1:</strong> Create connections between shapes
+                <button class="test-button" onclick="runTest2Step1()">Run Step 1</button>
+            </div>
+            <div class="test-step" id="test2-step2">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 2:</strong> Test different connection handles
+                <button class="test-button" onclick="runTest2Step2()">Run Step 2</button>
+            </div>
+            <div class="test-results" id="test2-results"></div>
+        </div>
+
+        <!-- Test 3: Save Operation -->
+        <div class="test-section">
+            <h2>💾 Test 3: Save Diagram Functionality</h2>
+            <div class="test-step" id="test3-step1">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 1:</strong> Save diagram and examine JSON structure
+                <button class="test-button" onclick="runTest3Step1()">Run Step 1</button>
+            </div>
+            <div class="test-step" id="test3-step2">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 2:</strong> Validate saved data schema
+                <button class="test-button" onclick="runTest3Step2()">Run Step 2</button>
+            </div>
+            <div class="test-results" id="test3-results"></div>
+            <div class="schema-preview" id="saved-schema-preview"></div>
+        </div>
+
+        <!-- Test 4: Load Operation -->
+        <div class="test-section">
+            <h2>📂 Test 4: Load Diagram Functionality</h2>
+            <div class="test-step" id="test4-step1">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 1:</strong> Clear current diagram and load saved file
+                <button class="test-button" onclick="runTest4Step1()">Run Step 1</button>
+            </div>
+            <div class="test-step" id="test4-step2">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 2:</strong> Verify all properties are restored correctly
+                <button class="test-button" onclick="runTest4Step2()">Run Step 2</button>
+            </div>
+            <div class="test-results" id="test4-results"></div>
+        </div>
+
+        <!-- Test 5: Schema Validation -->
+        <div class="test-section">
+            <h2>🔍 Test 5: Data Schema and Compatibility</h2>
+            <div class="test-step" id="test5-step1">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 1:</strong> Validate node.data.style structure
+                <button class="test-button" onclick="runTest5Step1()">Run Step 1</button>
+            </div>
+            <div class="test-step" id="test5-step2">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 2:</strong> Check timestamp preservation
+                <button class="test-button" onclick="runTest5Step2()">Run Step 2</button>
+            </div>
+            <div class="test-step" id="test5-step3">
+                <span class="status-indicator status-pending"></span>
+                <strong>Step 3:</strong> Validate connection handle naming
+                <button class="test-button" onclick="runTest5Step3()">Run Step 3</button>
+            </div>
+            <div class="test-results" id="test5-results"></div>
+        </div>
+
+        <!-- Test Summary -->
+        <div class="test-section">
+            <h2>📊 Test Summary</h2>
+            <div id="test-summary">
+                <p>Tests not yet started. Click the test buttons above to begin.</p>
+            </div>
+            <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+            <button class="test-button" onclick="resetTests()">Reset Tests</button>
+            <button class="test-button" onclick="generateTestData()">Generate Test Data</button>
+        </div>
+    </div>
+
+    <script>
+        // Test state tracking
+        let testState = {
+            testData: null,
+            savedDiagram: null,
+            completedTests: [],
+            failedTests: []
+        };
+
+        // Test data generation
+        function generateTestData() {
+            const testData = {
+                nodes: [
+                    {
+                        id: 'test-rectangle-1',
+                        type: 'shape',
+                        position: { x: 100, y: 100 },
+                        data: {
+                            label: 'Test Rectangle',
+                            shape: 'rectangle',
+                            width: 150,
+                            height: 80,
+                            style: {
+                                fill: '#ff6b6b',
+                                stroke: '#e53e3e',
+                                strokeWidth: 3,
+                                opacity: 0.9,
+                                fontSize: 16,
+                                fontFamily: 'Arial, sans-serif',
+                                fontWeight: 'bold',
+                                fontStyle: 'normal',
+                                textAlign: 'center',
+                                cornerRadius: 12,
+                                color: '#ffffff',
+                                textDecoration: 'none',
+                                textTransform: 'uppercase',
+                                lineHeight: 1.5,
+                                letterSpacing: '1px',
+                                wordSpacing: 'normal'
+                            },
+                            lastStyleUpdate: Date.now() - 1000,
+                            lastTextUpdate: Date.now() - 500
+                        }
+                    },
+                    {
+                        id: 'test-circle-1',
+                        type: 'shape',
+                        position: { x: 300, y: 150 },
+                        data: {
+                            label: 'Test Circle',
+                            shape: 'circle',
+                            width: 100,
+                            height: 100,
+                            style: {
+                                fill: '#4ecdc4',
+                                stroke: '#26d0ce',
+                                strokeWidth: 2,
+                                opacity: 0.8,
+                                fontSize: 14,
+                                fontFamily: 'Helvetica, sans-serif',
+                                fontWeight: 'normal',
+                                fontStyle: 'italic',
+                                textAlign: 'center',
+                                cornerRadius: 50,
+                                color: '#2d3748',
+                                textDecoration: 'underline',
+                                textTransform: 'capitalize',
+                                lineHeight: 1.2,
+                                letterSpacing: 'normal',
+                                wordSpacing: '2px'
+                            },
+                            lastStyleUpdate: Date.now() - 2000,
+                            lastTextUpdate: Date.now() - 1500
+                        }
+                    },
+                    {
+                        id: 'test-diamond-1',
+                        type: 'shape',
+                        position: { x: 150, y: 300 },
+                        data: {
+                            label: 'Decision Diamond',
+                            shape: 'diamond',
+                            width: 120,
+                            height: 120,
+                            style: {
+                                fill: '#ffd93d',
+                                stroke: '#ffcd07',
+                                strokeWidth: 4,
+                                opacity: 1.0,
+                                fontSize: 12,
+                                fontFamily: 'Georgia, serif',
+                                fontWeight: '600',
+                                fontStyle: 'normal',
+                                textAlign: 'center',
+                                cornerRadius: 0,
+                                color: '#744210',
+                                textDecoration: 'none',
+                                textTransform: 'lowercase',
+                                lineHeight: 1.6,
+                                letterSpacing: '0.5px',
+                                wordSpacing: 'normal'
+                            },
+                            lastStyleUpdate: Date.now() - 3000,
+                            lastTextUpdate: Date.now() - 2500
+                        }
+                    }
+                ],
+                edges: [
+                    {
+                        id: 'edge-test-1-2',
+                        source: 'test-rectangle-1',
+                        target: 'test-circle-1',
+                        sourceHandle: 'right-source',
+                        targetHandle: 'left-target',
+                        type: 'smoothstep',
+                        animated: false,
+                        style: { stroke: '#94a3b8', strokeWidth: 2 },
+                        markerEnd: {
+                            type: 'ArrowClosed',
+                            width: 20,
+                            height: 20,
+                            color: '#94a3b8'
+                        }
+                    },
+                    {
+                        id: 'edge-test-2-3',
+                        source: 'test-circle-1',
+                        target: 'test-diamond-1',
+                        sourceHandle: 'bottom-source',
+                        targetHandle: 'top-target',
+                        type: 'smoothstep',
+                        animated: true,
+                        style: { stroke: '#6366f1', strokeWidth: 3 },
+                        markerEnd: {
+                            type: 'ArrowClosed',
+                            width: 20,
+                            height: 20,
+                            color: '#6366f1'
+                        }
+                    }
+                ],
+                viewport: { x: 0, y: 0, zoom: 1 },
+                version: '1.0.0',
+                timestamp: new Date().toISOString()
+            };
+
+            testState.testData = testData;
+            logResult('test-summary', 'Generated comprehensive test data with 3 nodes and 2 edges');
+            updateSchemaPreview('saved-schema-preview', testData);
+            return testData;
+        }
+
+        // Utility functions
+        function updateTestStep(stepId, status, message = '') {
+            const step = document.getElementById(stepId);
+            const indicator = step.querySelector('.status-indicator');
+
+            // Remove all status classes
+            indicator.classList.remove('status-pending', 'status-running', 'status-success', 'status-failed');
+            step.classList.remove('completed', 'failed');
+
+            // Add new status
+            indicator.classList.add(`status-${status}`);
+            if (status === 'success') {
+                step.classList.add('completed');
+                testState.completedTests.push(stepId);
+            } else if (status === 'failed') {
+                step.classList.add('failed');
+                testState.failedTests.push(stepId);
+            }
+
+            if (message) {
+                const existingMessage = step.querySelector('.step-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'step-message';
+                messageDiv.style.marginTop = '5px';
+                messageDiv.style.fontSize = '12px';
+                messageDiv.style.color = status === 'success' ? '#28a745' : status === 'failed' ? '#dc3545' : '#6c757d';
+                messageDiv.textContent = message;
+                step.appendChild(messageDiv);
+            }
+
+            updateTestSummary();
+        }
+
+        function logResult(resultId, message, isError = false) {
+            const resultDiv = document.getElementById(resultId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+
+            if (resultDiv.textContent.includes('No results yet')) {
+                resultDiv.textContent = '';
+            }
+
+            resultDiv.textContent += logEntry;
+            resultDiv.scrollTop = resultDiv.scrollHeight;
+
+            if (isError) {
+                resultDiv.style.color = '#dc3545';
+            }
+        }
+
+        function updateSchemaPreview(previewId, data) {
+            const preview = document.getElementById(previewId);
+            preview.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function updateTestSummary() {
+            const summary = document.getElementById('test-summary');
+            const totalTests = document.querySelectorAll('.test-step').length;
+            const completed = testState.completedTests.length;
+            const failed = testState.failedTests.length;
+            const pending = totalTests - completed - failed;
+
+            summary.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0;">
+                    <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #6c757d;">${totalTests}</div>
+                        <div>Total Tests</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: #d4edda; border-radius: 4px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #28a745;">${completed}</div>
+                        <div>Passed</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: #f8d7da; border-radius: 4px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #dc3545;">${failed}</div>
+                        <div>Failed</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #856404;">${pending}</div>
+                        <div>Pending</div>
+                    </div>
+                </div>
+                <div style="margin: 10px 0;">
+                    <strong>Pass Rate:</strong> ${totalTests > 0 ? Math.round((completed / totalTests) * 100) : 0}%
+                </div>
+            `;
+        }
+
+        // Test implementations
+        function runTest1Step1() {
+            updateTestStep('test1-step1', 'running');
+            logResult('test1-results', 'Starting Test 1 Step 1: Shape Creation and Styling');
+
+            try {
+                // Generate test data if not already generated
+                if (!testState.testData) {
+                    generateTestData();
+                }
+
+                logResult('test1-results', '✓ Generated test shapes with various styles:');
+                logResult('test1-results', `  - Rectangle: fill=${testState.testData.nodes[0].data.style.fill}, fontSize=${testState.testData.nodes[0].data.style.fontSize}`);
+                logResult('test1-results', `  - Circle: fill=${testState.testData.nodes[1].data.style.fill}, fontStyle=${testState.testData.nodes[1].data.style.fontStyle}`);
+                logResult('test1-results', `  - Diamond: fill=${testState.testData.nodes[2].data.style.fill}, fontWeight=${testState.testData.nodes[2].data.style.fontWeight}`);
+
+                logResult('test1-results', '📋 Instructions: In the main app, create shapes using the toolbar and apply different styles using the PropertyPanel');
+                logResult('test1-results', '🎨 Test different fill colors, stroke colors, font sizes, opacity, corner radius, etc.');
+
+                updateTestStep('test1-step1', 'success', 'Test data generated. Please verify shape creation in main app.');
+            } catch (error) {
+                logResult('test1-results', `❌ Error in Test 1 Step 1: ${error.message}`, true);
+                updateTestStep('test1-step1', 'failed', 'Failed to generate test data');
+            }
+        }
+
+        function runTest1Step2() {
+            updateTestStep('test1-step2', 'running');
+            logResult('test1-results', 'Starting Test 1 Step 2: PropertyPanel Style Modifications');
+
+            try {
+                logResult('test1-results', '📋 Instructions for PropertyPanel testing:');
+                logResult('test1-results', '1. Select a shape in the main application');
+                logResult('test1-results', '2. In the PropertyPanel, modify the following properties:');
+                logResult('test1-results', '   - Fill color (background)');
+                logResult('test1-results', '   - Stroke color and width (border)');
+                logResult('test1-results', '   - Opacity (transparency)');
+                logResult('test1-results', '   - Font size and family');
+                logResult('test1-results', '   - Font weight and style');
+                logResult('test1-results', '   - Text alignment');
+                logResult('test1-results', '   - Corner radius');
+                logResult('test1-results', '   - Text decorations');
+                logResult('test1-results', '3. Verify that changes appear immediately on the shape');
+                logResult('test1-results', '4. Check console logs for style update timestamps');
+
+                updateTestStep('test1-step2', 'success', 'PropertyPanel test instructions provided. Please verify functionality.');
+            } catch (error) {
+                logResult('test1-results', `❌ Error in Test 1 Step 2: ${error.message}`, true);
+                updateTestStep('test1-step2', 'failed', 'Failed to provide test instructions');
+            }
+        }
+
+        function runTest2Step1() {
+            updateTestStep('test2-step1', 'running');
+            logResult('test2-results', 'Starting Test 2 Step 1: Connection Creation');
+
+            try {
+                logResult('test2-results', '📋 Instructions for connection testing:');
+                logResult('test2-results', '1. Create at least 2-3 shapes in the main application');
+                logResult('test2-results', '2. Connect shapes by dragging from one shape\'s handle to another');
+                logResult('test2-results', '3. Test different connection handles:');
+                logResult('test2-results', '   - top-source to bottom-target');
+                logResult('test2-results', '   - right-source to left-target');
+                logResult('test2-results', '   - bottom-source to top-target');
+                logResult('test2-results', '   - left-source to right-target');
+                logResult('test2-results', '4. Verify connections appear with arrows');
+                logResult('test2-results', '5. Check console logs for connection creation events');
+
+                updateTestStep('test2-step1', 'success', 'Connection test instructions provided. Please create connections.');
+            } catch (error) {
+                logResult('test2-results', `❌ Error in Test 2 Step 1: ${error.message}`, true);
+                updateTestStep('test2-step1', 'failed', 'Failed to provide connection instructions');
+            }
+        }
+
+        function runTest2Step2() {
+            updateTestStep('test2-step2', 'running');
+            logResult('test2-results', 'Starting Test 2 Step 2: Connection Handle Testing');
+
+            try {
+                const expectedHandles = [
+                    'top-source', 'top-target',
+                    'right-source', 'right-target',
+                    'bottom-source', 'bottom-target',
+                    'left-source', 'left-target'
+                ];
+
+                logResult('test2-results', '🔍 Expected connection handle names:');
+                expectedHandles.forEach(handle => {
+                    logResult('test2-results', `   - ${handle}`);
+                });
+
+                logResult('test2-results', '📋 Instructions:');
+                logResult('test2-results', '1. Create connections using different handles');
+                logResult('test2-results', '2. Check the browser console for edge creation logs');
+                logResult('test2-results', '3. Verify sourceHandle and targetHandle values match expected names');
+                logResult('test2-results', '4. Test that connections work from all four sides of shapes');
+
+                updateTestStep('test2-step2', 'success', 'Connection handle test instructions provided.');
+            } catch (error) {
+                logResult('test2-results', `❌ Error in Test 2 Step 2: ${error.message}`, true);
+                updateTestStep('test2-step2', 'failed', 'Failed to provide handle test instructions');
+            }
+        }
+
+        function runTest3Step1() {
+            updateTestStep('test3-step1', 'running');
+            logResult('test3-results', 'Starting Test 3 Step 1: Save Diagram Functionality');
+
+            try {
+                logResult('test3-results', '📋 Instructions for save testing:');
+                logResult('test3-results', '1. In the main application, create a complex diagram with:');
+                logResult('test3-results', '   - Multiple shapes with different styles');
+                logResult('test3-results', '   - Connections between shapes');
+                logResult('test3-results', '   - Various text content');
+                logResult('test3-results', '2. Use Ctrl+S or File → Save to save the diagram');
+                logResult('test3-results', '3. Open the saved JSON file in a text editor');
+                logResult('test3-results', '4. Verify the file contains:');
+                logResult('test3-results', '   - nodes array with shape data');
+                logResult('test3-results', '   - edges array with connection data');
+                logResult('test3-results', '   - viewport information');
+                logResult('test3-results', '   - version information');
+                logResult('test3-results', '5. Copy the JSON content and paste below for analysis');
+
+                // Add a text area for pasting saved JSON
+                const existingTextArea = document.getElementById('saved-json-input');
+                if (!existingTextArea) {
+                    const textArea = document.createElement('textarea');
+                    textArea.id = 'saved-json-input';
+                    textArea.placeholder = 'Paste your saved JSON here for analysis...';
+                    textArea.style.width = '100%';
+                    textArea.style.height = '200px';
+                    textArea.style.margin = '10px 0';
+                    textArea.style.fontFamily = 'monospace';
+                    textArea.style.fontSize = '11px';
+                    textArea.addEventListener('input', function() {
+                        try {
+                            const parsed = JSON.parse(this.value);
+                            testState.savedDiagram = parsed;
+                            logResult('test3-results', '✓ Valid JSON pasted. Analyzing structure...');
+                            analyzeJsonStructure(parsed);
+                        } catch (error) {
+                            logResult('test3-results', '⚠ Invalid JSON format', true);
+                        }
+                    });
+                    document.getElementById('test3-results').appendChild(textArea);
+                }
+
+                updateTestStep('test3-step1', 'success', 'Save test instructions provided. Please save and analyze diagram.');
+            } catch (error) {
+                logResult('test3-results', `❌ Error in Test 3 Step 1: ${error.message}`, true);
+                updateTestStep('test3-step1', 'failed', 'Failed to provide save instructions');
+            }
+        }
+
+        function analyzeJsonStructure(diagram) {
+            logResult('test3-results', '🔍 Analyzing saved JSON structure:');
+
+            // Check main structure
+            const hasNodes = Array.isArray(diagram.nodes);
+            const hasEdges = Array.isArray(diagram.edges);
+            const hasViewport = diagram.viewport && typeof diagram.viewport === 'object';
+            const hasVersion = typeof diagram.version === 'string';
+
+            logResult('test3-results', `✓ Nodes array: ${hasNodes} (${diagram.nodes?.length || 0} items)`);
+            logResult('test3-results', `✓ Edges array: ${hasEdges} (${diagram.edges?.length || 0} items)`);
+            logResult('test3-results', `✓ Viewport: ${hasViewport}`);
+            logResult('test3-results', `✓ Version: ${hasVersion} (${diagram.version})`);
+
+            // Analyze nodes
+            if (hasNodes && diagram.nodes.length > 0) {
+                const firstNode = diagram.nodes[0];
+                logResult('test3-results', '🔍 Analyzing first node structure:');
+                logResult('test3-results', `  - ID: ${firstNode.id}`);
+                logResult('test3-results', `  - Type: ${firstNode.type}`);
+                logResult('test3-results', `  - Position: ${JSON.stringify(firstNode.position)}`);
+                logResult('test3-results', `  - Has data: ${!!firstNode.data}`);
+
+                if (firstNode.data) {
+                    logResult('test3-results', `  - Label: "${firstNode.data.label}"`);
+                    logResult('test3-results', `  - Shape: ${firstNode.data.shape}`);
+                    logResult('test3-results', `  - Has style: ${!!firstNode.data.style}`);
+                    logResult('test3-results', `  - lastStyleUpdate: ${firstNode.data.lastStyleUpdate}`);
+                    logResult('test3-results', `  - lastTextUpdate: ${firstNode.data.lastTextUpdate}`);
+
+                    if (firstNode.data.style) {
+                        const style = firstNode.data.style;
+                        logResult('test3-results', '  - Style properties:');
+                        Object.keys(style).forEach(key => {
+                            logResult('test3-results', `    - ${key}: ${style[key]}`);
+                        });
+                    }
+                }
+            }
+
+            // Analyze edges
+            if (hasEdges && diagram.edges.length > 0) {
+                const firstEdge = diagram.edges[0];
+                logResult('test3-results', '🔍 Analyzing first edge structure:');
+                logResult('test3-results', `  - ID: ${firstEdge.id}`);
+                logResult('test3-results', `  - Source: ${firstEdge.source}`);
+                logResult('test3-results', `  - Target: ${firstEdge.target}`);
+                logResult('test3-results', `  - Source Handle: ${firstEdge.sourceHandle}`);
+                logResult('test3-results', `  - Target Handle: ${firstEdge.targetHandle}`);
+                logResult('test3-results', `  - Type: ${firstEdge.type}`);
+            }
+
+            updateSchemaPreview('saved-schema-preview', diagram);
+        }
+
+        function runTest3Step2() {
+            updateTestStep('test3-step2', 'running');
+            logResult('test3-results', 'Starting Test 3 Step 2: Schema Validation');
+
+            try {
+                if (!testState.savedDiagram) {
+                    logResult('test3-results', '⚠ No saved diagram data available. Please complete Step 1 first.', true);
+                    updateTestStep('test3-step2', 'failed', 'No saved diagram data');
+                    return;
+                }
+
+                const diagram = testState.savedDiagram;
+                let validationIssues = [];
+
+                // Validate schema
+                logResult('test3-results', '🔍 Validating schema compliance:');
+
+                // Check required fields
+                if (!diagram.nodes || !Array.isArray(diagram.nodes)) {
+                    validationIssues.push('Missing or invalid nodes array');
+                }
+                if (!diagram.edges || !Array.isArray(diagram.edges)) {
+                    validationIssues.push('Missing or invalid edges array');
+                }
+                if (!diagram.viewport) {
+                    validationIssues.push('Missing viewport information');
+                }
+                if (!diagram.version) {
+                    validationIssues.push('Missing version information');
+                }
+
+                // Validate node structure
+                diagram.nodes?.forEach((node, index) => {
+                    if (!node.id) validationIssues.push(`Node ${index}: Missing ID`);
+                    if (!node.type) validationIssues.push(`Node ${index}: Missing type`);
+                    if (!node.position) validationIssues.push(`Node ${index}: Missing position`);
+                    if (!node.data) validationIssues.push(`Node ${index}: Missing data`);
+
+                    if (node.data) {
+                        if (!node.data.hasOwnProperty('label')) validationIssues.push(`Node ${index}: Missing label`);
+                        if (!node.data.shape) validationIssues.push(`Node ${index}: Missing shape type`);
+                        if (!node.data.style) validationIssues.push(`Node ${index}: Missing style object`);
+                    }
+                });
+
+                // Validate edge structure
+                diagram.edges?.forEach((edge, index) => {
+                    if (!edge.id) validationIssues.push(`Edge ${index}: Missing ID`);
+                    if (!edge.source) validationIssues.push(`Edge ${index}: Missing source`);
+                    if (!edge.target) validationIssues.push(`Edge ${index}: Missing target`);
+                });
+
+                if (validationIssues.length === 0) {
+                    logResult('test3-results', '✅ Schema validation passed! All required fields present.');
+                    updateTestStep('test3-step2', 'success', 'Schema validation passed');
+                } else {
+                    logResult('test3-results', '❌ Schema validation failed:');
+                    validationIssues.forEach(issue => {
+                        logResult('test3-results', `  - ${issue}`, true);
+                    });
+                    updateTestStep('test3-step2', 'failed', `${validationIssues.length} validation issues`);
+                }
+
+            } catch (error) {
+                logResult('test3-results', `❌ Error in Test 3 Step 2: ${error.message}`, true);
+                updateTestStep('test3-step2', 'failed', 'Schema validation error');
+            }
+        }
+
+        function runTest4Step1() {
+            updateTestStep('test4-step1', 'running');
+            logResult('test4-results', 'Starting Test 4 Step 1: Load Diagram Functionality');
+
+            try {
+                logResult('test4-results', '📋 Instructions for load testing:');
+                logResult('test4-results', '1. In the main application, clear the current diagram (File → New or Ctrl+N)');
+                logResult('test4-results', '2. Load the saved diagram file (File → Open or Ctrl+O)');
+                logResult('test4-results', '3. Select the JSON file you saved in Test 3');
+                logResult('test4-results', '4. Verify the diagram loads completely');
+                logResult('test4-results', '5. Check the browser console for any loading errors');
+                logResult('test4-results', '6. Verify that the viewport (zoom/pan) is restored correctly');
+
+                updateTestStep('test4-step1', 'success', 'Load test instructions provided. Please load the diagram.');
+            } catch (error) {
+                logResult('test4-results', `❌ Error in Test 4 Step 1: ${error.message}`, true);
+                updateTestStep('test4-step1', 'failed', 'Failed to provide load instructions');
+            }
+        }
+
+        function runTest4Step2() {
+            updateTestStep('test4-step2', 'running');
+            logResult('test4-results', 'Starting Test 4 Step 2: Property Restoration Verification');
+
+            try {
+                logResult('test4-results', '🔍 Verification checklist for loaded diagram:');
+                logResult('test4-results', '');
+                logResult('test4-results', '✅ Shape Properties:');
+                logResult('test4-results', '  □ All shapes are visible in correct positions');
+                logResult('test4-results', '  □ Shape sizes (width/height) are preserved');
+                logResult('test4-results', '  □ Fill colors match original');
+                logResult('test4-results', '  □ Stroke colors and widths match original');
+                logResult('test4-results', '  □ Opacity levels are correct');
+                logResult('test4-results', '  □ Corner radius values are preserved');
+                logResult('test4-results', '');
+                logResult('test4-results', '✅ Text Properties:');
+                logResult('test4-results', '  □ Text content is identical');
+                logResult('test4-results', '  □ Font sizes are correct');
+                logResult('test4-results', '  □ Font families are preserved');
+                logResult('test4-results', '  □ Font weights (bold/normal) are correct');
+                logResult('test4-results', '  □ Font styles (italic/normal) are correct');
+                logResult('test4-results', '  □ Text alignment is preserved');
+                logResult('test4-results', '  □ Text decorations are correct');
+                logResult('test4-results', '  □ Text colors match original');
+                logResult('test4-results', '');
+                logResult('test4-results', '✅ Connections:');
+                logResult('test4-results', '  □ All connections are present');
+                logResult('test4-results', '  □ Connection handles are correct');
+                logResult('test4-results', '  □ Arrow markers are visible');
+                logResult('test4-results', '  □ Connection styles are preserved');
+                logResult('test4-results', '');
+                logResult('test4-results', '✅ Interactive Features:');
+                logResult('test4-results', '  □ Shapes can be selected');
+                logResult('test4-results', '  □ PropertyPanel shows correct values when shape is selected');
+                logResult('test4-results', '  □ Shapes can be dragged to new positions');
+                logResult('test4-results', '  □ Text can be edited by double-clicking');
+                logResult('test4-results', '');
+                logResult('test4-results', '📝 Test each item above and mark any failures in the main app console');
+
+                updateTestStep('test4-step2', 'success', 'Verification checklist provided. Please test each item.');
+            } catch (error) {
+                logResult('test4-results', `❌ Error in Test 4 Step 2: ${error.message}`, true);
+                updateTestStep('test4-step2', 'failed', 'Failed to provide verification checklist');
+            }
+        }
+
+        function runTest5Step1() {
+            updateTestStep('test5-step1', 'running');
+            logResult('test5-results', 'Starting Test 5 Step 1: node.data.style Structure Validation');
+
+            try {
+                if (!testState.savedDiagram || !testState.savedDiagram.nodes) {
+                    logResult('test5-results', '⚠ No saved diagram data. Please complete Tests 3-4 first.', true);
+                    updateTestStep('test5-step1', 'failed', 'No diagram data available');
+                    return;
+                }
+
+                const expectedStyleProperties = [
+                    'fill', 'stroke', 'strokeWidth', 'opacity',
+                    'fontSize', 'fontFamily', 'fontWeight', 'fontStyle',
+                    'textAlign', 'cornerRadius', 'color',
+                    'textDecoration', 'textTransform', 'lineHeight',
+                    'letterSpacing', 'wordSpacing'
+                ];
+
+                logResult('test5-results', '🔍 Analyzing node.data.style structure:');
+
+                let styleValidationPassed = true;
+                const nodes = testState.savedDiagram.nodes;
+
+                nodes.forEach((node, index) => {
+                    logResult('test5-results', `\nNode ${index + 1} (${node.id}):`);
+
+                    if (!node.data || !node.data.style) {
+                        logResult('test5-results', `  ❌ Missing style object`, true);
+                        styleValidationPassed = false;
+                        return;
+                    }
+
+                    const style = node.data.style;
+                    const presentProperties = Object.keys(style);
+
+                    logResult('test5-results', `  ✓ Style object present with ${presentProperties.length} properties`);
+
+                    // Check for expected properties
+                    expectedStyleProperties.forEach(prop => {
+                        if (style.hasOwnProperty(prop)) {
+                            logResult('test5-results', `    ✓ ${prop}: ${style[prop]}`);
+                        } else {
+                            logResult('test5-results', `    ⚠ Missing ${prop} property`);
+                        }
+                    });
+
+                    // Check for unexpected properties
+                    presentProperties.forEach(prop => {
+                        if (!expectedStyleProperties.includes(prop)) {
+                            logResult('test5-results', `    ℹ Additional property: ${prop}: ${style[prop]}`);
+                        }
+                    });
+                });
+
+                if (styleValidationPassed) {
+                    updateTestStep('test5-step1', 'success', 'Style structure validation passed');
+                    logResult('test5-results', '\n✅ node.data.style structure validation passed!');
+                } else {
+                    updateTestStep('test5-step1', 'failed', 'Style structure validation failed');
+                    logResult('test5-results', '\n❌ Style structure validation failed!');
+                }
+
+            } catch (error) {
+                logResult('test5-results', `❌ Error in Test 5 Step 1: ${error.message}`, true);
+                updateTestStep('test5-step1', 'failed', 'Style validation error');
+            }
+        }
+
+        function runTest5Step2() {
+            updateTestStep('test5-step2', 'running');
+            logResult('test5-results', 'Starting Test 5 Step 2: Timestamp Preservation Check');
+
+            try {
+                if (!testState.savedDiagram || !testState.savedDiagram.nodes) {
+                    logResult('test5-results', '⚠ No saved diagram data. Please complete Tests 3-4 first.', true);
+                    updateTestStep('test5-step2', 'failed', 'No diagram data available');
+                    return;
+                }
+
+                logResult('test5-results', '🔍 Checking timestamp preservation:');
+
+                let timestampValidationPassed = true;
+                const nodes = testState.savedDiagram.nodes;
+
+                nodes.forEach((node, index) => {
+                    logResult('test5-results', `\nNode ${index + 1} (${node.id}):`);
+
+                    if (!node.data) {
+                        logResult('test5-results', `  ❌ Missing data object`, true);
+                        timestampValidationPassed = false;
+                        return;
+                    }
+
+                    const data = node.data;
+
+                    // Check lastStyleUpdate
+                    if (data.lastStyleUpdate) {
+                        const styleDate = new Date(data.lastStyleUpdate);
+                        logResult('test5-results', `  ✓ lastStyleUpdate: ${data.lastStyleUpdate} (${styleDate.toLocaleString()})`);
+                    } else {
+                        logResult('test5-results', `  ⚠ Missing lastStyleUpdate timestamp`);
+                    }
+
+                    // Check lastTextUpdate
+                    if (data.lastTextUpdate) {
+                        const textDate = new Date(data.lastTextUpdate);
+                        logResult('test5-results', `  ✓ lastTextUpdate: ${data.lastTextUpdate} (${textDate.toLocaleString()})`);
+                    } else {
+                        logResult('test5-results', `  ⚠ Missing lastTextUpdate timestamp`);
+                    }
+
+                    // Validate timestamp format (should be numbers)
+                    if (data.lastStyleUpdate && !Number.isInteger(data.lastStyleUpdate)) {
+                        logResult('test5-results', `  ❌ lastStyleUpdate is not a valid timestamp`, true);
+                        timestampValidationPassed = false;
+                    }
+
+                    if (data.lastTextUpdate && !Number.isInteger(data.lastTextUpdate)) {
+                        logResult('test5-results', `  ❌ lastTextUpdate is not a valid timestamp`, true);
+                        timestampValidationPassed = false;
+                    }
+                });
+
+                // Check diagram-level timestamp
+                if (testState.savedDiagram.timestamp) {
+                    const diagramDate = new Date(testState.savedDiagram.timestamp);
+                    logResult('test5-results', `\n✓ Diagram timestamp: ${testState.savedDiagram.timestamp} (${diagramDate.toLocaleString()})`);
+                } else {
+                    logResult('test5-results', `\n⚠ Missing diagram-level timestamp`);
+                }
+
+                if (timestampValidationPassed) {
+                    updateTestStep('test5-step2', 'success', 'Timestamp validation passed');
+                    logResult('test5-results', '\n✅ Timestamp preservation validation passed!');
+                } else {
+                    updateTestStep('test5-step2', 'failed', 'Timestamp validation failed');
+                    logResult('test5-results', '\n❌ Timestamp preservation validation failed!');
+                }
+
+            } catch (error) {
+                logResult('test5-results', `❌ Error in Test 5 Step 2: ${error.message}`, true);
+                updateTestStep('test5-step2', 'failed', 'Timestamp validation error');
+            }
+        }
+
+        function runTest5Step3() {
+            updateTestStep('test5-step3', 'running');
+            logResult('test5-results', 'Starting Test 5 Step 3: Connection Handle Naming Validation');
+
+            try {
+                if (!testState.savedDiagram || !testState.savedDiagram.edges) {
+                    logResult('test5-results', '⚠ No saved diagram edges. Please complete Tests 3-4 with connections first.', true);
+                    updateTestStep('test5-step3', 'failed', 'No edge data available');
+                    return;
+                }
+
+                const expectedHandleNames = [
+                    'top-source', 'top-target',
+                    'right-source', 'right-target',
+                    'bottom-source', 'bottom-target',
+                    'left-source', 'left-target'
+                ];
+
+                logResult('test5-results', '🔍 Validating connection handle naming:');
+                logResult('test5-results', `Expected handle names: ${expectedHandleNames.join(', ')}`);
+
+                let handleValidationPassed = true;
+                const edges = testState.savedDiagram.edges;
+
+                if (edges.length === 0) {
+                    logResult('test5-results', '⚠ No edges found in saved diagram. Create connections before testing.', true);
+                    updateTestStep('test5-step3', 'failed', 'No edges to validate');
+                    return;
+                }
+
+                edges.forEach((edge, index) => {
+                    logResult('test5-results', `\nEdge ${index + 1} (${edge.id}):`);
+                    logResult('test5-results', `  Source: ${edge.source} → Target: ${edge.target}`);
+
+                    // Check source handle
+                    if (edge.sourceHandle) {
+                        if (expectedHandleNames.includes(edge.sourceHandle)) {
+                            logResult('test5-results', `  ✓ sourceHandle: ${edge.sourceHandle} (valid)`);
+                        } else {
+                            logResult('test5-results', `  ❌ sourceHandle: ${edge.sourceHandle} (invalid - expected format: side-source)`, true);
+                            handleValidationPassed = false;
+                        }
+                    } else {
+                        logResult('test5-results', `  ⚠ Missing sourceHandle`);
+                    }
+
+                    // Check target handle
+                    if (edge.targetHandle) {
+                        if (expectedHandleNames.includes(edge.targetHandle)) {
+                            logResult('test5-results', `  ✓ targetHandle: ${edge.targetHandle} (valid)`);
+                        } else {
+                            logResult('test5-results', `  ❌ targetHandle: ${edge.targetHandle} (invalid - expected format: side-target)`, true);
+                            handleValidationPassed = false;
+                        }
+                    } else {
+                        logResult('test5-results', `  ⚠ Missing targetHandle`);
+                    }
+
+                    // Check handle format consistency
+                    if (edge.sourceHandle && edge.targetHandle) {
+                        const sourceValid = edge.sourceHandle.endsWith('-source');
+                        const targetValid = edge.targetHandle.endsWith('-target');
+
+                        if (sourceValid && targetValid) {
+                            logResult('test5-results', `  ✓ Handle naming format is consistent`);
+                        } else {
+                            logResult('test5-results', `  ❌ Handle naming format is inconsistent`, true);
+                            handleValidationPassed = false;
+                        }
+                    }
+                });
+
+                if (handleValidationPassed) {
+                    updateTestStep('test5-step3', 'success', 'Connection handle validation passed');
+                    logResult('test5-results', '\n✅ Connection handle naming validation passed!');
+                } else {
+                    updateTestStep('test5-step3', 'failed', 'Connection handle validation failed');
+                    logResult('test5-results', '\n❌ Connection handle naming validation failed!');
+                }
+
+            } catch (error) {
+                logResult('test5-results', `❌ Error in Test 5 Step 3: ${error.message}`, true);
+                updateTestStep('test5-step3', 'failed', 'Handle validation error');
+            }
+        }
+
+        function runAllTests() {
+            logResult('test-summary', 'Starting comprehensive test suite...');
+
+            // Reset test state
+            testState.completedTests = [];
+            testState.failedTests = [];
+
+            // Run all tests in sequence with delays
+            const tests = [
+                () => runTest1Step1(),
+                () => runTest1Step2(),
+                () => runTest2Step1(),
+                () => runTest2Step2(),
+                () => runTest3Step1(),
+                () => runTest3Step2(),
+                () => runTest4Step1(),
+                () => runTest4Step2(),
+                () => runTest5Step1(),
+                () => runTest5Step2(),
+                () => runTest5Step3()
+            ];
+
+            tests.forEach((test, index) => {
+                setTimeout(test, index * 500);
+            });
+        }
+
+        function resetTests() {
+            testState.completedTests = [];
+            testState.failedTests = [];
+            testState.savedDiagram = null;
+
+            // Reset all test steps
+            document.querySelectorAll('.test-step').forEach(step => {
+                const indicator = step.querySelector('.status-indicator');
+                indicator.classList.remove('status-running', 'status-success', 'status-failed');
+                indicator.classList.add('status-pending');
+                step.classList.remove('completed', 'failed');
+
+                const message = step.querySelector('.step-message');
+                if (message) message.remove();
+            });
+
+            // Clear all result areas
+            document.querySelectorAll('.test-results').forEach(result => {
+                result.textContent = 'No results yet. Click the test buttons to begin.';
+                result.style.color = '';
+            });
+
+            // Clear schema preview
+            document.getElementById('saved-schema-preview').textContent = '';
+
+            // Remove JSON input if exists
+            const jsonInput = document.getElementById('saved-json-input');
+            if (jsonInput) jsonInput.remove();
+
+            updateTestSummary();
+            logResult('test-summary', 'All tests reset. Ready to begin testing.');
+        }
+
+        // Initialize
+        updateTestSummary();
+        document.querySelectorAll('.test-results').forEach(result => {
+            result.textContent = 'No results yet. Click the test buttons to begin.';
+        });
+
+        logResult('test-summary', 'Test suite loaded. Generate test data and begin testing.');
+    </script>
+</body>
+</html>

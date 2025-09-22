@@ -1,0 +1,298 @@
+{
+  "nodes": [
+    {
+      "id": "test-rectangle-styled",
+      "type": "shape",
+      "position": { "x": 100, "y": 100 },
+      "data": {
+        "label": "Styled Rectangle",
+        "shape": "rectangle",
+        "width": 180,
+        "height": 100,
+        "style": {
+          "fill": "#ff6b6b",
+          "stroke": "#e53e3e",
+          "strokeWidth": 4,
+          "opacity": 0.9,
+          "fontSize": 18,
+          "fontFamily": "Arial, sans-serif",
+          "fontWeight": "bold",
+          "fontStyle": "normal",
+          "textAlign": "center",
+          "cornerRadius": 15,
+          "color": "#ffffff",
+          "textDecoration": "none",
+          "textTransform": "uppercase",
+          "lineHeight": 1.5,
+          "letterSpacing": "2px",
+          "wordSpacing": "normal"
+        },
+        "backgroundColor": "#ff6b6b",
+        "borderColor": "#e53e3e",
+        "lastStyleUpdate": 1700000001000,
+        "lastTextUpdate": 1700000002000,
+        "onTextChange": null
+      },
+      "style": { "width": 180, "height": 100 },
+      "selected": false
+    },
+    {
+      "id": "test-circle-gradient",
+      "type": "shape",
+      "position": { "x": 350, "y": 150 },
+      "data": {
+        "label": "Circle with Gradient Effect",
+        "shape": "circle",
+        "width": 120,
+        "height": 120,
+        "style": {
+          "fill": "#4ecdc4",
+          "stroke": "#26d0ce",
+          "strokeWidth": 3,
+          "opacity": 0.8,
+          "fontSize": 14,
+          "fontFamily": "Helvetica, sans-serif",
+          "fontWeight": "normal",
+          "fontStyle": "italic",
+          "textAlign": "center",
+          "cornerRadius": 60,
+          "color": "#2d3748",
+          "textDecoration": "underline",
+          "textTransform": "capitalize",
+          "lineHeight": 1.2,
+          "letterSpacing": "normal",
+          "wordSpacing": "3px"
+        },
+        "backgroundColor": "#4ecdc4",
+        "borderColor": "#26d0ce",
+        "lastStyleUpdate": 1700000003000,
+        "lastTextUpdate": 1700000004000,
+        "onTextChange": null
+      },
+      "style": { "width": 120, "height": 120 },
+      "selected": false
+    },
+    {
+      "id": "test-diamond-decision",
+      "type": "shape",
+      "position": { "x": 200, "y": 320 },
+      "data": {
+        "label": "Decision Point",
+        "shape": "diamond",
+        "width": 140,
+        "height": 140,
+        "style": {
+          "fill": "#ffd93d",
+          "stroke": "#ffcd07",
+          "strokeWidth": 5,
+          "opacity": 1.0,
+          "fontSize": 16,
+          "fontFamily": "Georgia, serif",
+          "fontWeight": "600",
+          "fontStyle": "normal",
+          "textAlign": "center",
+          "cornerRadius": 0,
+          "color": "#744210",
+          "textDecoration": "none",
+          "textTransform": "lowercase",
+          "lineHeight": 1.6,
+          "letterSpacing": "1px",
+          "wordSpacing": "normal"
+        },
+        "backgroundColor": "#ffd93d",
+        "borderColor": "#ffcd07",
+        "lastStyleUpdate": 1700000005000,
+        "lastTextUpdate": 1700000006000,
+        "onTextChange": null
+      },
+      "style": { "width": 140, "height": 140 },
+      "selected": false
+    },
+    {
+      "id": "test-ellipse-complex",
+      "type": "shape",
+      "position": { "x": 450, "y": 50 },
+      "data": {
+        "label": "Complex Styled Ellipse",
+        "shape": "ellipse",
+        "width": 160,
+        "height": 90,
+        "style": {
+          "fill": "#9b59b6",
+          "stroke": "#8e44ad",
+          "strokeWidth": 2,
+          "opacity": 0.75,
+          "fontSize": 13,
+          "fontFamily": "Times New Roman, serif",
+          "fontWeight": "500",
+          "fontStyle": "oblique",
+          "textAlign": "left",
+          "cornerRadius": 45,
+          "color": "#ecf0f1",
+          "textDecoration": "line-through",
+          "textTransform": "none",
+          "lineHeight": 1.8,
+          "letterSpacing": "0.5px",
+          "wordSpacing": "1px"
+        },
+        "backgroundColor": "#9b59b6",
+        "borderColor": "#8e44ad",
+        "lastStyleUpdate": 1700000007000,
+        "lastTextUpdate": 1700000008000,
+        "onTextChange": null
+      },
+      "style": { "width": 160, "height": 90 },
+      "selected": false
+    },
+    {
+      "id": "test-hexagon-custom",
+      "type": "shape",
+      "position": { "x": 50, "y": 350 },
+      "data": {
+        "label": "Custom Hexagon",
+        "shape": "hexagon",
+        "width": 110,
+        "height": 95,
+        "style": {
+          "fill": "#e74c3c",
+          "stroke": "#c0392b",
+          "strokeWidth": 6,
+          "opacity": 0.95,
+          "fontSize": 12,
+          "fontFamily": "Courier New, monospace",
+          "fontWeight": "bold",
+          "fontStyle": "normal",
+          "textAlign": "right",
+          "cornerRadius": 8,
+          "color": "#ffffff",
+          "textDecoration": "overline",
+          "textTransform": "uppercase",
+          "lineHeight": 1.3,
+          "letterSpacing": "2px",
+          "wordSpacing": "normal"
+        },
+        "backgroundColor": "#e74c3c",
+        "borderColor": "#c0392b",
+        "lastStyleUpdate": 1700000009000,
+        "lastTextUpdate": 1700000010000,
+        "onTextChange": null
+      },
+      "style": { "width": 110, "height": 95 },
+      "selected": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-rect-circle",
+      "source": "test-rectangle-styled",
+      "target": "test-circle-gradient",
+      "sourceHandle": "right-source",
+      "targetHandle": "left-target",
+      "type": "smoothstep",
+      "animated": false,
+      "style": {
+        "stroke": "#94a3b8",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "ArrowClosed",
+        "width": 20,
+        "height": 20,
+        "color": "#94a3b8"
+      }
+    },
+    {
+      "id": "edge-circle-diamond",
+      "source": "test-circle-gradient",
+      "target": "test-diamond-decision",
+      "sourceHandle": "bottom-source",
+      "targetHandle": "top-target",
+      "type": "smoothstep",
+      "animated": true,
+      "style": {
+        "stroke": "#6366f1",
+        "strokeWidth": 3,
+        "strokeDasharray": "5,5"
+      },
+      "markerEnd": {
+        "type": "ArrowClosed",
+        "width": 25,
+        "height": 25,
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "edge-rect-ellipse",
+      "source": "test-rectangle-styled",
+      "target": "test-ellipse-complex",
+      "sourceHandle": "top-source",
+      "targetHandle": "bottom-target",
+      "type": "straight",
+      "animated": false,
+      "style": {
+        "stroke": "#f59e0b",
+        "strokeWidth": 4
+      },
+      "markerEnd": {
+        "type": "ArrowClosed",
+        "width": 18,
+        "height": 18,
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "edge-diamond-hexagon",
+      "source": "test-diamond-decision",
+      "target": "test-hexagon-custom",
+      "sourceHandle": "left-source",
+      "targetHandle": "right-target",
+      "type": "step",
+      "animated": false,
+      "style": {
+        "stroke": "#10b981",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "ArrowClosed",
+        "width": 22,
+        "height": 22,
+        "color": "#10b981"
+      },
+      "label": "Decision Branch"
+    },
+    {
+      "id": "edge-ellipse-hexagon",
+      "source": "test-ellipse-complex",
+      "target": "test-hexagon-custom",
+      "sourceHandle": "left-source",
+      "targetHandle": "top-target",
+      "type": "bezier",
+      "animated": true,
+      "style": {
+        "stroke": "#ef4444",
+        "strokeWidth": 1,
+        "strokeDasharray": "10,5,2,5"
+      },
+      "markerEnd": {
+        "type": "ArrowClosed",
+        "width": 15,
+        "height": 15,
+        "color": "#ef4444"
+      }
+    }
+  ],
+  "viewport": {
+    "x": 50,
+    "y": 25,
+    "zoom": 0.9
+  },
+  "version": "1.0.0",
+  "timestamp": "2023-11-15T10:30:00.000Z",
+  "metadata": {
+    "created": "2023-11-15T10:00:00.000Z",
+    "modified": "2023-11-15T10:30:00.000Z",
+    "author": "OpenChart Test Suite",
+    "description": "Comprehensive test diagram with various shape styles, text properties, and connection types",
+    "tags": ["test", "save-load", "comprehensive", "styles", "connections"]
+  }
+}

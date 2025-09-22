@@ -163,23 +163,16 @@ function App() {
     setEdges([]);
   }, []);
 
-  const handleSaveDiagram = useCallback(() => {
+  const handleSaveDiagram = useCallback(async () => {
     // Get viewport from React Flow instance
     const viewport = flowRef.current?.getViewport() || { x: 0, y: 0, zoom: 1 };
-    const diagram = { 
-      nodes, 
-      edges,
-      viewport,
-      version: '1.0.0'
-    };
-    const dataStr = JSON.stringify(diagram, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `diagram-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+
+    // Use the new persistence module
+    const { diagramPersistence } = await import('./utils/diagramPersistence');
+    await diagramPersistence.saveDiagramToFile(nodes, edges, viewport, {
+      title: 'OpenChart Diagram',
+      createdWith: 'OpenChart',
+    });
   }, [nodes, edges]);
 
   // Keep a ref to the file input to reuse it
@@ -453,20 +446,17 @@ function App() {
 
   // Auto-save functionality
   useEffect(() => {
-    const autoSaveInterval = setInterval(() => {
+    const autoSave = async () => {
       if (nodes.length > 0 || edges.length > 0) {
         const viewport = flowRef.current?.getViewport() || { x: 0, y: 0, zoom: 1 };
-        const diagram = {
-          nodes,
-          edges,
-          viewport,
-          version: '1.0.0',
-          timestamp: new Date().toISOString()
-        };
-        localStorage.setItem('openchart-autosave', JSON.stringify(diagram));
-        console.log('Auto-saved diagram');
+
+        // Use the new persistence module for auto-save
+        const { diagramPersistence } = await import('./utils/diagramPersistence');
+        await diagramPersistence.autoSaveDiagram(nodes, edges, viewport);
       }
-    }, 30000); // Auto-save every 30 seconds
+    };
+
+    const autoSaveInterval = setInterval(autoSave, 30000); // Auto-save every 30 seconds
 
     return () => clearInterval(autoSaveInterval);
   }, [nodes, edges]);
@@ -504,44 +494,43 @@ function App() {
     // Prevent duplicate dialogs in React StrictMode
     if (sessionStorage.getItem('openchart-recovery-shown')) return;
     sessionStorage.setItem('openchart-recovery-shown', 'true');
-    
-    const autosaved = localStorage.getItem('openchart-autosave');
-    if (autosaved && nodes.length === 0 && edges.length === 0) {
-      try {
-        const diagram = JSON.parse(autosaved);
-        const lastSaved = new Date(diagram.timestamp);
-        const minutesAgo = Math.floor((Date.now() - lastSaved.getTime()) / 60000);
-        
-        if (confirm(`Found auto-saved diagram from ${minutesAgo} minutes ago. Would you like to restore it?`)) {
-          // Re-attach onTextChange callbacks to auto-saved nodes
-          const nodesWithCallbacks = (diagram.nodes || []).map((node: any) => ({
-            ...node,
-            data: {
-              ...node.data,
-              onTextChange: (text: string) => {
-                setNodes((nds) =>
-                  nds.map((n) =>
-                    n.id === node.id
-                      ? { ...n, data: { ...n.data, label: text } }
-                      : n
-                  )
-                );
+
+    const loadAutoSaved = async () => {
+      if (nodes.length === 0 && edges.length === 0) {
+        try {
+          const { diagramPersistence } = await import('./utils/diagramPersistence');
+          const diagram = await diagramPersistence.loadAutoSavedDiagram();
+
+          if (diagram) {
+            const lastSaved = new Date(diagram.timestamp);
+            const minutesAgo = Math.floor((Date.now() - lastSaved.getTime()) / 60000);
+
+            if (confirm(`Found auto-saved diagram from ${minutesAgo} minutes ago. Would you like to restore it?`)) {
+              const result = await diagramPersistence.importDiagram(diagram);
+
+              setNodes(result.nodes);
+              setEdges(result.edges);
+
+              // Show restoration feedback if property panel data was restored
+              if (result.restoredFeatures.length > 0) {
+                console.log('Restored property panel features:', result.restoredFeatures);
+              }
+
+              // Restore viewport if React Flow is ready
+              if (result.viewport && flowRef.current) {
+                setTimeout(() => {
+                  flowRef.current.setViewport(result.viewport);
+                }, 100);
               }
             }
-          }));
-
-          setNodes(nodesWithCallbacks);
-          setEdges(diagram.edges || []);
-          if (diagram.viewport && flowRef.current) {
-            setTimeout(() => {
-              flowRef.current.setViewport(diagram.viewport);
-            }, 100);
           }
+        } catch (error) {
+          console.error('Failed to load auto-saved diagram:', error);
         }
-      } catch (error) {
-        console.error('Failed to load auto-saved diagram:', error);
       }
-    }
+    };
+
+    loadAutoSaved();
   }, []); // Only run on mount
 
 
@@ -560,38 +549,32 @@ function App() {
           if (file) {
             const reader = new FileReader();
 
-            reader.onload = (event: ProgressEvent<FileReader>) => {
+            reader.onload = async (event: ProgressEvent<FileReader>) => {
               try {
                 const content = event.target?.result as string;
                 const diagram = JSON.parse(content);
 
-                // Re-attach onTextChange callbacks to loaded nodes
-                const nodesWithCallbacks = (diagram.nodes || []).map((node: any) => ({
-                  ...node,
-                  data: {
-                    ...node.data,
-                    onTextChange: (text: string) => {
-                      setNodes((nds) =>
-                        nds.map((n) =>
-                          n.id === node.id
-                            ? { ...n, data: { ...n.data, label: text } }
-                            : n
-                        )
-                      );
-                    }
-                  }
-                }));
+                // Use the new persistence module for importing
+                const { diagramPersistence } = await import('./utils/diagramPersistence');
+                const result = await diagramPersistence.importDiagram(diagram);
 
-                setNodes(nodesWithCallbacks);
-                setEdges(diagram.edges || []);
+                setNodes(result.nodes);
+                setEdges(result.edges);
 
-                if (diagram.viewport && flowRef.current) {
+                // Show restoration feedback if property panel data was restored
+                if (result.restoredFeatures.length > 0) {
+                  console.log('Restored property panel features:', result.restoredFeatures);
+                  // You could show a toast notification here instead
+                }
+
+                if (result.viewport && flowRef.current) {
                   setTimeout(() => {
-                    flowRef.current.setViewport(diagram.viewport);
+                    flowRef.current.setViewport(result.viewport);
                   }, 100);
                 }
               } catch (error) {
-                alert('Error loading diagram: Invalid JSON format');
+                console.error('Error loading diagram:', error);
+                alert('Error loading diagram: Invalid file format or corrupted data');
               }
 
               // Clear the input value so the same file can be selected again
