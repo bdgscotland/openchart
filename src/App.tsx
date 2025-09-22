@@ -352,7 +352,24 @@ function App() {
         const minutesAgo = Math.floor((Date.now() - lastSaved.getTime()) / 60000);
         
         if (confirm(`Found auto-saved diagram from ${minutesAgo} minutes ago. Would you like to restore it?`)) {
-          setNodes(diagram.nodes || []);
+          // Re-attach onTextChange callbacks to auto-saved nodes
+          const nodesWithCallbacks = (diagram.nodes || []).map((node: any) => ({
+            ...node,
+            data: {
+              ...node.data,
+              onTextChange: (text: string) => {
+                setNodes((nds) =>
+                  nds.map((n) =>
+                    n.id === node.id
+                      ? { ...n, data: { ...n.data, label: text } }
+                      : n
+                  )
+                );
+              }
+            }
+          }));
+
+          setNodes(nodesWithCallbacks);
           setEdges(diagram.edges || []);
           if (diagram.viewport && flowRef.current) {
             setTimeout(() => {
@@ -386,7 +403,24 @@ function App() {
                 const content = event.target?.result as string;
                 const diagram = JSON.parse(content);
                 
-                setNodes(diagram.nodes || []);
+                // Re-attach onTextChange callbacks to loaded nodes
+                const nodesWithCallbacks = (diagram.nodes || []).map((node: any) => ({
+                  ...node,
+                  data: {
+                    ...node.data,
+                    onTextChange: (text: string) => {
+                      setNodes((nds) =>
+                        nds.map((n) =>
+                          n.id === node.id
+                            ? { ...n, data: { ...n.data, label: text } }
+                            : n
+                        )
+                      );
+                    }
+                  }
+                }));
+
+                setNodes(nodesWithCallbacks);
                 setEdges(diagram.edges || []);
                 
                 if (diagram.viewport && flowRef.current) {

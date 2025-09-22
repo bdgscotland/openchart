@@ -113,27 +113,32 @@ src/
 
 ## 🚀 Development Commands
 
-### Quick Start
+### 🔥 ALWAYS Use start.sh
 ```bash
-./start.sh               # Complete startup with checks (RECOMMENDED)
+./start.sh               # REQUIRED - Only way to start development
 ```
 
-### Manual Commands
+**IMPORTANT**: We ALWAYS use `start.sh` for development startup. This is the standard workflow.
+
+### Why start.sh?
+The startup script ensures:
+1. ✅ Node.js 18+ version verification
+2. 📦 Dependencies are installed/updated automatically
+3. 🔍 TypeScript type checking runs first
+4. 🧹 ESLint validates code quality
+5. 🗑️ Previous build artifacts are cleaned
+6. 🚀 Vite dev server starts on http://localhost:5173
+7. ⚠️ Graceful handling of warnings (continues with info)
+
+### Manual Commands (For CI/Build Only)
 ```bash
-npm install              # Install dependencies
-npm run dev             # Start development server
-npm run build           # Production build
+npm run build           # Production build (CI/deployment)
 npm run preview         # Preview production build
+npm run lint            # Run ESLint manually
+npm run type-check      # Run TypeScript checking manually
 ```
 
-### Startup Script Details
-The `start.sh` script performs the following:
-1. Verifies Node.js 18+ is installed
-2. Installs/updates dependencies if needed
-3. Runs TypeScript type checking
-4. Runs ESLint for code quality
-5. Cleans previous build artifacts
-6. Starts the Vite development server on http://localhost:5173
+**Note**: Manual `npm run dev` should NOT be used for regular development. Always use `./start.sh`.
 
 ### Testing Commands
 ```bash
