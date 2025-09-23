@@ -26,6 +26,7 @@ export interface BaseShapeProps extends NodeProps {
       [key: string]: any;
     };
     onTextChange?: (text: string) => void;
+    resizeVersion?: number;
   };
 }
 
@@ -49,8 +50,9 @@ export const BaseShape: React.FC<BaseShapeProps & {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
+  const [resizeVersion, setResizeVersion] = useState(0); // Force re-renders during resize
   const inputRef = useRef<HTMLInputElement>(null);
-  const { setNodes } = useReactFlow();
+  const { setNodes, getNodes } = useReactFlow();
 
   // Debounce text changes to reduce excessive state updates
   const debouncedTextChange = useDebounce((newText: string) => {
@@ -78,10 +80,12 @@ export const BaseShape: React.FC<BaseShapeProps & {
     }
   }, [text, debouncedTextChange, data.label]);
 
-  // Resize functionality
+  // Enhanced resize functionality with better React Flow integration
   const handleResizeStart = useCallback((handle: string) => (e: React.MouseEvent) => {
+    // Prevent event propagation to avoid conflicts with React Flow
     e.stopPropagation();
     e.preventDefault();
+
     setIsResizing(true);
     setResizeHandle(handle);
 
@@ -90,55 +94,105 @@ export const BaseShape: React.FC<BaseShapeProps & {
     const startWidth = data.width || 120;
     const startHeight = data.height || 80;
 
+    // Get the current node to access its position
+    const currentNode = getNodes().find(node => node.id === id);
+    const startPosition = currentNode?.position || { x: 0, y: 0 };
+
+    // Use requestAnimationFrame to throttle updates for better performance
+    let animationFrameId: number | null = null;
+    let lastUpdateTime = 0;
+    const updateThrottleMs = 16; // ~60fps
+
     const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - startX;
-      const deltaY = e.clientY - startY;
+      const now = Date.now();
 
-      let newWidth = startWidth;
-      let newHeight = startHeight;
-
-      // Calculate new dimensions based on handle
-      switch (handle) {
-        case 'nw':
-          newWidth = Math.max(60, startWidth - deltaX);
-          newHeight = Math.max(40, startHeight - deltaY);
-          break;
-        case 'ne':
-          newWidth = Math.max(60, startWidth + deltaX);
-          newHeight = Math.max(40, startHeight - deltaY);
-          break;
-        case 'sw':
-          newWidth = Math.max(60, startWidth - deltaX);
-          newHeight = Math.max(40, startHeight + deltaY);
-          break;
-        case 'se':
-          newWidth = Math.max(60, startWidth + deltaX);
-          newHeight = Math.max(40, startHeight + deltaY);
-          break;
+      // Throttle updates to avoid overwhelming React
+      if (now - lastUpdateTime < updateThrottleMs && animationFrameId) {
+        return;
       }
 
-      // Update node dimensions
-      setNodes((nodes) =>
-        nodes.map((node) =>
-          node.id === id
-            ? {
-                ...node,
-                data: {
-                  ...node.data,
-                  width: newWidth,
-                  height: newHeight,
-                },
-              }
-            : node
-        )
-      );
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+
+      animationFrameId = requestAnimationFrame(() => {
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+        let newPosition = { ...startPosition };
+
+        // Calculate new dimensions and position based on handle
+        switch (handle) {
+          case 'nw':
+            // Northwest: resize from top-left corner
+            newWidth = Math.max(60, startWidth - deltaX);
+            newHeight = Math.max(40, startHeight - deltaY);
+            // Adjust position to keep bottom-right corner fixed
+            newPosition.x = startPosition.x + (startWidth - newWidth);
+            newPosition.y = startPosition.y + (startHeight - newHeight);
+            break;
+          case 'ne':
+            // Northeast: resize from top-right corner
+            newWidth = Math.max(60, startWidth + deltaX);
+            newHeight = Math.max(40, startHeight - deltaY);
+            // Adjust Y position to keep bottom-left corner fixed
+            newPosition.y = startPosition.y + (startHeight - newHeight);
+            break;
+          case 'sw':
+            // Southwest: resize from bottom-left corner
+            newWidth = Math.max(60, startWidth - deltaX);
+            newHeight = Math.max(40, startHeight + deltaY);
+            // Adjust X position to keep top-right corner fixed
+            newPosition.x = startPosition.x + (startWidth - newWidth);
+            break;
+          case 'se':
+            // Southeast: resize from bottom-right corner (default behavior)
+            newWidth = Math.max(60, startWidth + deltaX);
+            newHeight = Math.max(40, startHeight + deltaY);
+            // No position adjustment needed - top-left stays fixed
+            break;
+        }
+
+        // Update node dimensions and position
+        setNodes((nodes) =>
+          nodes.map((node) =>
+            node.id === id
+              ? {
+                  ...node,
+                  position: newPosition,
+                  data: {
+                    ...node.data,
+                    width: newWidth,
+                    height: newHeight,
+                    // Add resize version to force re-render
+                    resizeVersion: Date.now(),
+                  },
+                }
+              : node
+          )
+        );
+
+        // Force local re-render to ensure immediate visual feedback
+        setResizeVersion(prev => prev + 1);
+        lastUpdateTime = now;
+      });
     };
 
     const handleMouseUp = () => {
       setIsResizing(false);
       setResizeHandle(null);
+
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+
+      // Final update to ensure consistency
+      setResizeVersion(prev => prev + 1);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -149,7 +203,14 @@ export const BaseShape: React.FC<BaseShapeProps & {
   useEffect(() => {
     if (isResizing) {
       document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'nw-resize';
+      // Update cursor based on the active resize handle
+      const cursorMap: Record<string, string> = {
+        'nw': 'nw-resize',
+        'ne': 'ne-resize',
+        'sw': 'sw-resize',
+        'se': 'se-resize'
+      };
+      document.body.style.cursor = cursorMap[resizeHandle || ''] || 'nw-resize';
     } else {
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
@@ -159,25 +220,27 @@ export const BaseShape: React.FC<BaseShapeProps & {
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     };
-  }, [isResizing]);
+  }, [isResizing, resizeHandle]);
 
   // Get styles from data.style as the primary source of truth
   const styles = data.style || {};
 
+  // Use current dimensions from data with fallbacks
+  const currentWidth = data.width || 120;
+  const currentHeight = data.height || 80;
+
   const defaultConfig: ShapeConfig = {
-    width: data.width || 120,
-    height: data.height || 80,
+    width: currentWidth,
+    height: currentHeight,
     // Primary style source: data.style, fallback to legacy data properties
     backgroundColor: styles.fill || data.backgroundColor || '#f0f9ff',
     // Selection always overrides stroke color
     borderColor: selected ? '#0066ff' : (styles.stroke || data.borderColor || '#d1d5db'),
     borderRadius: styles.cornerRadius ? `${styles.cornerRadius}px` : '8px',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: isResizing ? 'none' : 'all 0.2s ease', // Disable transitions during resize
     ...shapeConfig
   };
-
-  // Removed expensive console.log for better performance
 
   const renderContent = () => {
     if (isEditing) {
@@ -224,10 +287,12 @@ export const BaseShape: React.FC<BaseShapeProps & {
   };
 
   return (
-    <div 
+    <div
       style={{ position: 'relative' }}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      // Add key based on dimensions and resize version to force re-renders
+      key={`${id}-${currentWidth}-${currentHeight}-${resizeVersion}`}
     >
       {/* Enhanced Connection handles with smart indicators */}
       {/* Top handles */}
@@ -236,9 +301,9 @@ export const BaseShape: React.FC<BaseShapeProps & {
         position={Position.Top}
         id="top"
         isConnectable={true}
-        style={{ 
-          top: -8, 
-          left: '50%', 
+        style={{
+          top: -8,
+          left: '50%',
           transform: 'translateX(-50%)',
           opacity: isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
@@ -256,9 +321,9 @@ export const BaseShape: React.FC<BaseShapeProps & {
         position={Position.Left}
         id="left"
         isConnectable={true}
-        style={{ 
-          left: -8, 
-          top: '50%', 
+        style={{
+          left: -8,
+          top: '50%',
           transform: 'translateY(-50%)',
           opacity: isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
@@ -276,9 +341,9 @@ export const BaseShape: React.FC<BaseShapeProps & {
         position={Position.Right}
         id="right"
         isConnectable={true}
-        style={{ 
-          right: -8, 
-          top: '50%', 
+        style={{
+          right: -8,
+          top: '50%',
           transform: 'translateY(-50%)',
           opacity: isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
@@ -296,9 +361,9 @@ export const BaseShape: React.FC<BaseShapeProps & {
         position={Position.Bottom}
         id="bottom"
         isConnectable={true}
-        style={{ 
-          bottom: -8, 
-          left: '50%', 
+        style={{
+          bottom: -8,
+          left: '50%',
           transform: 'translateX(-50%)',
           opacity: isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
@@ -327,31 +392,75 @@ export const BaseShape: React.FC<BaseShapeProps & {
               animation: 'pulse 2s infinite',
             }}
           />
-          
+
           {/* Resize handles */}
           <div
-            className="resize-handle resize-handle-nw"
+            className="resize-handle resize-handle-nw nodrag"
             onMouseDown={handleResizeStart('nw')}
-            style={{ cursor: 'nw-resize' }}
+            style={{
+              cursor: 'nw-resize',
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              background: '#0066ff',
+              border: '2px solid #ffffff',
+              borderRadius: 2,
+              zIndex: 10,
+            }}
           />
           <div
-            className="resize-handle resize-handle-ne"
+            className="resize-handle resize-handle-ne nodrag"
             onMouseDown={handleResizeStart('ne')}
-            style={{ cursor: 'ne-resize' }}
+            style={{
+              cursor: 'ne-resize',
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              background: '#0066ff',
+              border: '2px solid #ffffff',
+              borderRadius: 2,
+              zIndex: 10,
+            }}
           />
           <div
-            className="resize-handle resize-handle-sw"
+            className="resize-handle resize-handle-sw nodrag"
             onMouseDown={handleResizeStart('sw')}
-            style={{ cursor: 'sw-resize' }}
+            style={{
+              cursor: 'sw-resize',
+              position: 'absolute',
+              bottom: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              background: '#0066ff',
+              border: '2px solid #ffffff',
+              borderRadius: 2,
+              zIndex: 10,
+            }}
           />
           <div
-            className="resize-handle resize-handle-se"
+            className="resize-handle resize-handle-se nodrag"
             onMouseDown={handleResizeStart('se')}
-            style={{ cursor: 'se-resize' }}
+            style={{
+              cursor: 'se-resize',
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              background: '#0066ff',
+              border: '2px solid #ffffff',
+              borderRadius: 2,
+              zIndex: 10,
+            }}
           />
         </>
       )}
-      
+
       {/* Shape content with enhanced styling */}
       <div
         onDoubleClick={handleDoubleClick}
@@ -367,10 +476,10 @@ export const BaseShape: React.FC<BaseShapeProps & {
           cursor: defaultConfig.cursor,
           transition: defaultConfig.transition,
           opacity: styles.opacity !== undefined ? styles.opacity : 1,
-          boxShadow: selected 
-            ? '0 4px 12px rgba(59, 130, 246, 0.3)' 
-            : isHovering 
-              ? '0 2px 8px rgba(0, 0, 0, 0.1)' 
+          boxShadow: selected
+            ? '0 4px 12px rgba(59, 130, 246, 0.3)'
+            : isHovering
+              ? '0 2px 8px rgba(0, 0, 0, 0.1)'
               : 'none',
           transform: isHovering && !selected ? 'translateY(-1px)' : 'translateY(0)',
           ...shapeConfig
@@ -381,8 +490,8 @@ export const BaseShape: React.FC<BaseShapeProps & {
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for memo optimization
-  // CRITICAL: Detect style object changes to ensure re-renders
+  // Enhanced comparison for memo optimization
+  // CRITICAL: Detect all changes that affect rendering
   const prevStyle = prevProps.data.style || {};
   const nextStyle = nextProps.data.style || {};
 
@@ -397,20 +506,18 @@ export const BaseShape: React.FC<BaseShapeProps & {
     !prevStyleKeys.every(key => nextStyleKeys.includes(key));
 
   if (styleChanged || keysChanged) {
-    // Removed expensive console.log for better performance
     return false; // Force re-render
   }
 
-  // Check other critical props
+  // Check other critical props including resize version
   const shouldRerender = (
     prevProps.data.label !== nextProps.data.label ||
     prevProps.data.width !== nextProps.data.width ||
     prevProps.data.height !== nextProps.data.height ||
+    prevProps.data.resizeVersion !== nextProps.data.resizeVersion ||
     prevProps.selected !== nextProps.selected ||
     prevProps.id !== nextProps.id
   );
-
-  // Removed expensive console.log for better click performance
 
   return !shouldRerender; // Return false to re-render, true to skip
 });
