@@ -1,49 +1,55 @@
-# OpenChart Project Overview
+# OpenChart Project Overview - REALISTIC ASSESSMENT
 
 ## Purpose
-OpenChart is an open-source, git-backed diagramming platform designed as an alternative to Lucidchart. The goal is to democratize visual communication through transparency, portability, and version control.
+OpenChart is an **experimental prototype** for an open-source diagramming tool. This is **NOT a production-ready application** and should be treated as a learning/development project.
 
-## Core Features
-- **Open Schema**: JSON-based, human-readable diagram format
-- **Git-First**: Every diagram is a versioned text file (planned)
-- **Export Everything**: No vendor lock-in, full data portability
-- **Node-Based Architecture**: Using React Flow for proper diagramming
+## Current Reality (December 2024)
+**⚠️ EARLY PROTOTYPE - MANY FEATURES BROKEN ⚠️**
 
-## Current Implementation Status (2025-09-17)
+### 🐛 Major Known Issues
+- **Shape rendering problems**: Many shapes display incorrectly or appear black
+- **Resize functionality broken**: Shape handles don't work properly  
+- **Connection problems**: Edge creation and editing is unreliable
+- **Grid visibility issues**: Grid may be hard to see or not display
+- **Export failures**: Export functions may not work consistently
+- **No reliable persistence**: Diagrams may not save properly
+- **Performance issues**: App can become slow with multiple shapes
+- **Incomplete undo/redo**: History management is partial at best
 
-### ✅ Completed Features
-1. **Basic Shapes**: Rectangle, Circle, Diamond, Triangle, Pentagon, Hexagon, Star, Ellipse
-2. **Node-Edge System**: Proper connections between shapes with React Flow
-3. **Connection Points**: 4-way handles on each node (top, right, bottom, left)
-4. **Save/Load**: JSON export and import functionality
-5. **Export**: PNG, SVG, PDF export (basic implementation)
-6. **Professional UI**: Dark theme with glassmorphism effects
-7. **Drag & Drop**: From toolbar to canvas
-8. **Text Editing**: Double-click nodes to edit inline
-9. **Example Templates**: Basic flowchart example
+### ✅ What Sort Of Works
+- Basic shape placement from sidebar (when it works)
+- Simple drag and drop (unreliable)
+- Basic zoom and pan controls
+- Some property panel functionality (buggy)
+- PNG export (sometimes works)
 
-### ⚠️ Known Limitations
-- No undo/redo yet (React Flow supports it, needs wiring)
-- Resize handles are visual only (not functional)
-- Limited edge customization
-- No keyboard shortcuts
-- No collaborative features
-- Save might not always capture current state (needs debugging)
+### 🔬 Recently Added (Experimental)
+- Action toolbar with undo/redo buttons (functionality limited)
+- 61 shapes in library (many don't render correctly)
+- Collapsible sidebars (may be buggy)
+- Multiple export formats (reliability varies)
+- Enhanced property panel (incomplete)
 
-### 🚧 Next Priorities
-1. Fix save/load to properly capture live canvas state
-2. Implement functional resize handles
-3. Add undo/redo functionality
-4. Improve edge routing and labels
-5. Add more node types and connection styles
+## Technology Stack
+- **React + TypeScript**: For component architecture
+- **React Flow**: For node-based diagram engine (migration incomplete)
+- **Vite**: For development and build tooling
+- **Lucide React**: For icons
+- **html-to-image**: For export (when working)
 
-## Technology Decisions
-- **Migrated from Konva.js to React Flow** (2025-09-17) for proper node-edge support
-- React Flow provides built-in diagramming features vs building from scratch
-- Professional icon library (Lucide React) instead of emojis
-- Focus on core functionality over advanced features
+## Development Status: PROTOTYPE ONLY
+- **Not suitable for real work**: Will lose your data
+- **Frequent bugs**: Many features don't work as expected
+- **Breaking changes**: Updates may break existing functionality
+- **No support**: This is experimental code
+- **For developers only**: Learning React Flow, contributing to OSS
 
-## Development Status
-- **Early Prototype**: Functional for basic flowcharts
-- **Not Production Ready**: Many features incomplete
-- **Active Development**: Regular improvements and bug fixes
+## Honest Next Steps
+1. **Fix basic shape rendering** - Priority #1
+2. **Make resize handles work** - Priority #2  
+3. **Fix connection/edge tools** - Priority #3
+4. **Add reliable save/load** - Priority #4
+5. **Performance optimization** - Priority #5
+
+## Reality Check
+This project is much further from being a "Lucidchart alternative" than the code comments might suggest. It's a prototype with many fundamental issues that need fixing before it can be considered even a basic working tool.
