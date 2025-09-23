@@ -125,17 +125,17 @@
   position: absolute;
   bottom: 20px;
   left: 20px;
-  background: rgba(17, 17, 20, 0.9) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .flow-controls button {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #333333 !important;
   width: 32px;
   height: 32px;
   display: flex;
@@ -146,26 +146,26 @@
 }
 
 .flow-controls button:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(0, 0, 0, 0.1) !important;
   border-color: #0066ff !important;
 }
 
 .flow-controls button svg {
   width: 18px;
   height: 18px;
-  fill: #ffffff !important;
-  stroke: #ffffff !important;
+  fill: #333333 !important;
+  stroke: #333333 !important;
 }
 
 /* React Flow control button overrides */
 .react-flow__controls-button {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #333333 !important;
 }
 
 .react-flow__controls-button:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(0, 0, 0, 0.1) !important;
   border-color: #0066ff !important;
 }
 
@@ -195,20 +195,20 @@
   position: absolute;
   bottom: 20px;
   right: 20px;
-  background: rgba(17, 17, 20, 0.9) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .flow-minimap .react-flow__minimap-mask {
-  fill: rgba(0, 0, 0, 0.7);
+  fill: rgba(255, 255, 255, 0.7);
 }
 
 .flow-minimap .react-flow__minimap-node {
-  fill: #ffffff;
-  stroke: #6b7280;
+  fill: #333333;
+  stroke: #9ca3af;
   stroke-width: 1;
 }
 
@@ -220,7 +220,7 @@
 
 /* Background dots */
 .react-flow__background pattern circle {
-  fill: rgba(255, 255, 255, 0.1);
+  fill: rgba(0, 0, 0, 0.1);
 }
 
 /* Node selection */
@@ -276,4 +276,44 @@
   bottom: -4px;
   right: -4px;
   cursor: se-resize;
+}
+
+/* Ruler styles */
+.ruler {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.horizontal-ruler {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.vertical-ruler {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 20px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ruler-mark {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.horizontal-ruler .ruler-mark {
+  width: 1px;
+  bottom: 0;
+}
+
+.vertical-ruler .ruler-mark {
+  height: 1px;
+  right: 0;
 }

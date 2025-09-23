@@ -17,6 +17,8 @@ function App() {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [copiedNodes, setCopiedNodes] = useState<any[]>([]);
   const [showPropertyPanel, setShowPropertyPanel] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
+  const [showRulers, setShowRulers] = useState(false);
   const flowRef = useRef<any>(null);
 
   // Initialize diagram state for PropertyPanel
@@ -343,14 +345,11 @@ function App() {
   }, [canvasState]);
 
   const handleToggleGrid = useCallback(() => {
-    if (flowRef.current?.toggleGrid) {
-      flowRef.current.toggleGrid();
-    }
+    setShowGrid(prev => !prev);
   }, []);
 
   const handleToggleRulers = useCallback(() => {
-    // TODO: Implement rulers
-    console.log('Rulers not yet implemented');
+    setShowRulers(prev => !prev);
   }, []);
 
   // Keyboard shortcuts
@@ -645,6 +644,8 @@ function App() {
                 setEdges(currentEdges => [...currentEdges, newEdge]);
               }}
               onPaneClick={handleCanvasClick}
+              showGrid={showGrid}
+              showRulers={showRulers}
             />
           </div>
           <PropertyPanel

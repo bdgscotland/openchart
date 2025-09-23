@@ -50,6 +50,7 @@ export interface FlowCanvasProps {
   showGrid?: boolean;
   showMiniMap?: boolean;
   showControls?: boolean;
+  showRulers?: boolean;
 }
 
 const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
@@ -67,6 +68,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     showGrid = true,
     showMiniMap = true,
     showControls = true,
+    showRulers = false,
   } = props;
 
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
@@ -385,6 +387,39 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         {showControls && <Controls className="flow-controls" />}
         {showMiniMap && <MiniMap className="flow-minimap" nodeColor="#ffffff" maskColor="rgba(0, 0, 0, 0.7)" />}
         {showGrid && <Background variant={BackgroundVariant.Dots} gap={20} size={1} />}
+
+        {/* Rulers */}
+        {showRulers && (
+          <>
+            {/* Horizontal Ruler */}
+            <div className="ruler horizontal-ruler">
+              {Array.from({ length: 100 }, (_, i) => (
+                <div
+                  key={i}
+                  className="ruler-mark"
+                  style={{
+                    left: `${i * 100}px`,
+                    height: i % 10 === 0 ? '15px' : i % 5 === 0 ? '10px' : '5px',
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Vertical Ruler */}
+            <div className="ruler vertical-ruler">
+              {Array.from({ length: 100 }, (_, i) => (
+                <div
+                  key={i}
+                  className="ruler-mark"
+                  style={{
+                    top: `${i * 100}px`,
+                    width: i % 10 === 0 ? '15px' : i % 5 === 0 ? '10px' : '5px',
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
         
         {/* Export Panel */}
         <Panel position="top-right">

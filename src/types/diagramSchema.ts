@@ -1,4 +1,4 @@
-import { Node, Edge, Viewport } from '@xyflow/react';
+import type { Node, Edge, Viewport } from '@xyflow/react';
 
 /**
  * Current schema version

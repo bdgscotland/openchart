@@ -445,40 +445,6 @@
   outline-offset: 2px;
 }
 
-/* Dark theme support */
-@media (prefers-color-scheme: dark) {
-  .color-picker {
-    background: #1f2937;
-    border-color: #374151;
-    color: #f9fafb;
-  }
-
-  .color-picker__title {
-    color: #f9fafb;
-  }
-
-  .color-picker__close {
-    color: #9ca3af;
-  }
-
-  .color-picker__close:hover {
-    background-color: #374151;
-  }
-
-  .color-input__input {
-    background: #374151;
-    border-color: #4b5563;
-    color: #f9fafb;
-  }
-
-  .color-input__format-tab {
-    background: #374151;
-    color: #9ca3af;
-  }
-
-  .color-input__format-tab:hover {
-    background: #4b5563;
-  }
-}
+/* Dark theme support (disabled - using light mode by default) */
 
 /* Animation for smooth transitions - Moved to top of file */

@@ -145,65 +145,41 @@ export const BaseShape: React.FC<BaseShapeProps & {
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Connection handles - unique IDs for source and target */}
-      <Handle
-        type="source"
-        position={Position.Top}
-        id="top-source"
-        isConnectable={true}
-        style={{ backgroundColor: '#555' }}
-      />
+      {/* Connection handles with unique positions to avoid conflicts */}
+      {/* Top handles */}
       <Handle
         type="target"
         position={Position.Top}
-        id="top-target"
+        id="top"
         isConnectable={true}
-        style={{ backgroundColor: '#555' }}
+        style={{ top: -6, left: '50%', transform: 'translateX(-50%)' }}
       />
 
-      <Handle
-        type="source"
-        position={Position.Left}
-        id="left-source"
-        isConnectable={true}
-        style={{ backgroundColor: '#555' }}
-      />
+      {/* Left handles */}
       <Handle
         type="target"
         position={Position.Left}
-        id="left-target"
+        id="left"
         isConnectable={true}
-        style={{ backgroundColor: '#555' }}
+        style={{ left: -6, top: '50%', transform: 'translateY(-50%)' }}
       />
 
+      {/* Right handles */}
       <Handle
         type="source"
         position={Position.Right}
-        id="right-source"
+        id="right"
         isConnectable={true}
-        style={{ backgroundColor: '#555' }}
-      />
-      <Handle
-        type="target"
-        position={Position.Right}
-        id="right-target"
-        isConnectable={true}
-        style={{ backgroundColor: '#555' }}
+        style={{ right: -6, top: '50%', transform: 'translateY(-50%)' }}
       />
 
+      {/* Bottom handles */}
       <Handle
         type="source"
         position={Position.Bottom}
-        id="bottom-source"
+        id="bottom"
         isConnectable={true}
-        style={{ backgroundColor: '#555' }}
-      />
-      <Handle
-        type="target"
-        position={Position.Bottom}
-        id="bottom-target"
-        isConnectable={true}
-        style={{ backgroundColor: '#555' }}
+        style={{ bottom: -6, left: '50%', transform: 'translateX(-50%)' }}
       />
       
       {/* Shape content with config applied */}

@@ -1,15 +1,17 @@
-import { Node, Edge, Viewport } from '@xyflow/react';
+import type { Node, Edge, Viewport } from '@xyflow/react';
 import { presetStorage } from '../components/PropertyPanel/StylePresets/utils/presetStorage';
 import { getRecentColors } from '../components/PropertyPanel/ColorPicker/colorUtils';
-import {
+import type {
   DiagramData,
   DiagramMetadata,
   PropertyPanelData,
   ExportOptions,
   ImportOptions,
+  ValidationResult,
+} from '../types/diagramSchema';
+import {
   CURRENT_SCHEMA_VERSION,
   STORAGE_KEYS,
-  ValidationResult,
 } from '../types/diagramSchema';
 
 class DiagramPersistence {
