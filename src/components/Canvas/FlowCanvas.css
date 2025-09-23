@@ -278,34 +278,67 @@
   cursor: se-resize;
 }
 
-/* Ruler styles */
+/* Enhanced Ruler styles */
 .ruler {
   position: absolute;
   z-index: 5;
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .horizontal-ruler {
   top: 0;
   left: 0;
   right: 0;
-  height: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  height: 24px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .vertical-ruler {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 20px;
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  width: 24px;
+  border-right: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.ruler-tick-container {
+  position: absolute;
 }
 
 .ruler-mark {
   position: absolute;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(71, 85, 105, 0.6);
+}
+
+/* Centimeter marks (every 10mm) - largest and darkest */
+.ruler-mark.centimeter {
+  background: rgba(30, 41, 59, 0.9);
+}
+
+/* Half-centimeter marks (every 5mm) - medium size */
+.ruler-mark.half-centimeter {
+  background: rgba(71, 85, 105, 0.7);
+}
+
+/* Millimeter marks (every 1-2mm) - smallest and lightest */
+.ruler-mark.millimeter {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Legacy support for old class names */
+.ruler-mark.major {
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.ruler-mark.minor {
+  background: rgba(71, 85, 105, 0.6);
+}
+
+.ruler-mark.micro {
+  background: rgba(148, 163, 184, 0.5);
 }
 
 .horizontal-ruler .ruler-mark {
@@ -316,4 +349,27 @@
 .vertical-ruler .ruler-mark {
   height: 1px;
   right: 0;
+}
+
+.ruler-label {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(30, 41, 59, 0.8);
+  background: rgba(248, 250, 252, 0.9);
+  padding: 1px 3px;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  top: 2px;
+  white-space: nowrap;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.ruler-label.vertical {
+  transform: translateY(-50%) rotate(-90deg);
+  left: 2px;
+  transform-origin: center;
+  top: auto;
+  font-size: 9px;
 }

@@ -75,7 +75,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { fitView, getViewport, setViewport, getNodes, getEdges, screenToFlowPosition } = useReactFlow();
 
@@ -172,7 +172,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   // Handle edges change with external callback
   const handleEdgesChange = useCallback((changes: any) => {
     onEdgesChangeInternal(changes);
-    
+
     // Use getEdges() to get the most current edge state instead of stale closure
     setTimeout(() => {
       const currentEdges = getEdges();
@@ -224,7 +224,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     // Import the shape factory at runtime to avoid circular imports
     import('./shapes').then(({ createShapeNode, isValidShapeType }) => {
       console.log('🎯 Shape module imported successfully');
-      
+
       if (!isValidShapeType(shapeType)) {
         console.warn(`❌ Invalid shape type: ${shapeType}`);
         return;
@@ -248,18 +248,18 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
       });
 
       console.log('🎯 New node created:', newNode);
-      
+
       // Update local state and immediately sync to external state
       setNodes((nds) => {
         const updatedNodes = nds.concat(newNode);
         console.log('🎯 Updated nodes array:', updatedNodes);
-        
+
         // Immediately call the external onNodesChange callback
         setTimeout(() => {
           console.log('🎯 Calling external onNodesChange with:', updatedNodes);
           onNodesChange(updatedNodes);
         }, 0);
-        
+
         return updatedNodes;
       });
     }).catch((error) => {
@@ -297,7 +297,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         width: 1200,
         height: 800,
       });
-      
+
       const link = document.createElement('a');
       link.download = 'diagram.png';
       link.href = dataUrl;
@@ -312,7 +312,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         width: 1200,
         height: 800,
       });
-      
+
       const link = document.createElement('a');
       link.download = 'diagram.svg';
       link.href = dataUrl;
@@ -385,42 +385,72 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         fitViewOptions={{ padding: 0.2 }}
       >
         {showControls && <Controls className="flow-controls" />}
-        {showMiniMap && <MiniMap className="flow-minimap" nodeColor="#ffffff" maskColor="rgba(0, 0, 0, 0.7)" />}
-        {showGrid && <Background variant={BackgroundVariant.Dots} gap={20} size={1} />}
+        {showMiniMap && (
+          <MiniMap
+            className="flow-minimap"
+            nodeColor="#ffffff"
+            maskColor="rgba(0, 0, 0, 0.7)"
+            pannable={true}
+            zoomable={true}
+          />
+        )}
+        {showGrid && <Background variant={BackgroundVariant.Dots} gap={20} size={2} color="#94a3b8" />}
 
-        {/* Rulers */}
+        {/* Enhanced Rulers with mm/cm markings */}
         {showRulers && (
           <>
             {/* Horizontal Ruler */}
             <div className="ruler horizontal-ruler">
-              {Array.from({ length: 100 }, (_, i) => (
-                <div
-                  key={i}
-                  className="ruler-mark"
-                  style={{
-                    left: `${i * 100}px`,
-                    height: i % 10 === 0 ? '15px' : i % 5 === 0 ? '10px' : '5px',
-                  }}
-                />
-              ))}
+              {Array.from({ length: 1000 }, (_, i) => {
+                const position = i * 2; // Every 2px for better performance
+                const isCentimeter = (i * 2) % 10 === 0; // Every 10mm = 1cm
+                const isHalfCentimeter = (i * 2) % 5 === 0; // Every 5mm
+
+                return (
+                  <div key={i} className="ruler-tick-container" style={{ left: `${position}px` }}>
+                    <div
+                      className={`ruler-mark ${isCentimeter ? 'centimeter' : isHalfCentimeter ? 'half-centimeter' : 'millimeter'}`}
+                      style={{
+                        height: isCentimeter ? '18px' : isHalfCentimeter ? '12px' : '6px',
+                      }}
+                    />
+                    {isCentimeter && (
+                      <div className="ruler-label" style={{ left: `${position}px` }}>
+                        {Math.floor(position / 10)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Vertical Ruler */}
             <div className="ruler vertical-ruler">
-              {Array.from({ length: 100 }, (_, i) => (
-                <div
-                  key={i}
-                  className="ruler-mark"
-                  style={{
-                    top: `${i * 100}px`,
-                    width: i % 10 === 0 ? '15px' : i % 5 === 0 ? '10px' : '5px',
-                  }}
-                />
-              ))}
+              {Array.from({ length: 600 }, (_, i) => {
+                const position = i * 2; // Every 2px for better performance
+                const isCentimeter = (i * 2) % 10 === 0; // Every 10mm = 1cm
+                const isHalfCentimeter = (i * 2) % 5 === 0; // Every 5mm
+
+                return (
+                  <div key={i} className="ruler-tick-container" style={{ top: `${position}px` }}>
+                    <div
+                      className={`ruler-mark ${isCentimeter ? 'centimeter' : isHalfCentimeter ? 'half-centimeter' : 'millimeter'}`}
+                      style={{
+                        width: isCentimeter ? '18px' : isHalfCentimeter ? '12px' : '6px',
+                      }}
+                    />
+                    {isCentimeter && (
+                      <div className="ruler-label vertical" style={{ top: `${position - 6}px` }}>
+                        {Math.floor(position / 10)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
-        
+
         {/* Export Panel */}
         <Panel position="top-right">
           <div style={{ display: 'flex', gap: '8px' }}>
