@@ -490,9 +490,7 @@ function App() {
 
   // Load auto-saved diagram on mount
   useEffect(() => {
-    // Prevent duplicate dialogs in React StrictMode
-    if (sessionStorage.getItem('openchart-recovery-shown')) return;
-    sessionStorage.setItem('openchart-recovery-shown', 'true');
+    // Auto-restore on every page load - no session storage protection needed
 
     const loadAutoSaved = async () => {
       if (nodes.length === 0 && edges.length === 0) {
@@ -504,24 +502,27 @@ function App() {
             const lastSaved = new Date(diagram.timestamp);
             const minutesAgo = Math.floor((Date.now() - lastSaved.getTime()) / 60000);
 
-            if (confirm(`Found auto-saved diagram from ${minutesAgo} minutes ago. Would you like to restore it?`)) {
-              const result = await diagramPersistence.importDiagram(diagram);
+            // Automatically restore the diagram without asking
+            console.log(`🔄 Auto-restoring diagram from ${minutesAgo} minutes ago...`);
 
-              setNodes(result.nodes);
-              setEdges(result.edges);
+            const result = await diagramPersistence.importDiagram(diagram);
 
-              // Show restoration feedback if property panel data was restored
-              if (result.restoredFeatures.length > 0) {
-                console.log('Restored property panel features:', result.restoredFeatures);
-              }
+            setNodes(result.nodes);
+            setEdges(result.edges);
 
-              // Restore viewport if React Flow is ready
-              if (result.viewport && flowRef.current) {
-                setTimeout(() => {
-                  flowRef.current.setViewport(result.viewport);
-                }, 100);
-              }
+            // Show restoration feedback if property panel data was restored
+            if (result.restoredFeatures.length > 0) {
+              console.log('✅ Restored property panel features:', result.restoredFeatures);
             }
+
+            // Restore viewport if React Flow is ready
+            if (result.viewport && flowRef.current) {
+              setTimeout(() => {
+                flowRef.current.setViewport(result.viewport);
+              }, 100);
+            }
+
+            console.log(`✅ Diagram automatically restored (${result.nodes.length} nodes, ${result.edges.length} edges)`);
           }
         } catch (error) {
           console.error('Failed to load auto-saved diagram:', error);

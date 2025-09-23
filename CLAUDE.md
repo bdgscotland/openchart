@@ -118,7 +118,16 @@ src/
 ./start.sh               # REQUIRED - Only way to start development
 ```
 
-**IMPORTANT**: We ALWAYS use `start.sh` for development startup. This is the standard workflow.
+**⚠️ CRITICAL**: We ALWAYS use `start.sh` for development startup. **NEVER** use `npm run dev` directly.
+
+**🚫 DO NOT USE:**
+- `npm run dev`
+- `vite`
+- Any other direct commands
+
+**✅ ALWAYS USE:**
+- `./start.sh` for development
+- This is the ONLY approved way to start the dev server
 
 ### Why start.sh?
 The startup script ensures:

@@ -8,6 +8,18 @@ set -e  # Exit on error
 echo "🚀 Starting OpenChart Development Environment..."
 echo "================================================"
 
+# Kill any existing dev servers to prevent port conflicts
+echo "🧹 Checking for existing dev servers..."
+if pgrep -f "vite" > /dev/null || pgrep -f "npm run dev" > /dev/null; then
+    echo "   Found existing dev servers, stopping them..."
+    pkill -f "npm run dev" 2>/dev/null || true
+    pkill -f "vite" 2>/dev/null || true
+    sleep 3
+    echo "   ✅ Existing servers stopped"
+else
+    echo "   ✅ No existing servers found"
+fi
+
 # Check Node.js version
 echo "✅ Checking Node.js version..."
 NODE_VERSION=$(node -v | cut -d'.' -f1 | sed 's/v//')
@@ -50,5 +62,13 @@ echo ""
 echo "Press Ctrl+C to stop the server"
 echo ""
 
-# Start Vite dev server
-npm run dev
+# Check if port 5173 is in use and kill it if needed
+if lsof -Pi :5173 -sTCP:LISTEN -t >/dev/null ; then
+    echo "🔧 Port 5173 is in use, freeing it..."
+    lsof -ti:5173 | xargs kill -9 2>/dev/null || true
+    sleep 2
+fi
+
+# Start Vite dev server with explicit port
+export PORT=5173
+npm run dev -- --port 5173 --host
