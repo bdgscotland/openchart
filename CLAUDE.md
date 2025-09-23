@@ -24,6 +24,12 @@ OpenChart is an open-source, git-backed diagramming platform built with React + 
   - Changing the canvas state management
   - Testing diagram persistence
   - Updating React Flow integration
+- **openchart-pmo Agent**: ALWAYS use when:
+  - Creating or managing GitHub issues
+  - Tracking project progress
+  - Organizing development tasks
+  - Managing bug reports and feature requests
+  - Coordinating project boards
 
 ### Data Persistence Agent Usage
 
@@ -41,6 +47,23 @@ OpenChart is an open-source, git-backed diagramming platform built with React + 
 - Update JSON schema documentation
 - Verify React Flow state synchronization
 - Add migration logic if schema changes
+
+### PMO Agent Usage
+
+**MUST use openchart-pmo agent for:**
+- Creating GitHub issues with proper labels and templates
+- Organizing issues on project boards
+- Tracking development progress
+- Managing bug triage and feature requests
+- Generating project status reports and metrics
+
+**The agent will:**
+- Create well-structured GitHub issues with appropriate labels
+- Organize work by priority (P1: Canvas, P2: File Ops, P3: Git)
+- Track completion rates and identify development blockers
+- Ensure quality gates are met (testing, documentation, performance)
+- Coordinate with other specialized agents for comprehensive project management
+- Generate actionable project insights and recommendations
 
 ### Technology Stack
 - **Frontend**: React + TypeScript + Vite
@@ -81,6 +104,18 @@ mcp__playwright__browser_navigate    # Navigate to app
 mcp__playwright__browser_snapshot    # Capture UI state
 mcp__playwright__browser_click       # Interact with elements
 mcp__playwright__browser_type        # Input text/data
+```
+
+### Project Management & Issues
+```bash
+# Use GitHub CLI for project management operations
+gh issue list                        # List open issues
+gh issue create                      # Create new issues
+gh issue view                        # View issue details
+gh pr list                          # List pull requests
+gh pr create                        # Create pull requests
+gh project list                     # List GitHub projects
+gh project item-add                 # Add items to projects
 ```
 
 ## 🏗️ Project Structure & Conventions
