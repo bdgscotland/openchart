@@ -451,17 +451,6 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
           </>
         )}
 
-        {/* Export Panel */}
-        <Panel position="top-right">
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={exportToPng} title="Export to PNG">
-              PNG
-            </button>
-            <button onClick={exportToSvg} title="Export to SVG">
-              SVG
-            </button>
-          </div>
-        </Panel>
       </ReactFlow>
 
       {/* Context Menu */}
