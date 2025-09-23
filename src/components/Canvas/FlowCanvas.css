@@ -22,17 +22,18 @@
   position: relative;
 }
 
-/* Connection handles - React Flow specific */
+/* Enhanced Connection handles - React Flow specific */
 .react-flow__handle {
   width: 12px !important;
   height: 12px !important;
-  background: #0066ff !important;
+  background: #3b82f6 !important;
   border: 2px solid #ffffff !important;
   border-radius: 50%;
   opacity: 0;
   transition: all 0.2s ease;
   pointer-events: all !important;
   z-index: 10;
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.0);
 }
 
 /* Position handles properly */
@@ -77,10 +78,13 @@
   opacity: 1 !important;
 }
 
-/* Handle hover state */
+/* Enhanced handle hover state */
 .react-flow__handle:hover {
   opacity: 1;
   transform: scale(1.3) translateX(-50%) translateY(0);
+  background: #22c55e !important;
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3) !important;
 }
 
 .react-flow__handle-top:hover,
@@ -223,9 +227,29 @@
   fill: rgba(0, 0, 0, 0.1);
 }
 
-/* Node selection */
+/* Enhanced node selection */
 .react-flow__node.selected {
   outline: none !important;
+  box-shadow: 0 0 0 2px #3b82f6, 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Enhanced drag preview */
+.drag-preview {
+  border: 2px dashed #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-radius: 8px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
 }
 
 /* Smooth animations */

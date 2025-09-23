@@ -1,5 +1,6 @@
 import { useCallback, useState, useRef, useEffect, useMemo } from 'react';
-import { ToolbarComponent, type DrawingTool } from './components/Toolbar/ToolbarComponent';
+import { ShapeLibrary } from './components/Toolbar';
+import type { DrawingTool } from './types/shapes';
 import { FlowCanvas } from './components/Canvas/FlowCanvas';
 import useShapeCreation from './components/Canvas/hooks/useShapeCreation';
 import { MenuBar } from './components/MenuBar/MenuBar';
@@ -9,6 +10,7 @@ import { createEmptyDiagram } from './utils/diagramFactory';
 // React Flow types are imported but typed as any for flexibility
 import type { Node, Edge } from '@xyflow/react';
 import { MarkerType } from '@xyflow/react';
+import type { ElementStyle } from './types/diagram';
 import './App.css';
 
 function App() {
@@ -26,30 +28,38 @@ function App() {
   const canvasState = useCanvasState(initialDiagram);
 
   // Convert React Flow nodes to diagram elements for PropertyPanel
-  // Use useMemo to ensure selectedElements updates when nodes change
+  // Optimized useMemo with dependency array that only includes selected nodes and their updates
   const selectedElements = useMemo(() => {
     const currentlySelectedNodes = nodes.filter(node => node.selected);
+
+    // Early return if no selection to avoid expensive computation
+    if (currentlySelectedNodes.length === 0) {
+      return [];
+    }
+
     const elements = currentlySelectedNodes.map(node => {
-      // Get complete style from node.data.style with proper defaults
-      const nodeStyle = node.data?.style || {};
+      // Get complete style from node.data.style with efficient defaults
+      const nodeStyle = node.data?.style as ElementStyle | undefined;
+
+      // Simplified style computation with fewer conditional checks
       const completeStyle = {
-        fill: nodeStyle.fill || node.data?.backgroundColor || '#f0f9ff',
-        stroke: node.selected ? '#0066ff' : (nodeStyle.stroke || node.data?.borderColor || '#d1d5db'),
-        strokeWidth: nodeStyle.strokeWidth || 2,
-        opacity: nodeStyle.opacity !== undefined ? nodeStyle.opacity : 1,
-        fontSize: nodeStyle.fontSize || 14,
-        fontFamily: nodeStyle.fontFamily || 'Arial, sans-serif',
-        fontWeight: nodeStyle.fontWeight || 'normal' as const,
-        fontStyle: nodeStyle.fontStyle || 'normal' as const,
-        textAlign: nodeStyle.textAlign || 'center' as const,
-        cornerRadius: nodeStyle.cornerRadius || 8,
-        color: nodeStyle.color || '#000000',
-        textDecoration: nodeStyle.textDecoration || 'none',
-        textTransform: nodeStyle.textTransform || 'none',
-        lineHeight: nodeStyle.lineHeight || 1.4,
-        letterSpacing: nodeStyle.letterSpacing || 'normal',
-        wordSpacing: nodeStyle.wordSpacing || 'normal',
-        ...nodeStyle // Preserve any additional style properties
+        fill: nodeStyle?.fill || node.data?.backgroundColor || '#f0f9ff',
+        stroke: nodeStyle?.stroke || node.data?.borderColor || '#d1d5db',
+        strokeWidth: nodeStyle?.strokeWidth || 2,
+        opacity: nodeStyle?.opacity ?? 1,
+        fontSize: nodeStyle?.fontSize || 14,
+        fontFamily: nodeStyle?.fontFamily || 'Arial, sans-serif',
+        fontWeight: nodeStyle?.fontWeight || 'normal' as const,
+        fontStyle: nodeStyle?.fontStyle || 'normal' as const,
+        textAlign: nodeStyle?.textAlign || 'center' as const,
+        cornerRadius: nodeStyle?.cornerRadius || 8,
+        color: nodeStyle?.color || '#000000',
+        textDecoration: nodeStyle?.textDecoration || 'none',
+        textTransform: nodeStyle?.textTransform || 'none',
+        lineHeight: nodeStyle?.lineHeight || 1.4,
+        letterSpacing: nodeStyle?.letterSpacing || 'normal',
+        wordSpacing: nodeStyle?.wordSpacing || 'normal',
+        ...(nodeStyle || {}) // Preserve any additional style properties
       };
 
       return {
@@ -68,9 +78,10 @@ function App() {
         properties: {} // Extensible properties
       };
     });
-    console.log('🔄 selectedElements recomputed:', elements);
+
+    console.log('🔄 selectedElements recomputed:', elements.length, 'selected');
     return elements;
-  }, [nodes]); // Recompute when nodes change
+  }, [nodes.filter(n => n.selected).map(n => n.id).join(','), nodes.length]); // Only recompute when selection changes
 
   // PropertyPanel callback handlers that update React Flow nodes
   const handleUpdateElementStyle = useCallback((elementId: string, styleUpdates: any) => {
@@ -194,7 +205,7 @@ function App() {
     try {
       const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(flowElement, {
-        backgroundColor: '#0a0a0b',
+        backgroundColor: '#ffffff',
         width: flowElement.offsetWidth,
         height: flowElement.offsetHeight,
       });
@@ -216,7 +227,7 @@ function App() {
     try {
       const { toSvg } = await import('html-to-image');
       const dataUrl = await toSvg(flowElement, {
-        backgroundColor: '#0a0a0b',
+        backgroundColor: '#ffffff',
       });
       
       const link = document.createElement('a');
@@ -237,7 +248,7 @@ function App() {
     try {
       const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(flowElement, {
-        backgroundColor: '#0a0a0b',
+        backgroundColor: '#ffffff',
         width: flowElement.offsetWidth,
         height: flowElement.offsetHeight,
       });
@@ -586,6 +597,7 @@ function App() {
         }}
         />
       </label>
+
       <MenuBar
         onNewDiagram={handleNewDiagram}
         onSaveDiagram={handleSaveDiagram}
@@ -601,7 +613,7 @@ function App() {
         onToggleGrid={handleToggleGrid}
         onToggleRulers={handleToggleRulers}
       />
-      
+
       <header className="app-header">
         <h1>OpenChart</h1>
         <div className="header-info">
@@ -609,10 +621,10 @@ function App() {
           <span>Edges: {edges.length}</span>
         </div>
       </header>
-      
+
       <main className="app-main">
         <div className="app-content">
-          <ToolbarComponent
+          <ShapeLibrary
             selectedTool={selectedTool}
             onToolSelect={setSelectedTool}
           />

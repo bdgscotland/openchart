@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState, useImperativeHandle, forwardRef, useEffect, useMemo } from 'react';
+import React, { useCallback, useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -6,7 +6,6 @@ import {
   BackgroundVariant,
   useNodesState,
   useEdgesState,
-  addEdge,
   useReactFlow,
   ReactFlowProvider,
   Panel,
@@ -14,9 +13,8 @@ import {
   ConnectionMode,
   MarkerType,
   applyNodeChanges,
-  applyEdgeChanges,
 } from '@xyflow/react';
-import type { Node, Edge, NodeProps, Connection } from '@xyflow/react';
+import type { Node, Edge, Connection } from '@xyflow/react';
 import { toPng, toSvg } from 'html-to-image';
 import '@xyflow/react/dist/style.css';
 import './FlowCanvas.css';
@@ -75,6 +73,12 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // Enhanced drag & drop states
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [dragPreview, setDragPreview] = useState<{ x: number; y: number; shapeType: string } | null>(null);
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [gridSize] = useState(20);
+  const [connectionMode, setConnectionMode] = useState<'loose' | 'strict'>('loose');
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { fitView, getViewport, setViewport, getNodes, getEdges, screenToFlowPosition } = useReactFlow();
@@ -99,6 +103,15 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     onNodesChange: setNodes,
     onEdgesChange: setEdges,
   });
+
+  // Helper function to snap position to grid
+  const snapToGridPosition = useCallback((position: { x: number; y: number }) => {
+    if (!snapToGrid) return position;
+    return {
+      x: Math.round(position.x / gridSize) * gridSize,
+      y: Math.round(position.y / gridSize) * gridSize,
+    };
+  }, [snapToGrid, gridSize]);
 
   // Initialize internal state on mount and when external state changes
   useEffect(() => {
@@ -200,7 +213,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   // Handle drag and drop from toolbar
   const onDrop = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    console.log('🎯 onDrop called - React Flow handler');
+    console.log('🎯 onDrop called - Enhanced React Flow handler');
 
     const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
     const shapeType = event.dataTransfer.getData('shapeTool');
@@ -208,18 +221,24 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     console.log('🎯 Shape type:', shapeType);
     console.log('🎯 React Flow bounds:', reactFlowBounds);
 
+    // Reset drag state
+    setIsDragOver(false);
+    setDragPreview(null);
+
     if (!shapeType || !reactFlowBounds) {
       console.log('🚫 Missing shapeType or reactFlowBounds');
       return;
     }
 
-    // Use the new screenToFlowPosition instead of deprecated project
-    const position = screenToFlowPosition({
+    // Calculate position and apply snap-to-grid
+    const rawPosition = screenToFlowPosition({
       x: event.clientX,
       y: event.clientY,
     });
 
-    console.log('🎯 Position calculated:', position);
+    const position = snapToGridPosition(rawPosition);
+
+    console.log('🎯 Position calculated:', position, 'snapped from:', rawPosition);
 
     // Import the shape factory at runtime to avoid circular imports
     import('./shapes').then(({ createShapeNode, isValidShapeType }) => {
@@ -265,11 +284,36 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     }).catch((error) => {
       console.error('❌ Error importing shapes module:', error);
     });
-  }, [screenToFlowPosition, setNodes, onNodesChange]);
+  }, [screenToFlowPosition, setNodes, onNodesChange, snapToGridPosition]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
+    
+    const shapeType = event.dataTransfer.getData('shapeTool');
+    if (shapeType && reactFlowWrapper.current) {
+      setIsDragOver(true);
+      
+      // Calculate position for preview
+      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+      const position = {
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      };
+      
+      setDragPreview({
+        ...position,
+        shapeType,
+      });
+    }
+  }, []);
+  // Enhanced drag leave handler
+  const onDragLeave = useCallback((event: React.DragEvent) => {
+    // Only hide preview if leaving the canvas area
+    if (!reactFlowWrapper.current?.contains(event.relatedTarget as Node)) {
+      setIsDragOver(false);
+      setDragPreview(null);
+    }
   }, []);
 
   // Handle context menu actions
@@ -285,9 +329,15 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
           handleDuplicateNodes([nodeId]);
         }
         break;
+      case 'toggle-snap':
+        setSnapToGrid(!snapToGrid);
+        break;
+      case 'toggle-connection-mode':
+        setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose');
+        break;
     }
     setContextMenu(null);
-  }, [handleDeleteNodes, handleDuplicateNodes]);
+  }, [handleDeleteNodes, handleDuplicateNodes, snapToGrid, connectionMode]);
 
   // Export functions
   const exportToPng = useCallback(async () => {
@@ -329,7 +379,10 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     getEdges,
     exportToPng,
     exportToSvg,
-  }), [fitView, getViewport, setViewport, getNodes, getEdges, exportToPng, exportToSvg]);
+    toggleSnapToGrid: () => setSnapToGrid(!snapToGrid),
+    toggleConnectionMode: () => setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose'),
+    getCanvasSettings: () => ({ snapToGrid, gridSize, connectionMode }),
+  }), [fitView, getViewport, setViewport, getNodes, getEdges, exportToPng, exportToSvg, snapToGrid, connectionMode, gridSize]);
 
   return (
     <div className="flow-canvas" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
@@ -346,6 +399,18 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         }}
         onNodeDragStop={(event, node) => {
           setIsDragging(false);
+
+          // Apply snap-to-grid after drag
+          if (snapToGrid) {
+            const snappedPosition = snapToGridPosition(node.position);
+            if (snappedPosition.x !== node.position.x || snappedPosition.y !== node.position.y) {
+              setNodes((nds) =>
+                nds.map((n) =>
+                  n.id === node.id ? { ...n, position: snappedPosition } : n
+                )
+              );
+            }
+          }
 
           // Sync to external state after drag is complete
           setTimeout(() => {
@@ -369,6 +434,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         }}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
         nodeTypes={nodeTypes}
         nodesDraggable={true}
         nodesConnectable={true}
@@ -379,10 +445,12 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         selectionKeyCode={null}
         deleteKeyCode="Delete"
         nodeDragThreshold={0}
-        connectionMode={ConnectionMode.Loose}
+        connectionMode={connectionMode === 'loose' ? ConnectionMode.Loose : ConnectionMode.Strict}
         defaultEdgeOptions={defaultEdgeOptions}
         fitView
         fitViewOptions={{ padding: 0.2 }}
+        snapToGrid={snapToGrid}
+        snapGrid={[gridSize, gridSize]}
       >
         {showControls && <Controls className="flow-controls" />}
         {showMiniMap && (
@@ -394,7 +462,31 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
             zoomable={true}
           />
         )}
-        {showGrid && <Background variant={BackgroundVariant.Dots} gap={20} size={2} color="#94a3b8" />}
+        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} size={3} color="#666666" />}
+
+        {/* Enhanced Settings Panel */}
+        <Panel position="top-right" className="flow-panel">
+          <div className="flex flex-col gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={snapToGrid}
+                onChange={() => setSnapToGrid(!snapToGrid)}
+                className="w-3 h-3"
+              />
+              <span className="text-gray-600">Snap to Grid ({gridSize}px)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600">Connection: </span>
+              <button
+                onClick={() => setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose')}
+                className="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 rounded"
+              >
+                {connectionMode}
+              </button>
+            </div>
+          </div>
+        </Panel>
 
         {/* Enhanced Rulers with mm/cm markings */}
         {showRulers && (
@@ -453,40 +545,65 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
       </ReactFlow>
 
-      {/* Context Menu */}
+      {/* Enhanced drag preview */}
+      {isDragOver && dragPreview && (
+        <div
+          className="absolute pointer-events-none z-50 border-2 border-blue-400 border-dashed bg-blue-50 opacity-70 rounded"
+          style={{
+            left: dragPreview.x - 60,
+            top: dragPreview.y - 40,
+            width: 120,
+            height: 80,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            color: '#1e40af',
+          }}
+        >
+          {dragPreview.shapeType}
+        </div>
+      )}
+
+      {/* Enhanced Context Menu */}
       {contextMenu && (
         <div
+          className="fixed bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 min-w-[160px]"
           style={{
-            position: 'fixed',
             top: contextMenu.y,
             left: contextMenu.x,
-            background: 'white',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            padding: '4px 0',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            zIndex: 1000,
           }}
         >
           {contextMenu.nodeId ? (
             <>
               <div
                 onClick={() => handleContextMenuAction('duplicate', contextMenu.nodeId)}
-                style={{ padding: '8px 16px', cursor: 'pointer' }}
+                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
               >
-                Duplicate
+                <span>Duplicate</span>
               </div>
               <div
                 onClick={() => handleContextMenuAction('delete', contextMenu.nodeId)}
-                style={{ padding: '8px 16px', cursor: 'pointer', color: 'red' }}
+                className="px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-2"
               >
-                Delete
+                <span>Delete</span>
               </div>
             </>
           ) : (
-            <div style={{ padding: '8px 16px', color: '#666' }}>
-              Canvas Options
-            </div>
+            <>
+              <div
+                onClick={() => handleContextMenuAction('toggle-snap')}
+                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+              >
+                <span>{snapToGrid ? '✓' : ''} Snap to Grid</span>
+              </div>
+              <div
+                onClick={() => handleContextMenuAction('toggle-connection-mode')}
+                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+              >
+                <span>Connection: {connectionMode}</span>
+              </div>
+            </>
           )}
         </div>
       )}

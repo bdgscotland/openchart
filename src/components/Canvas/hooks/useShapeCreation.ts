@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import type { Node } from '@xyflow/react';
-import type { DrawingTool } from '../../Toolbar/ToolbarComponent';
+import type { DrawingTool } from '../../../types/shapes';
 import { createShapeNode, isValidShapeType } from '../shapes';
 
 interface UseShapeCreationOptions {

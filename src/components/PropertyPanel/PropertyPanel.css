@@ -331,3 +331,45 @@
   font-weight: 600;
   color: #495057;
 }
+/* Diagram Placeholder Styling */
+.diagram-placeholder {
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: #f8fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  margin: 16px;
+  color: #64748b;
+  text-align: center;
+}
+
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 200px;
+}
+
+.placeholder-content svg {
+  color: #94a3b8;
+  opacity: 0.6;
+}
+
+.placeholder-content p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.placeholder-content small {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+  opacity: 0.8;
+}

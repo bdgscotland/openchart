@@ -45,6 +45,8 @@ export const BaseShape: React.FC<BaseShapeProps & {
 }> = memo(({ data, selected, children, shapeConfig = {} }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(data.label || '');
+  const [isHovering, setIsHovering] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Debounce text changes to reduce excessive state updates
@@ -71,7 +73,7 @@ export const BaseShape: React.FC<BaseShapeProps & {
       setIsEditing(false);
       setText(data.label || '');
     }
-  }, [text, debouncedTextChange]);
+  }, [text, debouncedTextChange, data.label]);
 
   // Get styles from data.style as the primary source of truth
   const styles = data.style || {};
@@ -89,15 +91,7 @@ export const BaseShape: React.FC<BaseShapeProps & {
     ...shapeConfig
   };
 
-  console.log('🗚️ BaseShape render:', {
-    id: data.label || 'Shape',
-    hasStyleObject: !!data.style,
-    stylesKeys: Object.keys(styles),
-    selectedStyle: selected,
-    backgroundColor: defaultConfig.backgroundColor,
-    borderColor: defaultConfig.borderColor,
-    opacity: styles.opacity
-  });
+  // Removed expensive console.log for better performance
 
   const renderContent = () => {
     if (isEditing) {
@@ -144,15 +138,30 @@ export const BaseShape: React.FC<BaseShapeProps & {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
-      {/* Connection handles with unique positions to avoid conflicts */}
+    <div 
+      style={{ position: 'relative' }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Enhanced Connection handles with smart indicators */}
       {/* Top handles */}
       <Handle
         type="target"
         position={Position.Top}
         id="top"
         isConnectable={true}
-        style={{ top: -6, left: '50%', transform: 'translateX(-50%)' }}
+        style={{ 
+          top: -8, 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          transition: 'all 0.2s ease',
+          background: isConnecting ? '#22c55e' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+        }}
+        onMouseEnter={() => setIsConnecting(true)}
+        onMouseLeave={() => setIsConnecting(false)}
       />
 
       {/* Left handles */}
@@ -161,7 +170,18 @@ export const BaseShape: React.FC<BaseShapeProps & {
         position={Position.Left}
         id="left"
         isConnectable={true}
-        style={{ left: -6, top: '50%', transform: 'translateY(-50%)' }}
+        style={{ 
+          left: -8, 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          transition: 'all 0.2s ease',
+          background: isConnecting ? '#22c55e' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+        }}
+        onMouseEnter={() => setIsConnecting(true)}
+        onMouseLeave={() => setIsConnecting(false)}
       />
 
       {/* Right handles */}
@@ -170,7 +190,18 @@ export const BaseShape: React.FC<BaseShapeProps & {
         position={Position.Right}
         id="right"
         isConnectable={true}
-        style={{ right: -6, top: '50%', transform: 'translateY(-50%)' }}
+        style={{ 
+          right: -8, 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          transition: 'all 0.2s ease',
+          background: isConnecting ? '#22c55e' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+        }}
+        onMouseEnter={() => setIsConnecting(true)}
+        onMouseLeave={() => setIsConnecting(false)}
       />
 
       {/* Bottom handles */}
@@ -179,10 +210,47 @@ export const BaseShape: React.FC<BaseShapeProps & {
         position={Position.Bottom}
         id="bottom"
         isConnectable={true}
-        style={{ bottom: -6, left: '50%', transform: 'translateX(-50%)' }}
+        style={{ 
+          bottom: -8, 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          transition: 'all 0.2s ease',
+          background: isConnecting ? '#22c55e' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+        }}
+        onMouseEnter={() => setIsConnecting(true)}
+        onMouseLeave={() => setIsConnecting(false)}
       />
+
+      {/* Enhanced Selection Indicators */}
+      {selected && (
+        <>
+          {/* Selection outline */}
+          <div
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              right: -4,
+              bottom: -4,
+              border: '2px solid #3b82f6',
+              borderRadius: defaultConfig.borderRadius,
+              pointerEvents: 'none',
+              animation: 'pulse 2s infinite',
+            }}
+          />
+          
+          {/* Resize handles */}
+          <div className="resize-handle resize-handle-nw" />
+          <div className="resize-handle resize-handle-ne" />
+          <div className="resize-handle resize-handle-sw" />
+          <div className="resize-handle resize-handle-se" />
+        </>
+      )}
       
-      {/* Shape content with config applied */}
+      {/* Shape content with enhanced styling */}
       <div
         onDoubleClick={handleDoubleClick}
         style={{
@@ -197,6 +265,12 @@ export const BaseShape: React.FC<BaseShapeProps & {
           cursor: defaultConfig.cursor,
           transition: defaultConfig.transition,
           opacity: styles.opacity !== undefined ? styles.opacity : 1,
+          boxShadow: selected 
+            ? '0 4px 12px rgba(59, 130, 246, 0.3)' 
+            : isHovering 
+              ? '0 2px 8px rgba(0, 0, 0, 0.1)' 
+              : 'none',
+          transform: isHovering && !selected ? 'translateY(-1px)' : 'translateY(0)',
           ...shapeConfig
         }}
       >
@@ -221,14 +295,7 @@ export const BaseShape: React.FC<BaseShapeProps & {
     !prevStyleKeys.every(key => nextStyleKeys.includes(key));
 
   if (styleChanged || keysChanged) {
-    console.log('🔄 BaseShape FORCING re-render due to style change:', {
-      id: prevProps.id || nextProps.id,
-      styleChanged,
-      keysChanged,
-      prevStyleKeys,
-      nextStyleKeys,
-      changedProps: criticalStyleProps.filter(prop => prevStyle[prop] !== nextStyle[prop])
-    });
+    // Removed expensive console.log for better performance
     return false; // Force re-render
   }
 
@@ -241,14 +308,7 @@ export const BaseShape: React.FC<BaseShapeProps & {
     prevProps.id !== nextProps.id
   );
 
-  if (shouldRerender) {
-    console.log('🔄 BaseShape re-rendering due to prop change:', {
-      id: prevProps.id || nextProps.id,
-      labelChanged: prevProps.data.label !== nextProps.data.label,
-      sizeChanged: prevProps.data.width !== nextProps.data.width || prevProps.data.height !== nextProps.data.height,
-      selectionChanged: prevProps.selected !== nextProps.selected
-    });
-  }
+  // Removed expensive console.log for better click performance
 
   return !shouldRerender; // Return false to re-render, true to skip
 });

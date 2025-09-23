@@ -16,6 +16,99 @@ export interface CanvasConfig {
   gridSize?: number;
   backgroundColor?: string;
   zoom?: number;
+  
+  // Enhanced grid settings
+  gridStyle?: 'dots' | 'lines' | 'crosshatch';
+  gridColor?: string;
+  gridOpacity?: number;
+  snapToGrid?: boolean;
+  snapDistance?: number;
+  
+  // Paper/Page settings
+  pageSize?: 'A4' | 'A3' | 'A5' | 'Letter' | 'Legal' | 'Tabloid' | 'Custom';
+  orientation?: 'portrait' | 'landscape';
+  margins?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  
+  // Background settings
+  backgroundImage?: string;
+  backgroundOpacity?: number;
+  backgroundRepeat?: 'no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y';
+  backgroundSize?: 'auto' | 'cover' | 'contain' | 'custom';
+  
+  // Canvas behavior
+  infiniteCanvas?: boolean;
+  panEnabled?: boolean;
+  zoomEnabled?: boolean;
+  minZoom?: number;
+  maxZoom?: number;
+  
+  // Rulers and guides
+  showRulers?: boolean;
+  rulerUnits?: 'px' | 'cm' | 'in' | 'pt';
+  showGuides?: boolean;
+  guidesColor?: string;
+}
+
+// Additional diagram-level interfaces
+export interface GridSettings {
+  enabled: boolean;
+  size: number;
+  style: 'dots' | 'lines' | 'crosshatch';
+  color: string;
+  opacity: number;
+  snapToGrid: boolean;
+  snapDistance: number;
+}
+
+export interface BackgroundSettings {
+  color: string;
+  image?: string;
+  opacity: number;
+  repeat: 'no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y';
+  size: 'auto' | 'cover' | 'contain' | 'custom';
+}
+
+export interface PaperSettings {
+  size: 'A4' | 'A3' | 'A5' | 'Letter' | 'Legal' | 'Tabloid' | 'Custom';
+  orientation: 'portrait' | 'landscape';
+  width: number; // in pixels
+  height: number; // in pixels
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+}
+
+export interface ViewportSettings {
+  zoom: number;
+  minZoom: number;
+  maxZoom: number;
+  panEnabled: boolean;
+  zoomEnabled: boolean;
+  infiniteCanvas: boolean;
+}
+
+export interface RulerSettings {
+  enabled: boolean;
+  units: 'px' | 'cm' | 'in' | 'pt';
+  showGuides: boolean;
+  guidesColor: string;
+}
+
+// Combined diagram settings interface
+export interface DiagramSettings {
+  grid: GridSettings;
+  background: BackgroundSettings;
+  paper: PaperSettings;
+  viewport: ViewportSettings;
+  rulers: RulerSettings;
 }
 
 export interface Point {
@@ -129,6 +222,70 @@ export const DEFAULT_CANVAS_CONFIG: CanvasConfig = {
   backgroundColor: '#ffffff',
   zoom: 1.0,
 };
+// Enhanced default settings for diagram-level controls
+export const DEFAULT_GRID_SETTINGS: GridSettings = {
+  enabled: true,
+  size: 20,
+  style: 'dots',
+  color: '#e0e0e0',
+  opacity: 0.5,
+  snapToGrid: true,
+  snapDistance: 10,
+};
+
+export const DEFAULT_BACKGROUND_SETTINGS: BackgroundSettings = {
+  color: '#ffffff',
+  opacity: 1.0,
+  repeat: 'no-repeat',
+  size: 'auto',
+};
+
+export const DEFAULT_PAPER_SETTINGS: PaperSettings = {
+  size: 'Custom',
+  orientation: 'landscape',
+  width: 1920,
+  height: 1080,
+  margins: {
+    top: 50,
+    right: 50,
+    bottom: 50,
+    left: 50,
+  },
+};
+
+export const DEFAULT_VIEWPORT_SETTINGS: ViewportSettings = {
+  zoom: 1.0,
+  minZoom: 0.1,
+  maxZoom: 5.0,
+  panEnabled: true,
+  zoomEnabled: true,
+  infiniteCanvas: true,
+};
+
+export const DEFAULT_RULER_SETTINGS: RulerSettings = {
+  enabled: false,
+  units: 'px',
+  showGuides: true,
+  guidesColor: '#4a90e2',
+};
+
+export const DEFAULT_DIAGRAM_SETTINGS: DiagramSettings = {
+  grid: DEFAULT_GRID_SETTINGS,
+  background: DEFAULT_BACKGROUND_SETTINGS,
+  paper: DEFAULT_PAPER_SETTINGS,
+  viewport: DEFAULT_VIEWPORT_SETTINGS,
+  rulers: DEFAULT_RULER_SETTINGS,
+};
+
+// Paper size presets in pixels (at 96 DPI)
+export const PAPER_SIZES = {
+  'A4': { width: 794, height: 1123 },
+  'A3': { width: 1123, height: 1587 },
+  'A5': { width: 559, height: 794 },
+  'Letter': { width: 816, height: 1056 },
+  'Legal': { width: 816, height: 1344 },
+  'Tabloid': { width: 1056, height: 1632 },
+} as const;
 
 export const DEFAULT_ELEMENT_STYLE: ElementStyle = {
   fill: '#ffffff',

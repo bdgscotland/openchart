@@ -1,0 +1,308 @@
+import React, { useState, useCallback, useMemo } from 'react';
+import { Search, ChevronDown, ChevronRight, X } from 'lucide-react';
+import type { DrawingTool, ShapeDefinition, ShapeCategory, SearchResult, ShapeLibraryState } from '../../types/shapes';
+import { shapeCategories, allShapes, searchShapes } from './shapeDefinitions';
+import './ShapeLibrary.css';
+
+interface ShapeLibraryProps {
+  selectedTool: DrawingTool;
+  onToolSelect: (tool: DrawingTool) => void;
+}
+
+interface ShapeButtonProps {
+  shape: ShapeDefinition;
+  isSelected: boolean;
+  onSelect: (tool: DrawingTool) => void;
+  searchTerm?: string;
+}
+
+// Individual Shape Button Component
+const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, searchTerm }) => {
+  const IconComponent = shape.icon;
+
+  const handleDragStart = useCallback((e: React.DragEvent) => {
+    if (shape.id === 'select') {
+      e.preventDefault();
+      return;
+    }
+
+    e.dataTransfer.setData('shapeTool', shape.id);
+    e.dataTransfer.effectAllowed = 'copy';
+
+    // Create drag ghost image
+    const dragIcon = e.currentTarget.cloneNode(true) as HTMLElement;
+    dragIcon.style.opacity = '0.7';
+    dragIcon.style.transform = 'scale(1.2)';
+    document.body.appendChild(dragIcon);
+    e.dataTransfer.setDragImage(dragIcon, 20, 20);
+
+    setTimeout(() => {
+      if (document.body.contains(dragIcon)) {
+        document.body.removeChild(dragIcon);
+      }
+    }, 0);
+  }, [shape.id]);
+
+  const handleClick = useCallback(() => {
+    onSelect(shape.id);
+  }, [shape.id, onSelect]);
+
+  return (
+    <button
+      className={`shape-button ${isSelected ? 'active' : ''}`}
+      onClick={handleClick}
+      draggable={shape.id !== 'select'}
+      onDragStart={handleDragStart}
+      title={shape.description || shape.name}
+      aria-label={shape.name}
+      data-shape-id={shape.id}
+    >
+      <IconComponent className="shape-icon" size={18} />
+      <span className="shape-name">{shape.name}</span>
+      {shape.isNew && <span className="new-badge">New</span>}
+    </button>
+  );
+};
+
+// Category Section Component
+interface CategorySectionProps {
+  category: ShapeCategory;
+  isExpanded: boolean;
+  onToggle: () => void;
+  selectedTool: DrawingTool;
+  onToolSelect: (tool: DrawingTool) => void;
+  searchTerm?: string;
+}
+
+const CategorySection: React.FC<CategorySectionProps> = ({
+  category,
+  isExpanded,
+  onToggle,
+  selectedTool,
+  onToolSelect,
+  searchTerm
+}) => {
+  const IconComponent = category.icon || ChevronRight;
+  const ChevronIcon = isExpanded ? ChevronDown : ChevronRight;
+
+  return (
+    <div className="category-section">
+      <button
+        className="category-header"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+        aria-controls={`category-${category.id}`}
+      >
+        <ChevronIcon className="category-chevron" size={16} />
+        <IconComponent className="category-icon" size={16} />
+        <span className="category-name">{category.name}</span>
+        <span className="shape-count">({category.shapes.length})</span>
+      </button>
+
+      {isExpanded && (
+        <div
+          className="category-content"
+          id={`category-${category.id}`}
+          role="group"
+          aria-labelledby={`category-header-${category.id}`}
+        >
+          <div className="shapes-grid">
+            {category.shapes.map((shape) => (
+              <ShapeButton
+                key={shape.id}
+                shape={shape}
+                isSelected={selectedTool === shape.id}
+                onSelect={onToolSelect}
+                searchTerm={searchTerm}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Search Bar Component
+interface SearchBarProps {
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
+  onClear: () => void;
+  placeholder?: string;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({
+  searchTerm,
+  onSearchChange,
+  onClear,
+  placeholder = "Search shapes..."
+}) => {
+  return (
+    <div className="search-bar">
+      <Search className="search-icon" size={16} />
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+        placeholder={placeholder}
+        className="search-input"
+        aria-label="Search shapes"
+      />
+      {searchTerm && (
+        <button
+          className="search-clear"
+          onClick={onClear}
+          aria-label="Clear search"
+        >
+          <X size={14} />
+        </button>
+      )}
+    </div>
+  );
+};
+
+// Main Shape Library Component
+export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
+  selectedTool,
+  onToolSelect
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set(shapeCategories.filter(cat => cat.defaultExpanded).map(cat => cat.id))
+  );
+
+  // Toggle category expansion
+  const toggleCategory = useCallback((categoryId: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Clear search
+  const clearSearch = useCallback(() => {
+    setSearchTerm('');
+  }, []);
+
+  // Search results
+  const searchResults = useMemo(() => {
+    if (!searchTerm.trim()) return [];
+    return searchShapes(searchTerm);
+  }, [searchTerm]);
+
+  // Filtered categories (when not searching)
+  const filteredCategories = useMemo(() => {
+    if (searchTerm.trim()) return [];
+    return shapeCategories.sort((a, b) => a.order - b.order);
+  }, [searchTerm]);
+
+  // Auto-expand categories when searching
+  const handleSearchChange = useCallback((term: string) => {
+    setSearchTerm(term);
+    if (term.trim()) {
+      // Expand all categories that have matching shapes
+      const categoriesWithResults = new Set<string>();
+      searchShapes(term).forEach(shape => {
+        categoriesWithResults.add(shape.category);
+      });
+      setExpandedCategories(categoriesWithResults);
+    }
+  }, []);
+
+  // Group search results by category
+  const groupedSearchResults = useMemo(() => {
+    if (!searchTerm.trim()) return [];
+
+    const grouped: { [categoryId: string]: ShapeDefinition[] } = {};
+    searchResults.forEach(shape => {
+      if (!grouped[shape.category]) {
+        grouped[shape.category] = [];
+      }
+      grouped[shape.category].push(shape);
+    });
+
+    return Object.entries(grouped).map(([categoryId, shapes]) => {
+      const category = shapeCategories.find(cat => cat.id === categoryId);
+      return {
+        category: category || { id: categoryId, name: categoryId, shapes: [], order: 999 },
+        shapes
+      };
+    }).sort((a, b) => a.category.order - b.category.order);
+  }, [searchResults, searchTerm]);
+
+  return (
+    <div className="shape-library" role="toolbar" aria-label="Shape Library">
+      {/* Search Bar */}
+      <div className="library-header">
+        <SearchBar
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          onClear={clearSearch}
+          placeholder="Search shapes..."
+        />
+      </div>
+
+      {/* Shape Categories */}
+      <div className="library-content">
+        {searchTerm.trim() ? (
+          // Search Results
+          <div className="search-results">
+            {searchResults.length === 0 ? (
+              <div className="no-results">
+                <p>No shapes found for "{searchTerm}"</p>
+                <p>Try different keywords or browse categories below.</p>
+              </div>
+            ) : (
+              <>
+                <div className="results-header">
+                  <span className="results-count">
+                    {searchResults.length} shape{searchResults.length !== 1 ? 's' : ''} found
+                  </span>
+                </div>
+                {groupedSearchResults.map(({ category, shapes }) => (
+                  <CategorySection
+                    key={category.id}
+                    category={{ ...category, shapes }}
+                    isExpanded={true}
+                    onToggle={() => {}}
+                    selectedTool={selectedTool}
+                    onToolSelect={onToolSelect}
+                    searchTerm={searchTerm}
+                  />
+                ))}
+              </>
+            )}
+          </div>
+        ) : (
+          // Category View
+          <div className="categories-container">
+            {filteredCategories.map((category) => (
+              <CategorySection
+                key={category.id}
+                category={category}
+                isExpanded={expandedCategories.has(category.id)}
+                onToggle={() => toggleCategory(category.id)}
+                selectedTool={selectedTool}
+                onToolSelect={onToolSelect}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Footer with stats */}
+      <div className="library-footer">
+        <span className="shape-stats">
+          {allShapes.length - 1} shapes in {shapeCategories.length} categories
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default ShapeLibrary;

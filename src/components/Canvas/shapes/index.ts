@@ -6,79 +6,279 @@ import DiamondShape from './DiamondShape';
 import TriangleShape from './TriangleShape';
 import EllipseShape from './EllipseShape';
 import PolygonShape from './PolygonShape';
+import { LineShape } from './LineShape';
+import { CrossShape } from './CrossShape';
+import { ProcessShape } from './ProcessShape';
+import { StartEndShape } from './StartEndShape';
+import { DocumentShape } from './DocumentShape';
+import { DataShape } from './DataShape';
+import { GenericShape } from './GenericShape';
 
-export type ShapeType = 
-  | 'rectangle' 
-  | 'circle' 
-  | 'diamond' 
-  | 'triangle' 
-  | 'ellipse' 
-  | 'pentagon' 
-  | 'hexagon' 
-  | 'star';
+export type ShapeType =
+  // Basic shapes
+  | 'rectangle'
+  | 'circle'
+  | 'diamond'
+  | 'triangle'
+  | 'ellipse'
+  | 'pentagon'
+  | 'hexagon'
+  | 'star'
+  | 'line'
+  | 'cross'
+  // Flowchart shapes
+  | 'process'
+  | 'decision'
+  | 'start-end'
+  | 'data'
+  | 'document'
+  | 'manual-operation'
+  | 'preparation'
+  | 'internal-storage'
+  | 'display'
+  // UML shapes
+  | 'class'
+  | 'interface'
+  | 'actor'
+  | 'use-case'
+  | 'component'
+  | 'package'
+  | 'note'
+  | 'lifeline'
+  // Arrow shapes
+  | 'arrow'
+  | 'double-arrow'
+  | 'curved-arrow'
+  | 'block-arrow'
+  | 'circular-arrow'
+  | 'connector'
+  | 'dashed-line'
+  // Entity-Relation shapes
+  | 'er-entity'
+  | 'weak-entity'
+  | 'relationship'
+  | 'weak-relationship'
+  | 'attribute'
+  | 'key-attribute'
+  | 'multi-valued-attribute'
+  // General shapes
+  | 'text'
+  | 'cloud'
+  | 'cylinder'
+  | 'shield'
+  | 'callout'
+  | 'banner';
 
 export interface ShapeRegistryEntry {
   component: React.ComponentType<BaseShapeProps>;
   defaultProps?: Partial<BaseShapeProps['data']>;
 }
 
+// Create a wrapper component for GenericShape to pass shapeType
+const createGenericShapeComponent = (shapeType: string) => {
+  return (props: BaseShapeProps) => React.createElement(GenericShape, { ...props, shapeType });
+};
+
 // Shape Registry - maps shape types to their components
 const SHAPE_REGISTRY: Record<ShapeType, ShapeRegistryEntry> = {
+  // Basic shapes
   rectangle: {
     component: RectangleShape,
-    defaultProps: {
-      width: 120,
-      height: 80,
-    },
+    defaultProps: { width: 120, height: 80 },
   },
   circle: {
     component: CircleShape,
-    defaultProps: {
-      width: 100,
-      height: 100,
-    },
+    defaultProps: { width: 100, height: 100 },
   },
   diamond: {
     component: DiamondShape,
-    defaultProps: {
-      width: 120,
-      height: 120,
-    },
+    defaultProps: { width: 120, height: 120 },
   },
   triangle: {
     component: TriangleShape,
-    defaultProps: {
-      width: 120,
-      height: 80,
-    },
+    defaultProps: { width: 120, height: 80 },
   },
   ellipse: {
     component: EllipseShape,
-    defaultProps: {
-      width: 120,
-      height: 80,
-    },
+    defaultProps: { width: 120, height: 80 },
   },
   pentagon: {
     component: PolygonShape,
-    defaultProps: {
-      width: 120,
-      height: 120,
-    },
+    defaultProps: { width: 120, height: 120 },
   },
   hexagon: {
     component: PolygonShape,
-    defaultProps: {
-      width: 120,
-      height: 120,
-    },
+    defaultProps: { width: 120, height: 120 },
   },
   star: {
     component: PolygonShape,
-    defaultProps: {
-      width: 120,
-      height: 120,
-    },
+    defaultProps: { width: 120, height: 120 },
+  },
+  line: {
+    component: LineShape,
+    defaultProps: { width: 100, height: 2 },
+  },
+  cross: {
+    component: CrossShape,
+    defaultProps: { width: 60, height: 60 },
+  },
+
+  // Flowchart shapes
+  process: {
+    component: ProcessShape,
+    defaultProps: { width: 120, height: 60 },
+  },
+  decision: {
+    component: DiamondShape,
+    defaultProps: { width: 100, height: 60 },
+  },
+  'start-end': {
+    component: StartEndShape,
+    defaultProps: { width: 100, height: 50 },
+  },
+  data: {
+    component: DataShape,
+    defaultProps: { width: 120, height: 60 },
+  },
+  document: {
+    component: DocumentShape,
+    defaultProps: { width: 100, height: 80 },
+  },
+  'manual-operation': {
+    component: createGenericShapeComponent('manual-operation'),
+    defaultProps: { width: 120, height: 60 },
+  },
+  preparation: {
+    component: createGenericShapeComponent('preparation'),
+    defaultProps: { width: 120, height: 60 },
+  },
+  'internal-storage': {
+    component: createGenericShapeComponent('internal-storage'),
+    defaultProps: { width: 100, height: 60 },
+  },
+  display: {
+    component: createGenericShapeComponent('display'),
+    defaultProps: { width: 100, height: 80 },
+  },
+
+  // UML shapes
+  class: {
+    component: RectangleShape,
+    defaultProps: { width: 120, height: 100 },
+  },
+  interface: {
+    component: RectangleShape,
+    defaultProps: { width: 120, height: 80 },
+  },
+  actor: {
+    component: createGenericShapeComponent('actor'),
+    defaultProps: { width: 60, height: 80 },
+  },
+  'use-case': {
+    component: EllipseShape,
+    defaultProps: { width: 120, height: 60 },
+  },
+  component: {
+    component: RectangleShape,
+    defaultProps: { width: 120, height: 80 },
+  },
+  package: {
+    component: RectangleShape,
+    defaultProps: { width: 140, height: 100 },
+  },
+  note: {
+    component: createGenericShapeComponent('note'),
+    defaultProps: { width: 100, height: 60 },
+  },
+  lifeline: {
+    component: LineShape,
+    defaultProps: { width: 20, height: 200 },
+  },
+
+  // Arrow shapes
+  arrow: {
+    component: createGenericShapeComponent('arrow'),
+    defaultProps: { width: 80, height: 20 },
+  },
+  'double-arrow': {
+    component: createGenericShapeComponent('double-arrow'),
+    defaultProps: { width: 80, height: 20 },
+  },
+  'curved-arrow': {
+    component: createGenericShapeComponent('curved-arrow'),
+    defaultProps: { width: 80, height: 60 },
+  },
+  'block-arrow': {
+    component: createGenericShapeComponent('block-arrow'),
+    defaultProps: { width: 100, height: 40 },
+  },
+  'circular-arrow': {
+    component: createGenericShapeComponent('circular-arrow'),
+    defaultProps: { width: 60, height: 60 },
+  },
+  connector: {
+    component: LineShape,
+    defaultProps: { width: 100, height: 2 },
+  },
+  'dashed-line': {
+    component: LineShape,
+    defaultProps: { width: 100, height: 2 },
+  },
+
+  // Entity-Relation shapes
+  'er-entity': {
+    component: RectangleShape,
+    defaultProps: { width: 120, height: 80 },
+  },
+  'weak-entity': {
+    component: RectangleShape,
+    defaultProps: { width: 120, height: 80 },
+  },
+  relationship: {
+    component: DiamondShape,
+    defaultProps: { width: 100, height: 60 },
+  },
+  'weak-relationship': {
+    component: DiamondShape,
+    defaultProps: { width: 100, height: 60 },
+  },
+  attribute: {
+    component: EllipseShape,
+    defaultProps: { width: 80, height: 40 },
+  },
+  'key-attribute': {
+    component: EllipseShape,
+    defaultProps: { width: 80, height: 40 },
+  },
+  'multi-valued-attribute': {
+    component: EllipseShape,
+    defaultProps: { width: 80, height: 40 },
+  },
+
+  // General shapes
+  text: {
+    component: createGenericShapeComponent('text'),
+    defaultProps: { width: 100, height: 30 },
+  },
+  cloud: {
+    component: createGenericShapeComponent('cloud'),
+    defaultProps: { width: 120, height: 80 },
+  },
+  cylinder: {
+    component: createGenericShapeComponent('cylinder'),
+    defaultProps: { width: 60, height: 100 },
+  },
+  shield: {
+    component: createGenericShapeComponent('shield'),
+    defaultProps: { width: 60, height: 80 },
+  },
+  callout: {
+    component: createGenericShapeComponent('callout'),
+    defaultProps: { width: 120, height: 80 },
+  },
+  banner: {
+    component: createGenericShapeComponent('banner'),
+    defaultProps: { width: 140, height: 40 },
   },
 };
 
@@ -132,7 +332,7 @@ export interface CreateShapeNodeOptions {
 
 export const createShapeNode = (options: CreateShapeNodeOptions) => {
   const defaults = getShapeDefaults(options.shapeType);
-  
+
   return {
     id: options.id,
     type: 'shape',
@@ -159,6 +359,13 @@ export {
   TriangleShape,
   EllipseShape,
   PolygonShape,
+  LineShape,
+  CrossShape,
+  ProcessShape,
+  StartEndShape,
+  DocumentShape,
+  DataShape,
+  GenericShape,
 };
 
 export { default as BaseShape } from './BaseShape';

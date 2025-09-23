@@ -165,16 +165,6 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .preview-content {
-    background: var(--color-bg-primary, #1a1a1a);
-  }
-
-  .preview-text {
-    color: var(--color-text-primary, #ffffff);
-  }
-}
 
 /* High contrast mode */
 @media (prefers-contrast: high) {

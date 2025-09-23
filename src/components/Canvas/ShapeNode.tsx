@@ -20,26 +20,22 @@ export const ShapeNode: React.FC<NodeProps> = memo((props) => {
   // Pass through all props to the specific shape component
   return <ShapeComponent {...(props as BaseShapeProps)} />;
 }, (prevProps, nextProps) => {
-  // Optimize ShapeNode re-renders but ensure style changes propagate
-  const prevStyle = prevProps.data.style || {};
-  const nextStyle = nextProps.data.style || {};
+  // Fast shallow comparison - avoid expensive JSON.stringify
+  const prevData = prevProps.data || {};
+  const nextData = nextProps.data || {};
 
-  const styleChanged = JSON.stringify(prevStyle) !== JSON.stringify(nextStyle);
-
-  if (styleChanged) {
-    console.log('🔄 ShapeNode re-rendering due to style change');
-    return false; // Force re-render
-  }
-
+  // Check for updates that require re-render
   return (
-    prevProps.data.shape === nextProps.data.shape &&
-    prevProps.data.label === nextProps.data.label &&
-    prevProps.data.backgroundColor === nextProps.data.backgroundColor &&
-    prevProps.data.borderColor === nextProps.data.borderColor &&
-    prevProps.data.width === nextProps.data.width &&
-    prevProps.data.height === nextProps.data.height &&
+    prevProps.id === nextProps.id &&
     prevProps.selected === nextProps.selected &&
-    prevProps.id === nextProps.id
+    prevData.shape === nextData.shape &&
+    prevData.label === nextData.label &&
+    prevData.backgroundColor === nextData.backgroundColor &&
+    prevData.borderColor === nextData.borderColor &&
+    prevData.width === nextData.width &&
+    prevData.height === nextData.height &&
+    prevData.lastStyleUpdate === nextData.lastStyleUpdate &&
+    prevData.lastTextUpdate === nextData.lastTextUpdate
   );
 });
 
