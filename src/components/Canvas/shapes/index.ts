@@ -26,6 +26,10 @@ export type ShapeType =
   | 'star'
   | 'line'
   | 'cross'
+  | 'parallelogram'
+  | 'trapezoid'
+  | 'octagon'
+  | 'heart'
   // Flowchart shapes
   | 'process'
   | 'decision'
@@ -36,6 +40,9 @@ export type ShapeType =
   | 'preparation'
   | 'internal-storage'
   | 'display'
+  | 'delay'
+  | 'or-gate'
+  | 'storage-cylinder'
   // UML shapes
   | 'class'
   | 'interface'
@@ -53,6 +60,9 @@ export type ShapeType =
   | 'circular-arrow'
   | 'connector'
   | 'dashed-line'
+  | 'callout-arrow'
+  | 'u-turn-arrow'
+  | 'stepped-arrow'
   // Entity-Relation shapes
   | 'er-entity'
   | 'weak-entity'
@@ -61,13 +71,17 @@ export type ShapeType =
   | 'attribute'
   | 'key-attribute'
   | 'multi-valued-attribute'
+  | 'identifying-relationship'
+  | 'crows-foot'
   // General shapes
   | 'text'
   | 'cloud'
   | 'cylinder'
   | 'shield'
   | 'callout'
-  | 'banner';
+  | 'banner'
+  | 'warning-triangle'
+  | 'speech-bubble';
 
 export interface ShapeRegistryEntry {
   component: React.ComponentType<BaseShapeProps>;
@@ -122,6 +136,22 @@ const SHAPE_REGISTRY: Record<ShapeType, ShapeRegistryEntry> = {
     component: CrossShape,
     defaultProps: { width: 60, height: 60 },
   },
+  parallelogram: {
+    component: createGenericShapeComponent('parallelogram'),
+    defaultProps: { width: 120, height: 60 },
+  },
+  trapezoid: {
+    component: createGenericShapeComponent('trapezoid'),
+    defaultProps: { width: 120, height: 60 },
+  },
+  octagon: {
+    component: createGenericShapeComponent('octagon'),
+    defaultProps: { width: 80, height: 80 },
+  },
+  heart: {
+    component: createGenericShapeComponent('heart'),
+    defaultProps: { width: 80, height: 80 },
+  },
 
   // Flowchart shapes
   process: {
@@ -159,6 +189,18 @@ const SHAPE_REGISTRY: Record<ShapeType, ShapeRegistryEntry> = {
   display: {
     component: createGenericShapeComponent('display'),
     defaultProps: { width: 100, height: 80 },
+  },
+  delay: {
+    component: createGenericShapeComponent('delay'),
+    defaultProps: { width: 100, height: 60 },
+  },
+  'or-gate': {
+    component: createGenericShapeComponent('or-gate'),
+    defaultProps: { width: 80, height: 60 },
+  },
+  'storage-cylinder': {
+    component: createGenericShapeComponent('storage-cylinder'),
+    defaultProps: { width: 60, height: 100 },
   },
 
   // UML shapes
@@ -224,6 +266,18 @@ const SHAPE_REGISTRY: Record<ShapeType, ShapeRegistryEntry> = {
     component: LineShape,
     defaultProps: { width: 100, height: 2 },
   },
+  'callout-arrow': {
+    component: createGenericShapeComponent('callout-arrow'),
+    defaultProps: { width: 120, height: 80 },
+  },
+  'u-turn-arrow': {
+    component: createGenericShapeComponent('u-turn-arrow'),
+    defaultProps: { width: 80, height: 60 },
+  },
+  'stepped-arrow': {
+    component: createGenericShapeComponent('stepped-arrow'),
+    defaultProps: { width: 100, height: 60 },
+  },
 
   // Entity-Relation shapes
   'er-entity': {
@@ -254,6 +308,14 @@ const SHAPE_REGISTRY: Record<ShapeType, ShapeRegistryEntry> = {
     component: EllipseShape,
     defaultProps: { width: 80, height: 40 },
   },
+  'identifying-relationship': {
+    component: createGenericShapeComponent('identifying-relationship'),
+    defaultProps: { width: 100, height: 60 },
+  },
+  'crows-foot': {
+    component: createGenericShapeComponent('crows-foot'),
+    defaultProps: { width: 40, height: 20 },
+  },
 
   // General shapes
   text: {
@@ -279,6 +341,14 @@ const SHAPE_REGISTRY: Record<ShapeType, ShapeRegistryEntry> = {
   banner: {
     component: createGenericShapeComponent('banner'),
     defaultProps: { width: 140, height: 40 },
+  },
+  'warning-triangle': {
+    component: createGenericShapeComponent('warning-triangle'),
+    defaultProps: { width: 80, height: 80 },
+  },
+  'speech-bubble': {
+    component: createGenericShapeComponent('speech-bubble'),
+    defaultProps: { width: 120, height: 80 },
   },
 };
 

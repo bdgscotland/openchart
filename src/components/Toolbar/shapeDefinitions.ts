@@ -1,17 +1,17 @@
 // Comprehensive Shape Definitions for OpenChart Shape Library
 import {
   // Basic shapes
-  MousePointer2, Square, Circle, Triangle, Diamond, Pentagon, Hexagon, Star, Minus, Plus, X, Type,
+  MousePointer2, Square, Circle, Triangle, Diamond, Pentagon, Hexagon, Star, Minus, Plus, X, Type, Heart, MoreHorizontal,
   // Flowchart shapes
-  RectangleHorizontal, Octagon, Cylinder, FileText, File, Settings, Database, Monitor,
+  RectangleHorizontal, Octagon, Cylinder, FileText, File, Settings, Database, Monitor, Clock, Zap as LogicGate,
   // Arrows and connectors
-  ArrowRight, ArrowLeftRight, RotateCcw, MoveRight, ArrowUpDown, Zap,
+  ArrowRight, ArrowLeftRight, RotateCcw, MoveRight, ArrowUpDown, Zap, CornerDownLeft, MessageSquareQuote,
   // UML shapes
   Box, Users, User, Package, FileCode, MessageSquare, GitBranch, Component,
   // Entity Relation shapes
   Database as DbEntity, Link, Key, Layers,
   // General shapes
-  Cloud, Shield, MessageCircle, Flag, Bookmark
+  Cloud, Shield, MessageCircle, Flag, Bookmark, AlertTriangle, MessageSquareText
 } from 'lucide-react';
 
 import type { ShapeDefinition, ShapeCategory } from '../../types/shapes';
@@ -107,6 +107,42 @@ const basicShapes: ShapeDefinition[] = [
     category: 'basic',
     tags: ['cross', 'plus', 'add', 'basic'],
     defaultSize: { width: 60, height: 60 }
+  },
+  {
+    id: 'parallelogram',
+    name: 'Parallelogram',
+    description: 'Four-sided parallelogram shape',
+    icon: MoreHorizontal,
+    category: 'basic',
+    tags: ['parallelogram', 'four', 'polygon', 'slanted', 'basic'],
+    defaultSize: { width: 120, height: 60 }
+  },
+  {
+    id: 'trapezoid',
+    name: 'Trapezoid',
+    description: 'Four-sided trapezoid shape',
+    icon: MoreHorizontal,
+    category: 'basic',
+    tags: ['trapezoid', 'four', 'polygon', 'slope', 'basic'],
+    defaultSize: { width: 120, height: 60 }
+  },
+  {
+    id: 'octagon',
+    name: 'Octagon',
+    description: 'Eight-sided polygon',
+    icon: Octagon,
+    category: 'basic',
+    tags: ['octagon', 'eight', 'polygon', 'stop', 'basic'],
+    defaultSize: { width: 80, height: 80 }
+  },
+  {
+    id: 'heart',
+    name: 'Heart',
+    description: 'Heart shape for love and favorites',
+    icon: Heart,
+    category: 'basic',
+    tags: ['heart', 'love', 'favorite', 'emotion', 'basic'],
+    defaultSize: { width: 80, height: 80 }
   }
 ];
 
@@ -192,6 +228,33 @@ const flowchartShapes: ShapeDefinition[] = [
     category: 'flowchart',
     tags: ['display', 'output', 'screen', 'flowchart'],
     defaultSize: { width: 100, height: 80 }
+  },
+  {
+    id: 'delay',
+    name: 'Delay',
+    description: 'Delay or wait step',
+    icon: Clock,
+    category: 'flowchart',
+    tags: ['delay', 'wait', 'pause', 'time', 'flowchart'],
+    defaultSize: { width: 100, height: 60 }
+  },
+  {
+    id: 'or-gate',
+    name: 'OR Gate',
+    description: 'Logical OR operation',
+    icon: LogicGate,
+    category: 'flowchart',
+    tags: ['or', 'gate', 'logic', 'boolean', 'flowchart'],
+    defaultSize: { width: 80, height: 60 }
+  },
+  {
+    id: 'storage-cylinder',
+    name: 'Storage Cylinder',
+    description: 'Database storage cylinder',
+    icon: Cylinder,
+    category: 'flowchart',
+    tags: ['storage', 'cylinder', 'database', 'disk', 'flowchart'],
+    defaultSize: { width: 60, height: 100 }
   }
 ];
 
@@ -335,6 +398,33 @@ const arrowShapes: ShapeDefinition[] = [
     category: 'arrows',
     tags: ['dashed', 'dotted', 'line', 'connection'],
     defaultSize: { width: 100, height: 2 }
+  },
+  {
+    id: 'callout-arrow',
+    name: 'Callout Arrow',
+    description: 'Arrow with speech bubble callout',
+    icon: MessageSquareQuote,
+    category: 'arrows',
+    tags: ['callout', 'speech', 'bubble', 'arrow', 'comment'],
+    defaultSize: { width: 120, height: 80 }
+  },
+  {
+    id: 'u-turn-arrow',
+    name: 'U-Turn Arrow',
+    description: 'U-shaped return arrow',
+    icon: CornerDownLeft,
+    category: 'arrows',
+    tags: ['u-turn', 'return', 'loop', 'back', 'arrow'],
+    defaultSize: { width: 80, height: 60 }
+  },
+  {
+    id: 'stepped-arrow',
+    name: 'Stepped Arrow',
+    description: 'Right-angle stepped arrow',
+    icon: CornerDownLeft,
+    category: 'arrows',
+    tags: ['stepped', 'right-angle', 'corner', 'arrow'],
+    defaultSize: { width: 100, height: 60 }
   }
 ];
 
@@ -402,6 +492,24 @@ const erShapes: ShapeDefinition[] = [
     category: 'entity-relation',
     tags: ['multi', 'valued', 'attribute', 'er'],
     defaultSize: { width: 80, height: 40 }
+  },
+  {
+    id: 'identifying-relationship',
+    name: 'Identifying Relationship',
+    description: 'ER diagram identifying relationship',
+    icon: Diamond,
+    category: 'entity-relation',
+    tags: ['identifying', 'relationship', 'double', 'er'],
+    defaultSize: { width: 100, height: 60 }
+  },
+  {
+    id: 'crows-foot',
+    name: 'Crow\'s Foot',
+    description: 'Crow\'s foot cardinality notation',
+    icon: GitBranch,
+    category: 'entity-relation',
+    tags: ['crows', 'foot', 'cardinality', 'notation', 'er'],
+    defaultSize: { width: 40, height: 20 }
   }
 ];
 
@@ -460,6 +568,24 @@ const generalShapes: ShapeDefinition[] = [
     category: 'general',
     tags: ['banner', 'ribbon', 'flag', 'label'],
     defaultSize: { width: 140, height: 40 }
+  },
+  {
+    id: 'warning-triangle',
+    name: 'Warning Triangle',
+    description: 'Warning or alert triangle',
+    icon: AlertTriangle,
+    category: 'general',
+    tags: ['warning', 'alert', 'caution', 'triangle', 'danger'],
+    defaultSize: { width: 80, height: 80 }
+  },
+  {
+    id: 'speech-bubble',
+    name: 'Speech Bubble',
+    description: 'Speech bubble for conversations',
+    icon: MessageSquareText,
+    category: 'general',
+    tags: ['speech', 'bubble', 'talk', 'conversation', 'chat'],
+    defaultSize: { width: 120, height: 80 }
   }
 ];
 

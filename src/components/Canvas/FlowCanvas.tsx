@@ -15,7 +15,7 @@ import {
   applyNodeChanges,
 } from '@xyflow/react';
 import type { Node, Edge, Connection } from '@xyflow/react';
-import { toPng, toSvg } from 'html-to-image';
+import { toPng, toSvg, toJpeg, toCanvas } from 'html-to-image';
 import '@xyflow/react/dist/style.css';
 import './FlowCanvas.css';
 
@@ -45,6 +45,9 @@ export interface FlowCanvasProps {
   onPaneClick?: (event: React.MouseEvent) => void;
   onPaneContextMenu?: (event: React.MouseEvent) => void;
   onNodeContextMenu?: (event: React.MouseEvent, node: Node) => void;
+  onEdgeClick?: (event: React.MouseEvent, edge: Edge) => void;
+  onEdgeDoubleClick?: (event: React.MouseEvent, edge: Edge) => void;
+  onEdgeContextMenu?: (event: React.MouseEvent, edge: Edge) => void;
   showGrid?: boolean;
   showMiniMap?: boolean;
   showControls?: boolean;
@@ -63,6 +66,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     onPaneClick,
     onPaneContextMenu,
     onNodeContextMenu,
+    onEdgeClick,
+    onEdgeDoubleClick,
+    onEdgeContextMenu,
     showGrid = true,
     showMiniMap = true,
     showControls = true,
@@ -370,6 +376,64 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     }
   }, []);
 
+  const exportToJpeg = useCallback(async () => {
+    if (reactFlowWrapper.current) {
+      const dataUrl = await toJpeg(reactFlowWrapper.current, {
+        backgroundColor: '#ffffff',
+        width: 1200,
+        height: 800,
+        quality: 0.9,
+      });
+
+      const link = document.createElement('a');
+      link.download = 'diagram.jpg';
+      link.href = dataUrl;
+      link.click();
+    }
+  }, []);
+
+  const exportToWebp = useCallback(async () => {
+    if (reactFlowWrapper.current) {
+      const canvas = await toCanvas(reactFlowWrapper.current, {
+        backgroundColor: '#ffffff',
+        width: 1200,
+        height: 800,
+      });
+
+      // Convert canvas to WebP
+      const dataUrl = canvas.toDataURL('image/webp', 0.9);
+
+      const link = document.createElement('a');
+      link.download = 'diagram.webp';
+      link.href = dataUrl;
+      link.click();
+    }
+  }, []);
+
+  const exportToPdf = useCallback(async () => {
+    if (reactFlowWrapper.current) {
+      // Import jsPDF dynamically to avoid bundle issues
+      const { jsPDF } = await import('jspdf');
+
+      // First, get the canvas
+      const canvas = await toCanvas(reactFlowWrapper.current, {
+        backgroundColor: '#ffffff',
+        width: 1200,
+        height: 800,
+      });
+
+      // Create PDF with appropriate size
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save('diagram.pdf');
+    }
+  }, []);
+
   // Expose methods through ref
   useImperativeHandle(ref, () => ({
     fitView,
@@ -379,10 +443,23 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     getEdges,
     exportToPng,
     exportToSvg,
+    exportToJpeg,
+    exportToWebp,
+    exportToPdf,
     toggleSnapToGrid: () => setSnapToGrid(!snapToGrid),
     toggleConnectionMode: () => setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose'),
     getCanvasSettings: () => ({ snapToGrid, gridSize, connectionMode }),
-  }), [fitView, getViewport, setViewport, getNodes, getEdges, exportToPng, exportToSvg, snapToGrid, connectionMode, gridSize]);
+    // Expose React Flow instance methods for zoom controls
+    zoomIn: () => {
+      const currentZoom = getViewport().zoom;
+      setViewport({ ...getViewport(), zoom: Math.min(currentZoom * 1.2, 4) });
+    },
+    zoomOut: () => {
+      const currentZoom = getViewport().zoom;
+      setViewport({ ...getViewport(), zoom: Math.max(currentZoom / 1.2, 0.1) });
+    },
+    getZoom: () => getViewport().zoom,
+  }), [fitView, getViewport, setViewport, getNodes, getEdges, exportToPng, exportToSvg, exportToJpeg, exportToWebp, exportToPdf, snapToGrid, connectionMode, gridSize]);
 
   return (
     <div className="flow-canvas" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
@@ -432,6 +509,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
           setContextMenu({ x: event.clientX, y: event.clientY, nodeId: node.id });
           onNodeContextMenu?.(event, node);
         }}
+        onEdgeClick={onEdgeClick}
+        onEdgeDoubleClick={onEdgeDoubleClick}
+        onEdgeContextMenu={onEdgeContextMenu}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -439,6 +519,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
+        edgesSelectable={true}
         selectNodesOnDrag={false}
         selectionOnDrag={true}
         multiSelectionKeyCode={null}
@@ -456,13 +537,13 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         {showMiniMap && (
           <MiniMap
             className="flow-minimap"
-            nodeColor="#ffffff"
+            nodeColor="#e5e7eb"
             maskColor="rgba(0, 0, 0, 0.7)"
             pannable={true}
             zoomable={true}
           />
         )}
-        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} size={3} color="#666666" />}
+        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} size={3} color="#888888" />}
 
         {/* Enhanced Settings Panel */}
         <Panel position="top-right" className="flow-panel">

@@ -1,32 +1,43 @@
 # OpenChart
 
-A professional open-source diagramming tool built with React Flow. Transform your ideas into beautiful diagrams with a feature-rich interface that rivals commercial tools like diagrams.net and Lucidchart.
+**⚠️ Early Development - Not Ready for Production Use**
 
-## 🌟 Key Features
+An experimental open-source diagramming tool built with React Flow. This is a prototype in active development - expect bugs, incomplete features, and breaking changes.
 
-### 📐 Professional Shape Library
-- **60+ Categorized Shapes**: Basic, Flowchart, UML, Arrows & Connectors, Entity Relation, General
-- **Real-time Search**: Find shapes instantly with fuzzy search across names and categories
-- **Expandable Categories**: Clean, organized shape organization with smooth animations
-- **Drag & Drop**: Intuitive shape placement from library to canvas
+## 🎯 Project Goals
 
-### 🎨 Advanced Property Panel
-- **Tabbed Interface**: Diagram and Style tabs for organized controls
-- **Diagram Controls**: Grid settings, background options, paper sizes, viewport controls
-- **Rich Styling**: Real-time color pickers, typography, appearance controls
-- **Accordion Layout**: Clean, collapsed-by-default sections for better UX
+OpenChart aims to become a modern, open-source alternative to commercial diagramming tools. Our vision includes:
 
-### ⚡ Enhanced Canvas Experience
-- **Visible Grid System**: Professional dot grid with snap-to-grid functionality
-- **Smart Connections**: Color-coded connection handles with hover states
-- **Performance Optimized**: Sub-50ms click response times
-- **Professional Controls**: Settings panel with grid and connection mode toggles
+- **Professional Quality**: Eventually rival commercial diagramming tools
+- **Open Source**: Transparent, community-driven development
+- **Modern Tech Stack**: Built with React, TypeScript, and React Flow
+- **File Format Freedom**: No vendor lock-in with open JSON format
 
-### 🚀 Modern Architecture
-- **React + TypeScript**: Type-safe, maintainable codebase
-- **React Flow Engine**: Powerful node-based diagram foundation
-- **Responsive Design**: Works seamlessly across desktop and tablet
-- **Accessibility First**: Full keyboard navigation and screen reader support
+## 🚧 Current Development Status
+
+**This is an early prototype.** Many core features are incomplete or buggy:
+
+### ⚠️ Known Issues
+- **Shape rendering**: Some shapes display incorrectly or appear black
+- **Resizing**: Shape resize handles may not work reliably
+- **Connections**: Edge creation and editing needs improvement
+- **Grid visibility**: Grid dots may be hard to see
+- **Export quality**: Export functions are basic and may fail
+- **No persistence**: Diagrams are not automatically saved
+- **Limited undo/redo**: History management is incomplete
+
+### ✅ What Currently Works (Sort Of)
+- Basic shape placement from sidebar
+- Simple drag and drop operations
+- Basic zoom and pan controls
+- Property panel for styling (when it works)
+- Some export functionality (PNG, SVG)
+
+### 🔬 Experimental Features
+- 61 shapes across 6 categories (many with rendering issues)
+- Action toolbar with common operations
+- Collapsible sidebars
+- Multiple export formats (reliability varies)
 
 ## 🚀 Quick Start
 
@@ -48,37 +59,48 @@ npm run dev
 
 Open http://localhost:5173
 
-## ✨ What's New (v2.0)
+## 🔨 Recent Development Work
 
-### Professional Shape Library
-- **6 Shape Categories** with 60+ shapes total
-- **Advanced Search** with real-time filtering
-- **All Shapes Functional** - every shape in the library works
-- **Professional UI** matching industry standards
+### Latest Iteration (v0.2.1-alpha)
+**Focus: Basic UI improvements and bug fixes**
 
-### Enhanced Property Panel
-- **Diagram Tab**: Canvas-level controls (grid, background, paper settings)
-- **Style Tab**: Element-level styling with advanced controls
-- **Accordion Behavior**: One section open at a time for clean interface
-- **Consistent Light Theme** throughout the application
+- Attempted to fix shape rendering issues (ongoing)
+- Added action toolbar prototype (functionality limited)
+- Implemented collapsible sidebars (may be buggy)
+- Expanded shape library to 61 shapes (many still broken)
+- Added multiple export formats (reliability varies)
+- Grid visibility improvements (still needs work)
+- Basic undo/redo framework (incomplete)
 
-### Performance & UX Improvements
-- **Grid Visibility**: Clear, visible grid dots for precise alignment
-- **Optimized Performance**: Eliminated 300ms click delays
-- **Smooth Animations**: Professional transitions and hover effects
-- **Better Accessibility**: Enhanced keyboard navigation and screen reader support
+### Known Regressions
+- Some changes may have introduced new bugs
+- Export functions may not work consistently
+- Shape resizing still unreliable
+- Connection editing remains problematic
 
-## ✅ What Works
+## ⚠️ Reality Check
 
-- **60+ Professional Shapes**: Complete shape library with all categories
-- **Advanced Property Panel**: Comprehensive styling and diagram controls
-- **Real-time Editing**: Instant visual feedback for all changes
-- **Professional Grid System**: Visible grid with snap-to-grid functionality
-- **Shape Search**: Find shapes quickly across all categories
-- **Canvas Interactions**: Drag, select, connect, and style shapes
-- **Export Options**: PNG, SVG, PDF export functionality
-- **Auto-save/Recovery**: Automatic diagram persistence
-- **Performance Optimized**: Smooth, responsive interface
+**This is NOT a usable diagramming tool yet.** It's a development prototype with many broken features.
+
+### What You Can Expect
+- Frequent bugs and crashes
+- Features that don't work as expected
+- Incomplete functionality
+- Data loss (no reliable save/load)
+- Poor performance with complex diagrams
+- Breaking changes between versions
+
+### For Developers Only
+This project is currently suitable for:
+- Learning React Flow
+- Contributing to open source
+- Experimenting with diagramming concepts
+- Understanding the challenges of building diagram editors
+
+**Not suitable for:**
+- Real work or production use
+- Important diagrams you can't afford to lose
+- Users expecting polished software
 
 ## 🛠️ Tech Stack
 
@@ -142,56 +164,62 @@ npm run test             # Run test suite
 npm run test:e2e         # End-to-end tests with Playwright
 ```
 
-## 🎯 Project Vision
+## 🎯 Future Vision (Aspirational)
 
-OpenChart bridges the gap between proprietary diagramming tools and open-source alternatives by providing:
+If development continues successfully, OpenChart could eventually become:
 
-- **Professional Quality**: Feature parity with commercial tools
-- **Open Source**: Transparent, community-driven development
-- **Modern Architecture**: Built with cutting-edge web technologies
-- **Extensible Design**: Easy to add new shapes, features, and integrations
-- **Performance Focus**: Optimized for smooth, responsive user experience
+- A reliable open-source diagramming tool
+- Feature-competitive with commercial alternatives
+- Built on modern web technologies
+- Extensible and customizable
+- Fast and responsive
 
-## 🚀 Performance Highlights
+**But we're not there yet.** This is early-stage development with a long road ahead.
 
-- **Sub-50ms Click Response**: Optimized event handlers
-- **Smooth Animations**: 60fps transitions and interactions
-- **Efficient Rendering**: Smart re-rendering with React.memo
-- **Memory Optimized**: Minimal memory footprint for large diagrams
-- **Fast Search**: Real-time shape filtering across 60+ shapes
+## 🐛 Current Performance Issues
 
-## 🔧 Advanced Features
+- **Slow Shape Rendering**: Many shapes render poorly or incorrectly
+- **Memory Leaks**: Performance degrades with complex diagrams
+- **Buggy Interactions**: Click handlers may not work reliably
+- **Inconsistent Animations**: UI transitions are hit-or-miss
+- **Search Problems**: Shape filtering may be unreliable
 
-### Shape Library
-- **Fuzzy Search**: Find shapes by name, description, or tags
-- **Category Management**: Organized, expandable shape categories
-- **Shape Metadata**: Rich descriptions and usage information
-- **Accessibility**: Full keyboard navigation and screen reader support
+## 🛠️ Development Focus Areas
 
-### Property Panel
-- **Real-time Updates**: Changes apply instantly without lag
-- **Professional Color Pickers**: Multiple input methods (palette, wheel, input)
-- **Typography Controls**: Font size, weight, alignment with shortcuts
-- **Appearance Options**: Colors, borders, opacity, corner radius
-- **Bulk Operations**: Multi-select styling and alignment tools
+### Critical Issues to Fix
+- **Shape Rendering**: Make all shapes display correctly
+- **Resize Handles**: Implement reliable shape resizing
+- **Connection Tools**: Fix edge creation and editing
+- **Data Persistence**: Add reliable save/load functionality
+- **Performance**: Optimize rendering for larger diagrams
 
-### Canvas Features
-- **Professional Grid**: 20px dot grid with configurable snap-to-grid
-- **Smart Connections**: Intelligent connection points with visual feedback
-- **Advanced Selection**: Multi-select with professional indicators
-- **Zoom & Pan**: Smooth viewport navigation with mouse and keyboard
+### Nice-to-Have Features (Later)
+- Fuzzy search for shapes
+- Advanced property controls
+- Professional color pickers
+- Grid customization
+- Multi-select operations
+- Keyboard navigation
+- Accessibility support
 
 ## 🤝 Contributing
 
-We welcome contributions! Current focus areas:
+**This project needs help!** If you're interested in contributing:
 
-1. **Advanced Features**: Templates, collaboration, version control integration
-2. **Export/Import**: Enhanced format support, Lucidchart compatibility
-3. **Performance**: Further optimizations for very large diagrams
-4. **Mobile Support**: Touch-friendly interface for tablets and phones
-5. **Integrations**: API development, third-party tool connections
+### High Priority Fixes Needed
+1. **Fix shape rendering** - Many shapes don't display correctly
+2. **Implement reliable resizing** - Shape resize handles are broken
+3. **Improve connection tools** - Edge creation/editing needs work
+4. **Add data persistence** - Currently no way to save diagrams
+5. **Performance optimization** - App gets slow with many shapes
 
-Feel free to fork and experiment. Issues and PRs are welcome.
+### For Contributors
+- Expect to encounter many bugs
+- Focus on one small issue at a time
+- Test thoroughly - many features are fragile
+- Document any workarounds you discover
+
+**Note**: This is prototype-quality code. Don't expect commercial-grade architecture.
 
 ## 📄 License
 
@@ -205,4 +233,4 @@ MIT - See LICENSE file for details
 
 ---
 
-**OpenChart v2.0**: From prototype to professional-grade diagramming tool. Ready for real-world use with industry-standard features and performance.
+**OpenChart v0.2.1-alpha**: Early development prototype. Not ready for real-world use. Expect bugs, incomplete features, and breaking changes.

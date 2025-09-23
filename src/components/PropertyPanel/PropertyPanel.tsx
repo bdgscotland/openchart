@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, Settings, Palette, Layout } from 'lucide-react';
+import { ChevronLeft, Settings, Palette, Layout, PanelRightClose } from 'lucide-react';
 import TabContainer from './TabContainer';
 import DiagramControls from './DiagramControls';
 import StyleControls from './StyleControls';
@@ -72,13 +72,12 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     return (
       <div className={`property-panel property-panel-collapsed ${className}`}>
         <button
-          className="property-panel-toggle"
+          className="property-panel-toggle collapsed-toggle"
           onClick={onToggleVisibility}
           aria-label="Show Properties Panel"
           title="Show Properties Panel"
         >
-          <Settings size={20} />
-          <span className="toggle-hint">Properties</span>
+          <ChevronLeft size={20} />
         </button>
       </div>
     );
@@ -150,7 +149,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
             aria-label="Hide Properties Panel"
             title="Hide Properties Panel"
           >
-            <ChevronRight size={20} />
+            <PanelRightClose size={20} />
           </button>
         )}
       </div>

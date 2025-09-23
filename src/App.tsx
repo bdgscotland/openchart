@@ -5,7 +5,9 @@ import { FlowCanvas } from './components/Canvas/FlowCanvas';
 import useShapeCreation from './components/Canvas/hooks/useShapeCreation';
 import { MenuBar } from './components/MenuBar/MenuBar';
 import { PropertyPanel } from './components/PropertyPanel/PropertyPanel';
+import { ActionToolbar } from './components/ActionToolbar';
 import { useCanvasState } from './hooks/useCanvasState';
+import { useActionToolbar } from './hooks/useActionToolbar';
 import { createEmptyDiagram } from './utils/diagramFactory';
 // React Flow types are imported but typed as any for flexibility
 import type { Node, Edge } from '@xyflow/react';
@@ -17,15 +19,27 @@ function App() {
   const [selectedTool, setSelectedTool] = useState<DrawingTool>('select');
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [copiedNodes, setCopiedNodes] = useState<any[]>([]);
-  const [showPropertyPanel, setShowPropertyPanel] = useState(true);
+  const [copiedNodes, setCopiedNodes] = useState<Node[]>([]);
   const [showGrid, setShowGrid] = useState(true);
   const [showRulers, setShowRulers] = useState(false);
-  const flowRef = useRef<any>(null);
+
+  // Sidebar collapse states with localStorage persistence
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('openchart-left-sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('openchart-right-sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const flowRef = useRef<React.ElementRef<typeof FlowCanvas>>(null);
 
   // Initialize diagram state for PropertyPanel
   const initialDiagram = createEmptyDiagram('OpenChart Diagram');
   const canvasState = useCanvasState(initialDiagram);
+
 
   // Convert React Flow nodes to diagram elements for PropertyPanel
   // Optimized useMemo with dependency array that only includes selected nodes and their updates
@@ -199,88 +213,57 @@ function App() {
   }, []);
 
   const handleExportPNG = useCallback(async () => {
-    const flowElement = document.querySelector('.react-flow') as HTMLElement;
-    if (!flowElement) return;
-    
-    try {
-      const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(flowElement, {
-        backgroundColor: '#ffffff',
-        width: flowElement.offsetWidth,
-        height: flowElement.offsetHeight,
-      });
-      
-      const link = document.createElement('a');
-      link.download = `diagram-${new Date().toISOString().slice(0, 10)}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (error) {
-      console.error('Error exporting PNG:', error);
-      alert('Failed to export PNG');
+    if (flowRef.current?.exportToPng) {
+      try {
+        await flowRef.current.exportToPng();
+      } catch (error) {
+        console.error('Error exporting PNG:', error);
+        alert('Failed to export PNG');
+      }
+    }
+  }, []);
+
+  const handleExportJPEG = useCallback(async () => {
+    if (flowRef.current?.exportToJpeg) {
+      try {
+        await flowRef.current.exportToJpeg();
+      } catch (error) {
+        console.error('Error exporting JPEG:', error);
+        alert('Failed to export JPEG');
+      }
+    }
+  }, []);
+
+  const handleExportWebP = useCallback(async () => {
+    if (flowRef.current?.exportToWebp) {
+      try {
+        await flowRef.current.exportToWebp();
+      } catch (error) {
+        console.error('Error exporting WebP:', error);
+        alert('Failed to export WebP');
+      }
     }
   }, []);
 
   const handleExportSVG = useCallback(async () => {
-    const flowElement = document.querySelector('.react-flow') as HTMLElement;
-    if (!flowElement) return;
-    
-    try {
-      const { toSvg } = await import('html-to-image');
-      const dataUrl = await toSvg(flowElement, {
-        backgroundColor: '#ffffff',
-      });
-      
-      const link = document.createElement('a');
-      link.download = `diagram-${new Date().toISOString().slice(0, 10)}.svg`;
-      link.href = dataUrl;
-      link.click();
-    } catch (error) {
-      console.error('Error exporting SVG:', error);
-      alert('Failed to export SVG');
+    if (flowRef.current?.exportToSvg) {
+      try {
+        await flowRef.current.exportToSvg();
+      } catch (error) {
+        console.error('Error exporting SVG:', error);
+        alert('Failed to export SVG');
+      }
     }
   }, []);
 
   const handleExportPDF = useCallback(async () => {
-    // For PDF, we'll first convert to PNG then suggest printing to PDF
-    const flowElement = document.querySelector('.react-flow') as HTMLElement;
-    if (!flowElement) return;
-    
-    try {
-      const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(flowElement, {
-        backgroundColor: '#ffffff',
-        width: flowElement.offsetWidth,
-        height: flowElement.offsetHeight,
-      });
-      
-      // Open in new window for printing to PDF
-      const newWindow = window.open();
-      if (newWindow) {
-        newWindow.document.write(`
-          <html>
-            <head>
-              <title>OpenChart Diagram</title>
-              <style>
-                body { margin: 0; padding: 20px; background: white; }
-                img { max-width: 100%; height: auto; }
-                @media print {
-                  body { padding: 0; }
-                }
-              </style>
-            </head>
-            <body>
-              <img src="${dataUrl}" alt="Diagram" />
-              <script>
-                window.onload = () => { window.print(); };
-              </script>
-            </body>
-          </html>
-        `);
-        newWindow.document.close();
+    if (flowRef.current?.exportToPdf) {
+      try {
+        await flowRef.current.exportToPdf();
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        alert('Failed to export PDF');
       }
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      alert('Failed to export PDF');
     }
   }, []);
 
@@ -363,6 +346,36 @@ function App() {
     setShowRulers(prev => !prev);
   }, []);
 
+  // Action toolbar functionality - after handlers are defined
+  const actionToolbar = useActionToolbar({
+    nodes,
+    edges,
+    onNodesChange: setNodes,
+    onEdgesChange: setEdges,
+    canUndo: canvasState.canUndo,
+    canRedo: canvasState.canRedo,
+    onUndo: handleUndo,
+    onRedo: handleRedo,
+    flowCanvasRef: flowRef,
+  });
+
+  // Sidebar collapse handlers
+  const handleToggleLeftSidebar = useCallback(() => {
+    setIsLeftSidebarCollapsed(prev => {
+      const newValue = !prev;
+      localStorage.setItem('openchart-left-sidebar-collapsed', JSON.stringify(newValue));
+      return newValue;
+    });
+  }, []);
+
+  const handleToggleRightSidebar = useCallback(() => {
+    setIsRightSidebarCollapsed(prev => {
+      const newValue = !prev;
+      localStorage.setItem('openchart-right-sidebar-collapsed', JSON.stringify(newValue));
+      return newValue;
+    });
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -371,16 +384,10 @@ function App() {
         return;
       }
 
-      // Delete selected nodes
+      // Delete selected nodes - handled by ActionToolbar
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
-        if (selectedNodeIds.length > 0) {
-          setNodes(nodes => nodes.filter(n => !selectedNodeIds.includes(n.id)));
-          setEdges(edges => edges.filter(e => 
-            !selectedNodeIds.includes(e.source) && !selectedNodeIds.includes(e.target)
-          ));
-        }
+        // Let ActionToolbar handle deletion to avoid conflicts
+        return;
       }
 
       // Copy (Ctrl+C / Cmd+C)
@@ -436,17 +443,14 @@ function App() {
         handleLoadDiagram();
       }
 
-      // Undo (Ctrl+Z / Cmd+Z)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        handleUndo();
+      // Undo/Redo - handled by ActionToolbar
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        // Let ActionToolbar handle undo/redo to avoid conflicts
+        return;
       }
-
-      // Redo (Ctrl+Shift+Z / Cmd+Shift+Z or Ctrl+Y / Cmd+Y)
-      if (((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z') || 
-          ((e.ctrlKey || e.metaKey) && e.key === 'y')) {
-        e.preventDefault();
-        handleRedo();
+      if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        // Let ActionToolbar handle undo/redo to avoid conflicts
+        return;
       }
     };
 
@@ -603,6 +607,8 @@ function App() {
         onSaveDiagram={handleSaveDiagram}
         onLoadDiagram={handleLoadDiagram}
         onExportPNG={handleExportPNG}
+        onExportJPEG={handleExportJPEG}
+        onExportWebP={handleExportWebP}
         onExportSVG={handleExportSVG}
         onExportPDF={handleExportPDF}
         onLoadExample={handleLoadExample}
@@ -622,11 +628,30 @@ function App() {
         </div>
       </header>
 
+      <ActionToolbar
+        canUndo={canvasState.canUndo}
+        canRedo={canvasState.canRedo}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        hasSelection={actionToolbar.hasSelection}
+        onDelete={actionToolbar.handleDelete}
+        onBringToFront={actionToolbar.handleBringToFront}
+        onSendToBack={actionToolbar.handleSendToBack}
+        edgeStyle={actionToolbar.edgeStyle}
+        onEdgeStyleChange={actionToolbar.handleEdgeStyleChange}
+        zoom={actionToolbar.zoom}
+        onZoomIn={actionToolbar.handleZoomIn}
+        onZoomOut={actionToolbar.handleZoomOut}
+        onFitToView={actionToolbar.handleFitToView}
+      />
+
       <main className="app-main">
-        <div className="app-content">
+        <div className={`app-content ${isLeftSidebarCollapsed ? 'left-sidebar-collapsed' : ''} ${isRightSidebarCollapsed ? 'right-sidebar-collapsed' : ''}`}>
           <ShapeLibrary
             selectedTool={selectedTool}
             onToolSelect={setSelectedTool}
+            isCollapsed={isLeftSidebarCollapsed}
+            onToggleCollapse={handleToggleLeftSidebar}
           />
           <div className="canvas-area">
             <FlowCanvas
@@ -667,8 +692,8 @@ function App() {
             onUpdateElementText={handleUpdateElementText}
             onUpdateElementPosition={handleUpdateElementPosition}
             onUpdateElementSize={handleUpdateElementSize}
-            isVisible={showPropertyPanel}
-            onToggleVisibility={() => setShowPropertyPanel(!showPropertyPanel)}
+            isVisible={!isRightSidebarCollapsed}
+            onToggleVisibility={handleToggleRightSidebar}
           />
         </div>
       </main>

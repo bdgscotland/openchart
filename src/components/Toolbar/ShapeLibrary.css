@@ -1,9 +1,6 @@
 /* Professional Shape Library Styling - Diagrams.net Inspired */
 
 .shape-library {
-  width: 280px; /* Expandable from 64px */
-  min-width: 280px;
-  max-width: 400px;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-default);
   display: flex;
@@ -16,6 +13,21 @@
   -webkit-backdrop-filter: var(--glass-blur);
   z-index: 100;
   font-family: var(--font-sans);
+  transition: all var(--transition-normal);
+}
+
+/* Expanded state */
+.shape-library-expanded {
+  width: 280px;
+  min-width: 280px;
+  max-width: 400px;
+}
+
+/* Collapsed state */
+.shape-library-collapsed {
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
 }
 
 /* Library Header with Search */
@@ -24,6 +36,58 @@
   border-bottom: 1px solid var(--border-default);
   background: var(--surface);
   flex-shrink: 0;
+}
+
+/* Library header content wrapper */
+.library-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Collapsed header */
+.library-header-collapsed {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--surface);
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Collapsed content */
+.library-content-collapsed {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-2) var(--space-1);
+}
+
+/* Collapse toggle button */
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: var(--primary-text-secondary);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.collapse-toggle:hover {
+  background: var(--primary-surface-hover);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+.collapse-toggle:active {
+  transform: scale(0.95);
 }
 
 /* Search Bar */
@@ -204,6 +268,14 @@
   gap: var(--space-1);
 }
 
+/* Compact shapes grid for collapsed state */
+.compact-shapes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  width: 100%;
+}
+
 /* Shape Button */
 .shape-button {
   display: flex;
@@ -221,6 +293,15 @@
   text-align: left;
   position: relative;
   min-height: 36px;
+}
+
+/* Compact shape button for collapsed state */
+.shape-button.compact {
+  justify-content: center;
+  padding: var(--space-2);
+  min-height: 32px;
+  width: 100%;
+  aspect-ratio: 1;
 }
 
 .shape-button:hover {

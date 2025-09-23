@@ -112,16 +112,34 @@
 .react-flow__edge-path {
   stroke: #9ca3af;
   stroke-width: 2;
+  transition: all 0.2s ease;
 }
 
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: #0066ff;
+  stroke: #3b82f6;
   stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
 }
 
 .react-flow__edge:hover .react-flow__edge-path {
-  stroke: #0066ff;
+  stroke: #3b82f6;
   stroke-width: 2.5;
+  cursor: pointer;
+}
+
+/* Edge markers */
+.react-flow__edge.selected .react-flow__arrowhead {
+  fill: #3b82f6;
+}
+
+/* Make edges focusable and interactive */
+.react-flow__edge {
+  cursor: pointer;
+}
+
+.react-flow__edge:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 /* Controls styling */
@@ -211,9 +229,9 @@
 }
 
 .flow-minimap .react-flow__minimap-node {
-  fill: #333333;
-  stroke: #9ca3af;
-  stroke-width: 1;
+  fill: #374151;
+  stroke: #6b7280;
+  stroke-width: 1.5;
 }
 
 /* Selection box */
@@ -224,7 +242,7 @@
 
 /* Background dots */
 .react-flow__background pattern circle {
-  fill: rgba(0, 0, 0, 0.1);
+  fill: rgba(0, 0, 0, 0.15);
 }
 
 /* Enhanced node selection */

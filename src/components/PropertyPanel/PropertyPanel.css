@@ -20,6 +20,10 @@
 .property-panel-collapsed {
   width: 48px;
   min-width: 48px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 8px;
 }
 
 .property-panel-header {
@@ -57,6 +61,29 @@
 .property-panel-toggle:hover {
   background: #e9ecef;
   color: #495057;
+}
+
+/* Collapsed toggle button styles */
+.property-panel-toggle.collapsed-toggle {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.property-panel-toggle.collapsed-toggle:hover {
+  border-color: #0066cc;
+  color: #0066cc;
+  background: #f8f9fa;
+  transform: scale(1.05);
+}
+
+.property-panel-toggle.collapsed-toggle:active {
+  transform: scale(0.95);
 }
 
 .property-panel-content {

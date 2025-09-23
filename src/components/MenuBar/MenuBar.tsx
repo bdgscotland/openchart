@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MenuBar.css';
 
 export interface MenuBarProps {
@@ -6,6 +6,8 @@ export interface MenuBarProps {
   onSaveDiagram: () => void;
   onLoadDiagram: () => void;
   onExportPNG: () => void;
+  onExportJPEG: () => void;
+  onExportWebP: () => void;
   onExportSVG: () => void;
   onExportPDF: () => void;
   onLoadExample: (exampleName: string) => void;
@@ -31,6 +33,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onSaveDiagram,
   onLoadDiagram,
   onExportPNG,
+  onExportJPEG,
+  onExportWebP,
   onExportSVG,
   onExportPDF,
   onLoadExample,
@@ -67,10 +71,12 @@ export const MenuBar: React.FC<MenuBarProps> = ({
       { label: 'Save Diagram (.json)', onClick: onSaveDiagram, shortcut: 'Ctrl+S' },
       { label: 'Load Diagram', onClick: onLoadDiagram, shortcut: 'Ctrl+O' },
       { separator: true, label: '' },
-      { 
-        label: 'Export', 
+      {
+        label: 'Export',
         submenu: [
           { label: 'Export as PNG', onClick: onExportPNG },
+          { label: 'Export as JPEG', onClick: onExportJPEG },
+          { label: 'Export as WebP', onClick: onExportWebP },
           { label: 'Export as SVG', onClick: onExportSVG },
           { label: 'Export as PDF', onClick: onExportPDF },
         ]

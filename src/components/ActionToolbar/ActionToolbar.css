@@ -1,0 +1,257 @@
+/* Action Toolbar - Sleek and compact light mode styling */
+
+.action-toolbar {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 4px;
+  gap: 6px;
+  font-size: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  position: relative;
+  height: 32px;
+  min-height: 32px;
+}
+
+.action-toolbar.compact {
+  padding: 4px;
+  gap: 2px;
+}
+
+/* Toolbar Groups */
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: #d1d5db;
+  margin: 0 6px;
+}
+
+/* Toolbar Buttons */
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #374151;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  min-height: 24px;
+  max-height: 24px;
+  min-width: 24px;
+  white-space: nowrap;
+}
+
+.toolbar-button:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.toolbar-button:active:not(:disabled) {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.toolbar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+.toolbar-button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Toolbar Text */
+.toolbar-text {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Zoom Display */
+.zoom-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 6px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 48px;
+  height: 24px;
+  text-align: center;
+  cursor: default;
+}
+
+/* Edge Style Dropdown */
+.edge-style-dropdown {
+  position: relative;
+}
+
+.edge-style-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2px;
+  z-index: 1000;
+  min-width: 120px;
+  margin-top: 2px;
+}
+
+.edge-style-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  color: #374151;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.1s ease;
+  text-align: left;
+}
+
+.edge-style-option:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.edge-style-option.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.edge-style-option.active:hover {
+  background: #bfdbfe;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .action-toolbar {
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .toolbar-button {
+    padding: 4px;
+    min-height: 24px;
+    max-height: 24px;
+    min-width: 24px;
+  }
+
+  .toolbar-text {
+    display: none; /* Hide text labels on mobile */
+  }
+
+  .zoom-display {
+    min-width: 40px;
+    font-size: 10px;
+    height: 24px;
+  }
+
+  .toolbar-separator {
+    height: 18px;
+    margin: 0 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .action-toolbar {
+    padding: 4px;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .action-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toolbar-group {
+    flex-shrink: 0;
+    gap: 1px;
+  }
+
+  .toolbar-button {
+    padding: 3px;
+    min-height: 22px;
+    max-height: 22px;
+    min-width: 22px;
+  }
+
+  .zoom-display {
+    min-width: 36px;
+    padding: 3px 4px;
+    height: 22px;
+    font-size: 10px;
+  }
+
+  .toolbar-separator {
+    height: 16px;
+    margin: 0 3px;
+  }
+}
+
+/* Light mode focus - removed dark mode for cleaner, more compact styling */
+
+/* Accessibility improvements */
+.toolbar-button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Animation for smooth interactions */
+.edge-style-menu {
+  animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle hover effects for sleek appearance */
+.toolbar-button:not(:disabled):hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.toolbar-button:not(:disabled):active {
+  transform: none;
+  box-shadow: none;
+}

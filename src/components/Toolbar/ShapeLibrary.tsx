@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Search, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, X, ChevronLeft, PanelLeftClose } from 'lucide-react';
 import type { DrawingTool, ShapeDefinition, ShapeCategory, SearchResult, ShapeLibraryState } from '../../types/shapes';
 import { shapeCategories, allShapes, searchShapes } from './shapeDefinitions';
 import './ShapeLibrary.css';
@@ -7,6 +7,8 @@ import './ShapeLibrary.css';
 interface ShapeLibraryProps {
   selectedTool: DrawingTool;
   onToolSelect: (tool: DrawingTool) => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 interface ShapeButtonProps {
@@ -14,10 +16,11 @@ interface ShapeButtonProps {
   isSelected: boolean;
   onSelect: (tool: DrawingTool) => void;
   searchTerm?: string;
+  isCompact?: boolean;
 }
 
 // Individual Shape Button Component
-const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, searchTerm }) => {
+const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, searchTerm, isCompact = false }) => {
   const IconComponent = shape.icon;
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
@@ -49,7 +52,7 @@ const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, 
 
   return (
     <button
-      className={`shape-button ${isSelected ? 'active' : ''}`}
+      className={`shape-button ${isSelected ? 'active' : ''} ${isCompact ? 'compact' : ''}`}
       onClick={handleClick}
       draggable={shape.id !== 'select'}
       onDragStart={handleDragStart}
@@ -57,9 +60,13 @@ const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, 
       aria-label={shape.name}
       data-shape-id={shape.id}
     >
-      <IconComponent className="shape-icon" size={18} />
-      <span className="shape-name">{shape.name}</span>
-      {shape.isNew && <span className="new-badge">New</span>}
+      <IconComponent className="shape-icon" size={isCompact ? 16 : 18} />
+      {!isCompact && (
+        <>
+          <span className="shape-name">{shape.name}</span>
+          {shape.isNew && <span className="new-badge">New</span>}
+        </>
+      )}
     </button>
   );
 };
@@ -72,6 +79,7 @@ interface CategorySectionProps {
   selectedTool: DrawingTool;
   onToolSelect: (tool: DrawingTool) => void;
   searchTerm?: string;
+  isCompact?: boolean;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -80,10 +88,29 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   onToggle,
   selectedTool,
   onToolSelect,
-  searchTerm
+  searchTerm,
+  isCompact = false
 }) => {
   const IconComponent = category.icon || ChevronRight;
   const ChevronIcon = isExpanded ? ChevronDown : ChevronRight;
+
+  if (isCompact) {
+    // In compact mode, show shapes directly without category headers
+    return (
+      <div className="compact-shapes-grid">
+        {category.shapes.slice(0, 6).map((shape) => ( // Show only first 6 shapes in compact mode
+          <ShapeButton
+            key={shape.id}
+            shape={shape}
+            isSelected={selectedTool === shape.id}
+            onSelect={onToolSelect}
+            searchTerm={searchTerm}
+            isCompact={true}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="category-section">
@@ -114,6 +141,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 isSelected={selectedTool === shape.id}
                 onSelect={onToolSelect}
                 searchTerm={searchTerm}
+                isCompact={false}
               />
             ))}
           </div>
@@ -164,7 +192,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
 // Main Shape Library Component
 export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
   selectedTool,
-  onToolSelect
+  onToolSelect,
+  isCollapsed = false,
+  onToggleCollapse
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
@@ -235,16 +265,71 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
     }).sort((a, b) => a.category.order - b.category.order);
   }, [searchResults, searchTerm]);
 
+  // Get most common shapes for collapsed view
+  const mostCommonShapes = useMemo(() => {
+    if (!isCollapsed) return [];
+    // Return the first few shapes from Basic category + Select tool
+    const basicCategory = shapeCategories.find(cat => cat.id === 'basic');
+    const basicShapes = basicCategory ? basicCategory.shapes.slice(0, 8) : [];
+    const selectTool = allShapes.find(shape => shape.id === 'select');
+    return selectTool ? [selectTool, ...basicShapes] : basicShapes;
+  }, [isCollapsed]);
+
+  if (isCollapsed) {
+    return (
+      <div className="shape-library shape-library-collapsed" role="toolbar" aria-label="Shape Library">
+        {/* Collapse toggle button */}
+        <div className="library-header-collapsed">
+          <button
+            className="collapse-toggle"
+            onClick={onToggleCollapse}
+            aria-label="Expand Shape Library"
+            title="Expand Shape Library"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+
+        {/* Compact shapes grid */}
+        <div className="library-content-collapsed">
+          <div className="compact-shapes-grid">
+            {mostCommonShapes.map((shape) => (
+              <ShapeButton
+                key={shape.id}
+                shape={shape}
+                isSelected={selectedTool === shape.id}
+                onSelect={onToolSelect}
+                isCompact={true}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="shape-library" role="toolbar" aria-label="Shape Library">
-      {/* Search Bar */}
+    <div className="shape-library shape-library-expanded" role="toolbar" aria-label="Shape Library">
+      {/* Header with Search and Collapse Button */}
       <div className="library-header">
-        <SearchBar
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
-          onClear={clearSearch}
-          placeholder="Search shapes..."
-        />
+        <div className="library-header-content">
+          <SearchBar
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            onClear={clearSearch}
+            placeholder="Search shapes..."
+          />
+          {onToggleCollapse && (
+            <button
+              className="collapse-toggle"
+              onClick={onToggleCollapse}
+              aria-label="Collapse Shape Library"
+              title="Collapse Shape Library"
+            >
+              <PanelLeftClose size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Shape Categories */}
@@ -273,6 +358,7 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
                     selectedTool={selectedTool}
                     onToolSelect={onToolSelect}
                     searchTerm={searchTerm}
+                    isCompact={false}
                   />
                 ))}
               </>
@@ -289,6 +375,7 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
                 onToggle={() => toggleCategory(category.id)}
                 selectedTool={selectedTool}
                 onToolSelect={onToolSelect}
+                isCompact={false}
               />
             ))}
           </div>

@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useState, memo } from 'react';
-import { Handle, Position } from '@xyflow/react';
+import React, { useCallback, useRef, useState, memo, useEffect } from 'react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { useDebounce } from '../../../hooks/useDebounce';
 
@@ -42,12 +42,15 @@ export interface ShapeConfig {
 export const BaseShape: React.FC<BaseShapeProps & {
   children: React.ReactNode;
   shapeConfig?: Partial<ShapeConfig>;
-}> = memo(({ data, selected, children, shapeConfig = {} }) => {
+}> = memo(({ data, selected, children, shapeConfig = {}, id }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(data.label || '');
   const [isHovering, setIsHovering] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { setNodes } = useReactFlow();
 
   // Debounce text changes to reduce excessive state updates
   const debouncedTextChange = useDebounce((newText: string) => {
@@ -74,6 +77,89 @@ export const BaseShape: React.FC<BaseShapeProps & {
       setText(data.label || '');
     }
   }, [text, debouncedTextChange, data.label]);
+
+  // Resize functionality
+  const handleResizeStart = useCallback((handle: string) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsResizing(true);
+    setResizeHandle(handle);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = data.width || 120;
+    const startHeight = data.height || 80;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+
+      // Calculate new dimensions based on handle
+      switch (handle) {
+        case 'nw':
+          newWidth = Math.max(60, startWidth - deltaX);
+          newHeight = Math.max(40, startHeight - deltaY);
+          break;
+        case 'ne':
+          newWidth = Math.max(60, startWidth + deltaX);
+          newHeight = Math.max(40, startHeight - deltaY);
+          break;
+        case 'sw':
+          newWidth = Math.max(60, startWidth - deltaX);
+          newHeight = Math.max(40, startHeight + deltaY);
+          break;
+        case 'se':
+          newWidth = Math.max(60, startWidth + deltaX);
+          newHeight = Math.max(40, startHeight + deltaY);
+          break;
+      }
+
+      // Update node dimensions
+      setNodes((nodes) =>
+        nodes.map((node) =>
+          node.id === id
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  width: newWidth,
+                  height: newHeight,
+                },
+              }
+            : node
+        )
+      );
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      setResizeHandle(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [data.width, data.height, id, setNodes]);
+
+  // Prevent drag when resizing
+  useEffect(() => {
+    if (isResizing) {
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'nw-resize';
+    } else {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    }
+
+    return () => {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [isResizing]);
 
   // Get styles from data.style as the primary source of truth
   const styles = data.style || {};
@@ -243,10 +329,26 @@ export const BaseShape: React.FC<BaseShapeProps & {
           />
           
           {/* Resize handles */}
-          <div className="resize-handle resize-handle-nw" />
-          <div className="resize-handle resize-handle-ne" />
-          <div className="resize-handle resize-handle-sw" />
-          <div className="resize-handle resize-handle-se" />
+          <div
+            className="resize-handle resize-handle-nw"
+            onMouseDown={handleResizeStart('nw')}
+            style={{ cursor: 'nw-resize' }}
+          />
+          <div
+            className="resize-handle resize-handle-ne"
+            onMouseDown={handleResizeStart('ne')}
+            style={{ cursor: 'ne-resize' }}
+          />
+          <div
+            className="resize-handle resize-handle-sw"
+            onMouseDown={handleResizeStart('sw')}
+            style={{ cursor: 'sw-resize' }}
+          />
+          <div
+            className="resize-handle resize-handle-se"
+            onMouseDown={handleResizeStart('se')}
+            style={{ cursor: 'se-resize' }}
+          />
         </>
       )}
       

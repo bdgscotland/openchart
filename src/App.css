@@ -281,6 +281,18 @@
   gap: 0.5rem;
   padding: 0.5rem;
   box-sizing: border-box;
+  transition: all var(--transition-normal);
+}
+
+/* Sidebar collapse states */
+.app-content.left-sidebar-collapsed .shape-library {
+  width: 64px;
+  min-width: 64px;
+}
+
+.app-content.right-sidebar-collapsed .property-panel {
+  width: 48px;
+  min-width: 48px;
 }
 
 .canvas-area {
