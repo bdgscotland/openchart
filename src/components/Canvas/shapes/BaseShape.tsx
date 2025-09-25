@@ -54,6 +54,9 @@ export const BaseShape: React.FC<BaseShapeProps & {
   const inputRef = useRef<HTMLInputElement>(null);
   const { setNodes, getNodes } = useReactFlow();
 
+  // Check if we're in connection mode (when connector tool is selected)
+  const isConnectionMode = data.selectedTool === 'connector' || data.isConnectionMode;
+
   // Debounce text changes to reduce excessive state updates
   const debouncedTextChange = useDebounce((newText: string) => {
     data.onTextChange?.(newText);
@@ -98,101 +101,70 @@ export const BaseShape: React.FC<BaseShapeProps & {
     const currentNode = getNodes().find(node => node.id === id);
     const startPosition = currentNode?.position || { x: 0, y: 0 };
 
-    // Use requestAnimationFrame to throttle updates for better performance
-    let animationFrameId: number | null = null;
-    let lastUpdateTime = 0;
-    const updateThrottleMs = 16; // ~60fps
-
     const handleMouseMove = (e: MouseEvent) => {
-      const now = Date.now();
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
 
-      // Throttle updates to avoid overwhelming React
-      if (now - lastUpdateTime < updateThrottleMs && animationFrameId) {
-        return;
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+      let newPosition = { ...startPosition };
+
+      // Calculate new dimensions and position based on handle
+      switch (handle) {
+        case 'nw':
+          // Northwest: resize from top-left corner
+          newWidth = Math.max(60, startWidth - deltaX);
+          newHeight = Math.max(40, startHeight - deltaY);
+          // Adjust position to keep bottom-right corner fixed
+          newPosition.x = startPosition.x + (startWidth - newWidth);
+          newPosition.y = startPosition.y + (startHeight - newHeight);
+          break;
+        case 'ne':
+          // Northeast: resize from top-right corner
+          newWidth = Math.max(60, startWidth + deltaX);
+          newHeight = Math.max(40, startHeight - deltaY);
+          // Adjust Y position to keep bottom-left corner fixed
+          newPosition.y = startPosition.y + (startHeight - newHeight);
+          break;
+        case 'sw':
+          // Southwest: resize from bottom-left corner
+          newWidth = Math.max(60, startWidth - deltaX);
+          newHeight = Math.max(40, startHeight + deltaY);
+          // Adjust X position to keep top-right corner fixed
+          newPosition.x = startPosition.x + (startWidth - newWidth);
+          break;
+        case 'se':
+          // Southeast: resize from bottom-right corner (default behavior)
+          newWidth = Math.max(60, startWidth + deltaX);
+          newHeight = Math.max(40, startHeight + deltaY);
+          // No position adjustment needed - top-left stays fixed
+          break;
       }
 
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-
-      animationFrameId = requestAnimationFrame(() => {
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
-
-        let newWidth = startWidth;
-        let newHeight = startHeight;
-        let newPosition = { ...startPosition };
-
-        // Calculate new dimensions and position based on handle
-        switch (handle) {
-          case 'nw':
-            // Northwest: resize from top-left corner
-            newWidth = Math.max(60, startWidth - deltaX);
-            newHeight = Math.max(40, startHeight - deltaY);
-            // Adjust position to keep bottom-right corner fixed
-            newPosition.x = startPosition.x + (startWidth - newWidth);
-            newPosition.y = startPosition.y + (startHeight - newHeight);
-            break;
-          case 'ne':
-            // Northeast: resize from top-right corner
-            newWidth = Math.max(60, startWidth + deltaX);
-            newHeight = Math.max(40, startHeight - deltaY);
-            // Adjust Y position to keep bottom-left corner fixed
-            newPosition.y = startPosition.y + (startHeight - newHeight);
-            break;
-          case 'sw':
-            // Southwest: resize from bottom-left corner
-            newWidth = Math.max(60, startWidth - deltaX);
-            newHeight = Math.max(40, startHeight + deltaY);
-            // Adjust X position to keep top-right corner fixed
-            newPosition.x = startPosition.x + (startWidth - newWidth);
-            break;
-          case 'se':
-            // Southeast: resize from bottom-right corner (default behavior)
-            newWidth = Math.max(60, startWidth + deltaX);
-            newHeight = Math.max(40, startHeight + deltaY);
-            // No position adjustment needed - top-left stays fixed
-            break;
-        }
-
-        // Update node dimensions and position
-        setNodes((nodes) =>
-          nodes.map((node) =>
-            node.id === id
-              ? {
-                  ...node,
-                  position: newPosition,
-                  data: {
-                    ...node.data,
-                    width: newWidth,
-                    height: newHeight,
-                    // Add resize version to force re-render
-                    resizeVersion: Date.now(),
-                  },
-                }
-              : node
-          )
-        );
-
-        // Force local re-render to ensure immediate visual feedback
-        setResizeVersion(prev => prev + 1);
-        lastUpdateTime = now;
-      });
+      // Update node dimensions and position atomically
+      setNodes((nodes) =>
+        nodes.map((node) =>
+          node.id === id
+            ? {
+                ...node,
+                position: newPosition,
+                data: {
+                  ...node.data,
+                  width: newWidth,
+                  height: newHeight,
+                  resizeVersion: Date.now(),
+                },
+              }
+            : node
+        )
+      );
     };
 
     const handleMouseUp = () => {
       setIsResizing(false);
       setResizeHandle(null);
-
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-
-      // Final update to ensure consistency
-      setResizeVersion(prev => prev + 1);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -305,11 +277,13 @@ export const BaseShape: React.FC<BaseShapeProps & {
           top: -8,
           left: '50%',
           transform: 'translateX(-50%)',
-          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          opacity: isConnectionMode || isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
-          background: isConnecting ? '#22c55e' : '#3b82f6',
-          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
-          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          background: isConnecting ? '#22c55e' : isConnectionMode ? '#f59e0b' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : isConnectionMode ? '#d97706' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          width: isConnectionMode ? 14 : 10,
+          height: isConnectionMode ? 14 : 10,
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}
@@ -325,11 +299,13 @@ export const BaseShape: React.FC<BaseShapeProps & {
           left: -8,
           top: '50%',
           transform: 'translateY(-50%)',
-          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          opacity: isConnectionMode || isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
-          background: isConnecting ? '#22c55e' : '#3b82f6',
-          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
-          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          background: isConnecting ? '#22c55e' : isConnectionMode ? '#f59e0b' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : isConnectionMode ? '#d97706' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          width: isConnectionMode ? 14 : 10,
+          height: isConnectionMode ? 14 : 10,
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}
@@ -345,11 +321,13 @@ export const BaseShape: React.FC<BaseShapeProps & {
           right: -8,
           top: '50%',
           transform: 'translateY(-50%)',
-          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          opacity: isConnectionMode || isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
-          background: isConnecting ? '#22c55e' : '#3b82f6',
-          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
-          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          background: isConnecting ? '#22c55e' : isConnectionMode ? '#f59e0b' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : isConnectionMode ? '#d97706' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          width: isConnectionMode ? 14 : 10,
+          height: isConnectionMode ? 14 : 10,
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}
@@ -365,11 +343,13 @@ export const BaseShape: React.FC<BaseShapeProps & {
           bottom: -8,
           left: '50%',
           transform: 'translateX(-50%)',
-          opacity: isHovering || selected || isConnecting ? 1 : 0,
+          opacity: isConnectionMode || isHovering || selected || isConnecting ? 1 : 0,
           transition: 'all 0.2s ease',
-          background: isConnecting ? '#22c55e' : '#3b82f6',
-          border: `2px solid ${isConnecting ? '#16a34a' : '#1e40af'}`,
-          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          background: isConnecting ? '#22c55e' : isConnectionMode ? '#f59e0b' : '#3b82f6',
+          border: `2px solid ${isConnecting ? '#16a34a' : isConnectionMode ? '#d97706' : '#1e40af'}`,
+          boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
+          width: isConnectionMode ? 14 : 10,
+          height: isConnectionMode ? 14 : 10,
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}

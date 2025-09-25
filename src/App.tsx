@@ -184,6 +184,20 @@ function App() {
     onNodesChange: setNodes,
   });
 
+  // Update all nodes when selectedTool changes to show connection mode
+  useEffect(() => {
+    setNodes(currentNodes =>
+      currentNodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          selectedTool: selectedTool,
+          isConnectionMode: selectedTool === 'connector'
+        }
+      }))
+    );
+  }, [selectedTool]);
+
   // Menu handlers
   const handleNewDiagram = useCallback(() => {
     setNodes([]);
