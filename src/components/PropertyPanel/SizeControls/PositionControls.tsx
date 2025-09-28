@@ -76,7 +76,7 @@ export const PositionControls: React.FC<PositionControlsProps> = ({
       e.preventDefault();
 
       const increment = e.shiftKey ? 10 : e.altKey ? 0.5 : 1;
-      let newPosition = { ...position };
+      const newPosition = { ...position };
 
       switch (e.key) {
         case 'ArrowUp':

@@ -23,7 +23,7 @@ export const SizeControls: React.FC<SizeControlsProps> = ({
   }, [dimensions.width, dimensions.height]);
 
   const handleWidthChange = useCallback((value: number, unit: typeof dimensions.unit) => {
-    let newDimensions: Dimensions = {
+    const newDimensions: Dimensions = {
       ...dimensions,
       width: value,
       unit
@@ -38,7 +38,7 @@ export const SizeControls: React.FC<SizeControlsProps> = ({
   }, [dimensions, aspectRatioLocked, aspectRatio, onDimensionsChange]);
 
   const handleHeightChange = useCallback((value: number, unit: typeof dimensions.unit) => {
-    let newDimensions: Dimensions = {
+    const newDimensions: Dimensions = {
       ...dimensions,
       height: value,
       unit
@@ -58,7 +58,7 @@ export const SizeControls: React.FC<SizeControlsProps> = ({
       e.preventDefault();
 
       const increment = e.altKey ? 1 : 10; // Alt for fine, normal for coarse
-      let newDimensions = { ...dimensions };
+      const newDimensions = { ...dimensions };
 
       switch (e.key) {
         case 'ArrowRight': // Increase width

@@ -162,7 +162,7 @@ export const StyleHistory: React.FC<StyleHistoryProps> = ({
 
   // Sort and filter history
   const sortedHistory = useMemo(() => {
-    let filtered = showFavoritesOnly
+    const filtered = showFavoritesOnly
       ? history.filter(entry => entry.isFavorite)
       : history;
 

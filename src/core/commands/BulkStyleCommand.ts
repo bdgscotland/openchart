@@ -363,7 +363,7 @@ export class DistributeElementsCommand implements Command {
         return element;
       }
 
-      let newPosition = { ...element.position };
+      const newPosition = { ...element.position };
 
       if (sortedIndex > 0 && sortedIndex < sortedElements.length - 1) {
         if (this.operation.type === 'distribute-horizontal') {

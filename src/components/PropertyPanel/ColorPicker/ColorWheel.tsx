@@ -195,7 +195,7 @@ export const ColorWheel: React.FC<ColorWheelProps> = ({
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const step = event.shiftKey ? 10 : 1;
-    let newHsva = { ...currentHsva };
+    const newHsva = { ...currentHsva };
 
     switch (event.key) {
       case 'ArrowLeft':

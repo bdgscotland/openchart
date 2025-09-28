@@ -107,7 +107,7 @@ export const BaseShape: React.FC<BaseShapeProps & {
 
       let newWidth = startWidth;
       let newHeight = startHeight;
-      let newPosition = { ...startPosition };
+      const newPosition = { ...startPosition };
 
       // Calculate new dimensions and position based on handle
       switch (handle) {
