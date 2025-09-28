@@ -11,6 +11,8 @@ import {
   ZoomOut,
   Workflow,
   GitBranch,
+  Grid3X3,
+  Link,
 } from 'lucide-react';
 import './ActionToolbar.css';
 
@@ -39,6 +41,12 @@ export interface ActionToolbarProps {
   onZoomOut: () => void;
   onFitToView: () => void;
 
+  // Canvas settings
+  snapToGrid: boolean;
+  onToggleSnapToGrid: () => void;
+  connectionMode: 'loose' | 'strict';
+  onToggleConnectionMode: () => void;
+
   // Optional props for responsive design
   isCompact?: boolean;
 }
@@ -58,6 +66,10 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
   onZoomIn,
   onZoomOut,
   onFitToView,
+  snapToGrid,
+  onToggleSnapToGrid,
+  connectionMode,
+  onToggleConnectionMode,
   isCompact = false,
 }) => {
   const [showEdgeStyleMenu, setShowEdgeStyleMenu] = useState(false);
@@ -140,13 +152,13 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
   const edgeStyleIcon = () => {
     switch (edgeStyle) {
       case 'straight':
-        return <Minus className="w-3 h-3" />;
+        return <Minus className="w-1.5 h-1.5" />;
       case 'curved':
-        return <GitBranch className="w-3 h-3" />;
+        return <GitBranch className="w-1.5 h-1.5" />;
       case 'step':
-        return <Workflow className="w-3 h-3" />;
+        return <Workflow className="w-1.5 h-1.5" />;
       default:
-        return <Minus className="w-3 h-3" />;
+        return <Minus className="w-1.5 h-1.5" />;
     }
   };
 
@@ -161,7 +173,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Undo (Ctrl+Z)"
           aria-label="Undo"
         >
-          <Undo className="w-3 h-3" />
+          <Undo className="w-1.5 h-1.5" />
         </button>
         <button
           className="toolbar-button"
@@ -170,7 +182,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Redo (Ctrl+Y)"
           aria-label="Redo"
         >
-          <Redo className="w-3 h-3" />
+          <Redo className="w-1.5 h-1.5" />
         </button>
       </div>
 
@@ -185,7 +197,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Delete selected (Delete)"
           aria-label="Delete selected elements"
         >
-          <Trash2 className="w-3 h-3" />
+          <Trash2 className="w-1.5 h-1.5" />
         </button>
       </div>
 
@@ -200,7 +212,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Bring to front"
           aria-label="Bring selected elements to front"
         >
-          <ChevronUp className="w-3 h-3" />
+          <ChevronUp className="w-1.5 h-1.5" />
         </button>
         <button
           className="toolbar-button"
@@ -209,7 +221,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Send to back"
           aria-label="Send selected elements to back"
         >
-          <ChevronDown className="w-3 h-3" />
+          <ChevronDown className="w-1.5 h-1.5" />
         </button>
       </div>
 
@@ -234,26 +246,51 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
                 className={`edge-style-option ${edgeStyle === 'straight' ? 'active' : ''}`}
                 onClick={() => handleEdgeStyleSelect('straight')}
               >
-                <Minus className="w-3 h-3" />
+                <Minus className="w-1.5 h-1.5" />
                 <span>Straight</span>
               </button>
               <button
                 className={`edge-style-option ${edgeStyle === 'curved' ? 'active' : ''}`}
                 onClick={() => handleEdgeStyleSelect('curved')}
               >
-                <GitBranch className="w-3 h-3" />
+                <GitBranch className="w-1.5 h-1.5" />
                 <span>Curved</span>
               </button>
               <button
                 className={`edge-style-option ${edgeStyle === 'step' ? 'active' : ''}`}
                 onClick={() => handleEdgeStyleSelect('step')}
               >
-                <Workflow className="w-3 h-3" />
+                <Workflow className="w-1.5 h-1.5" />
                 <span>Step</span>
               </button>
             </div>
           )}
         </div>
+      </div>
+
+      <div className="toolbar-separator" />
+
+      {/* Canvas Settings Group */}
+      <div className="toolbar-group">
+        <button
+          className={`toolbar-button ${snapToGrid ? 'active' : ''}`}
+          onClick={onToggleSnapToGrid}
+          title="Snap to Grid (20px)"
+          aria-label="Toggle snap to grid"
+        >
+          <Grid3X3 className="w-1.5 h-1.5" />
+          <span className="toolbar-text">Snap</span>
+        </button>
+
+        <button
+          className="toolbar-button"
+          onClick={onToggleConnectionMode}
+          title={`Connection mode: ${connectionMode}`}
+          aria-label={`Change connection mode (currently ${connectionMode})`}
+        >
+          <Link className="w-1.5 h-1.5" />
+          <span className="toolbar-text">{connectionMode}</span>
+        </button>
       </div>
 
       <div className="toolbar-separator" />
@@ -266,7 +303,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Zoom out (Ctrl+-)"
           aria-label="Zoom out"
         >
-          <ZoomOut className="w-3 h-3" />
+          <ZoomOut className="w-1.5 h-1.5" />
         </button>
 
         <div className="zoom-display" title="Current zoom level">
@@ -279,7 +316,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Zoom in (Ctrl++)"
           aria-label="Zoom in"
         >
-          <ZoomIn className="w-3 h-3" />
+          <ZoomIn className="w-1.5 h-1.5" />
         </button>
 
         <button
@@ -288,7 +325,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           title="Fit to view (Ctrl+0)"
           aria-label="Fit diagram to view"
         >
-          <Maximize2 className="w-3 h-3" />
+          <Maximize2 className="w-1.5 h-1.5" />
         </button>
       </div>
     </div>

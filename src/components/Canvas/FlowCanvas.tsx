@@ -8,7 +8,6 @@ import {
   useEdgesState,
   useReactFlow,
   ReactFlowProvider,
-  Panel,
   MiniMap,
   ConnectionMode,
   MarkerType,
@@ -52,6 +51,8 @@ export interface FlowCanvasProps {
   showMiniMap?: boolean;
   showControls?: boolean;
   showRulers?: boolean;
+  snapToGrid?: boolean;
+  connectionMode?: 'loose' | 'strict';
 }
 
 const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
@@ -73,6 +74,8 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     showMiniMap = true,
     showControls = true,
     showRulers = false,
+    snapToGrid: propSnapToGrid = true,
+    connectionMode: propConnectionMode = 'loose',
   } = props;
 
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
@@ -82,9 +85,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   // Enhanced drag & drop states
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragPreview, setDragPreview] = useState<{ x: number; y: number; shapeType: string } | null>(null);
-  const [snapToGrid, setSnapToGrid] = useState(true);
+  const snapToGrid = propSnapToGrid;
   const [gridSize] = useState(20);
-  const [connectionMode, setConnectionMode] = useState<'loose' | 'strict'>('loose');
+  const connectionMode = propConnectionMode;
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { fitView, getViewport, setViewport, getNodes, getEdges, screenToFlowPosition } = useReactFlow();
@@ -446,8 +449,6 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     exportToJpeg,
     exportToWebp,
     exportToPdf,
-    toggleSnapToGrid: () => setSnapToGrid(!snapToGrid),
-    toggleConnectionMode: () => setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose'),
     getCanvasSettings: () => ({ snapToGrid, gridSize, connectionMode }),
     // Expose React Flow instance methods for zoom controls
     zoomIn: () => {
@@ -545,29 +546,6 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         )}
         {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} size={3} color="#888888" />}
 
-        {/* Enhanced Settings Panel */}
-        <Panel position="top-right" className="flow-panel">
-          <div className="flex flex-col gap-2 text-xs">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={snapToGrid}
-                onChange={() => setSnapToGrid(!snapToGrid)}
-                className="w-3 h-3"
-              />
-              <span className="text-gray-600">Snap to Grid ({gridSize}px)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Connection: </span>
-              <button
-                onClick={() => setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose')}
-                className="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 rounded"
-              >
-                {connectionMode}
-              </button>
-            </div>
-          </div>
-        </Panel>
 
         {/* Enhanced Rulers with mm/cm markings */}
         {showRulers && (

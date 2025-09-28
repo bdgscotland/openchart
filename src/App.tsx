@@ -22,6 +22,8 @@ function App() {
   const [copiedNodes, setCopiedNodes] = useState<Node[]>([]);
   const [showGrid, setShowGrid] = useState(true);
   const [showRulers, setShowRulers] = useState(false);
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [connectionMode, setConnectionMode] = useState<'loose' | 'strict'>('loose');
 
   // Sidebar collapse states with localStorage persistence
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(() => {
@@ -657,6 +659,10 @@ function App() {
         onZoomIn={actionToolbar.handleZoomIn}
         onZoomOut={actionToolbar.handleZoomOut}
         onFitToView={actionToolbar.handleFitToView}
+        snapToGrid={snapToGrid}
+        onToggleSnapToGrid={() => setSnapToGrid(!snapToGrid)}
+        connectionMode={connectionMode}
+        onToggleConnectionMode={() => setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose')}
       />
 
       <main className="app-main">
@@ -698,6 +704,8 @@ function App() {
               onPaneClick={handleCanvasClick}
               showGrid={showGrid}
               showRulers={showRulers}
+              snapToGrid={snapToGrid}
+              connectionMode={connectionMode}
             />
           </div>
           <PropertyPanel

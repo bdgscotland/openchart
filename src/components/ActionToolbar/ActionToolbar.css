@@ -39,19 +39,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 4px;
+  gap: 3px;
+  padding: 3px 4px;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 2px;
   background: transparent;
-  color: #374151;
-  font-size: 11px;
-  font-weight: 500;
+  color: #4b5563;
+  font-size: 10px;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.1s ease;
-  min-height: 24px;
-  max-height: 24px;
-  min-width: 24px;
+  min-height: 20px;
+  max-height: 20px;
+  min-width: 20px;
   white-space: nowrap;
 }
 
@@ -77,10 +77,26 @@
   outline-offset: 2px;
 }
 
+.toolbar-button.active {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.toolbar-button.active:hover {
+  background: #bfdbfe;
+  border-color: #60a5fa;
+}
+
+/* Toolbar Icons */
+.toolbar-button svg {
+  stroke-width: 1.25;
+}
+
 /* Toolbar Text */
 .toolbar-text {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 9px;
+  font-weight: 400;
   text-transform: capitalize;
 }
 
