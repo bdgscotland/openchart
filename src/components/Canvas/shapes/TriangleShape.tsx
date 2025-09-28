@@ -66,27 +66,42 @@ export const TriangleShape: React.FC<BaseShapeProps> = ({ data, selected }) => {
       <Handle type="target" position={Position.Bottom} style={{ background: '#555' }} />
       
       {/* Triangle shape using CSS borders */}
-      <div style={{ 
-        width: 0, 
-        height: 0, 
-        borderLeft: `${(data.width || 120) / 2}px solid transparent`,
-        borderRight: `${(data.width || 120) / 2}px solid transparent`,
-        borderBottom: `${data.height || 80}px solid ${data.backgroundColor || '#f0f9ff'}`,
+      <div style={{
+        width: `${data.width || 120}px`,
+        height: `${data.height || 80}px`,
         position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
         filter: selected ? 'drop-shadow(0 0 0 2px #0066ff)' : 'drop-shadow(0 0 0 1px #d1d5db)',
       }}>
+        {/* Actual triangle using border trick, centered in container */}
         <div style={{
+          width: 0,
+          height: 0,
+          borderLeft: `${(data.width || 120) / 2}px solid transparent`,
+          borderRight: `${(data.width || 120) / 2}px solid transparent`,
+          borderBottom: `${data.height || 80}px solid ${data.backgroundColor || '#f0f9ff'}`,
           position: 'absolute',
-          top: '60%',
+          top: 0,
           left: '50%',
           transform: 'translateX(-50%)',
-          fontSize: '12px',
-          whiteSpace: 'nowrap',
         }}>
-          {renderContent()}
+          <div style={{
+            position: 'absolute',
+            top: '60%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '12px',
+            whiteSpace: 'nowrap',
+          }}>
+            {renderContent()}
+          </div>
         </div>
       </div>
       
+      {/* Source handles for connecting from this shape */}
       <Handle type="source" position={Position.Top} style={{ background: '#555' }} />
       <Handle type="source" position={Position.Left} style={{ background: '#555' }} />
       <Handle type="source" position={Position.Right} style={{ background: '#555' }} />

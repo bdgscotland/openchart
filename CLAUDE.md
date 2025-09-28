@@ -63,7 +63,7 @@ OpenChart is an open-source, git-backed diagramming platform built with React + 
 - Organize work by priority (P1: Canvas, P2: File Ops, P3: Git)
 - Track completion rates and identify development blockers
 - Ensure quality gates are met (testing, documentation, performance)
-- Coordinate with other specialized agents for comprehensive project management
+- Coordinate with other specialized agents for project management
 - Generate actionable project insights and recommendations
 
 ### Technology Stack
@@ -237,7 +237,7 @@ npm run format          # Prettier formatting
 - **React**: Component framework
 - **TypeScript**: Type safety
 - **React Flow**: Node-based diagramming engine
-- **Lucide React**: Professional icon library
+- **Lucide React**: Icon library
 - **html-to-image**: Export functionality
 - **Vite**: Build tool and dev server
 

@@ -18,26 +18,27 @@ OpenChart aims to become a modern, open-source alternative to commercial diagram
 **This is an early prototype.** Many core features are incomplete or buggy:
 
 ### ⚠️ Known Issues
-- **Shape rendering**: Some shapes display incorrectly or appear black
-- **Resizing**: Shape resize handles may not work reliably
-- **Connections**: Edge creation and editing needs improvement
-- **Grid visibility**: Grid dots may be hard to see
+- **Shape resizing**: Shape resize handles may not work reliably in all scenarios
 - **Export quality**: Export functions are basic and may fail
-- **No persistence**: Diagrams are not automatically saved
 - **Limited undo/redo**: History management is incomplete
+- **Performance**: May slow down with very complex diagrams (100+ shapes)
 
-### ✅ What Currently Works (Sort Of)
-- Basic shape placement from sidebar
-- Simple drag and drop operations
-- Basic zoom and pan controls
-- Property panel for styling (when it works)
-- Some export functionality (PNG, SVG)
+### ✅ What Currently Works Well
+- **Shape Placement**: All 61 shapes render correctly from categorized sidebar
+- **Shape Interactions**: Drag, drop, select, multi-select operations work reliably
+- **Connection Tools**: Edge creation with multiple styles (straight, curved, step)
+- **Property Panel**: Styling controls with real-time updates
+- **Color Picker**: Multi-tab color picker with palette, transparency, and theme options
+- **Zoom & Pan**: Smooth canvas navigation with minimap and controls
+- **Edge Positioning**: Accurate connection points on all shape types
+- **UI Polish**: Consistent icons, proper hover states, and visual feedback
+- **Auto-save**: Diagrams automatically saved as you work
 
-### 🔬 Experimental Features
-- 61 shapes across 6 categories (many with rendering issues)
-- Action toolbar with common operations
-- Collapsible sidebars
-- Multiple export formats (reliability varies)
+### 🔬 Stable Features
+- **Shape Library**: 61 shapes across 6 categories
+- **Action Toolbar**: Context-aware tools for selection, duplication, and layering
+- **Collapsible Sidebars**: Space-efficient interface with smooth animations
+- **Multiple Export Formats**: PNG, SVG export capabilities
 
 ## 🚀 Quick Start
 
@@ -61,46 +62,47 @@ Open http://localhost:5173
 
 ## 🔨 Recent Development Work
 
-### Latest Iteration (v0.2.1-alpha)
-**Focus: Basic UI improvements and bug fixes**
+### Latest Iteration (v0.2.2-alpha)
+**Focus: UI polish and core functionality stabilization**
 
-- Attempted to fix shape rendering issues (ongoing)
-- Added action toolbar prototype (functionality limited)
-- Implemented collapsible sidebars (may be buggy)
-- Expanded shape library to 61 shapes (many still broken)
-- Added multiple export formats (reliability varies)
-- Grid visibility improvements (still needs work)
-- Basic undo/redo framework (incomplete)
+- ✅ **Fixed edge positioning** - Resolved React Flow zoom scaling issues affecting all shapes
+- ✅ **Enhanced connection tools** - Working dropdown for edge styles (straight, curved, step)
+- ✅ **Improved color picker** - Multi-tab interface with multiple color palettes
+- ✅ **UI consistency fixes** - Proper icon states, hover effects, and visual feedback
+- ✅ **PropertyPanel improvements** - Fixed collapsed state positioning and expand/contract icons
+- ✅ **Minimap contrast** - Enhanced viewport visibility with blue highlighting
+- ✅ **Multi-select operations** - Verified copy/paste/duplicate functionality works correctly
 
-### Known Regressions
-- Some changes may have introduced new bugs
-- Export functions may not work consistently
-- Shape resizing still unreliable
-- Connection editing remains problematic
+### Recent Quality Improvements
+- Significantly reduced known UI bugs and inconsistencies
+- Improved visual feedback and user experience
+- Enhanced stability of core diagramming operations
+- Better React Flow integration and zoom handling
 
 ## ⚠️ Reality Check
 
-**This is NOT a usable diagramming tool yet.** It's a development prototype with many broken features.
+**This is an improving prototype** with increasingly stable core functionality, but still has limitations.
 
 ### What You Can Expect
-- Frequent bugs and crashes
-- Features that don't work as expected
-- Incomplete functionality
-- Data loss (no reliable save/load)
-- Poor performance with complex diagrams
-- Breaking changes between versions
+- Generally stable basic diagramming operations
+- Some advanced features may not work as expected
+- Occasional bugs in edge cases
+- Automatic diagram saving (but limited recovery options)
+- Good performance with moderate diagrams (50-100 shapes)
+- Breaking changes possible between versions
 
-### For Developers Only
-This project is currently suitable for:
-- Learning React Flow
-- Contributing to open source
-- Experimenting with diagramming concepts
-- Understanding the challenges of building diagram editors
+### Development Status
+This project is now suitable for:
+- **Learning React Flow** - Good example of complex React Flow implementation
+- **Contributing to open source** - Well-structured codebase with clear patterns
+- **Experimenting with diagramming** - Most core features work reliably
+- **Prototype diagrams** - Basic diagramming needs can be met
+- **Educational use** - Understanding modern web-based diagram editors
 
-**Not suitable for:**
-- Real work or production use
-- Important diagrams you can't afford to lose
-- Users expecting polished software
+**Still not ready for:**
+- Mission-critical business diagrams
+- Production workflows requiring 100% reliability
+- Users needing advanced diagramming features
 
 ## 🛠️ Tech Stack
 
