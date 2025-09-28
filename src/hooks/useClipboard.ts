@@ -27,17 +27,18 @@ export const useClipboard = ({
    */
   const copySelection = useCallback(() => {
     const selectedNodes = nodes.filter(node => node.selected);
+    const selectedEdges = edges.filter(edge => edge.selected);
 
-    if (selectedNodes.length === 0) {
-      console.log('📋 Copy: No nodes selected');
+    if (selectedNodes.length === 0 && selectedEdges.length === 0) {
+      console.log('📋 Copy: No nodes or edges selected');
       return false;
     }
 
     const selectedNodeIds = new Set(selectedNodes.map(node => node.id));
 
-    // Find edges that connect selected nodes
+    // Find edges that connect selected nodes OR are explicitly selected
     const connectedEdges = edges.filter(edge =>
-      selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target)
+      (selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target)) || edge.selected
     );
 
     const clipboardContent: ClipboardData = {
@@ -51,7 +52,7 @@ export const useClipboard = ({
 
     setClipboardData(clipboardContent);
 
-    console.log(`📋 Copied ${selectedNodes.length} nodes and ${connectedEdges.length} edges to clipboard`);
+    console.log(`📋 Copied ${selectedNodes.length} nodes and ${connectedEdges.length} edges to clipboard (${selectedEdges.length} explicitly selected edges)`);
     return true;
   }, [nodes, edges]);
 

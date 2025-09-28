@@ -402,6 +402,8 @@ export interface CreateShapeNodeOptions {
 
 export const createShapeNode = (options: CreateShapeNodeOptions) => {
   const defaults = getShapeDefaults(options.shapeType);
+  const nodeWidth = options.width || defaults.width || 120;
+  const nodeHeight = options.height || defaults.height || 80;
 
   return {
     id: options.id,
@@ -409,11 +411,16 @@ export const createShapeNode = (options: CreateShapeNodeOptions) => {
     position: options.position,
     draggable: true,
     selectable: true,
+    // CRITICAL: Set dimensions at React Flow node level for proper edge connections
+    width: nodeWidth,
+    height: nodeHeight,
+    // CRITICAL: Set measured to force React Flow to use our dimensions for edge calculations
+    measured: { width: nodeWidth, height: nodeHeight },
     data: {
       shape: options.shapeType,
       label: options.label || options.shapeType.charAt(0).toUpperCase() + options.shapeType.slice(1),
-      width: options.width || defaults.width || 120,
-      height: options.height || defaults.height || 80,
+      width: nodeWidth,
+      height: nodeHeight,
       backgroundColor: options.backgroundColor || '#f0f9ff',
       onTextChange: options.onTextChange,
       ...defaults,

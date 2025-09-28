@@ -13,16 +13,21 @@ import { createEmptyDiagram } from './utils/diagramFactory';
 // React Flow types are imported but typed as any for flexibility
 import type { Node, Edge } from '@xyflow/react';
 import { MarkerType } from '@xyflow/react';
-import type { ElementStyle } from './types/diagram';
+import type { ElementStyle, DiagramSettings, GridSettings, BackgroundSettings, PaperSettings, ViewportSettings, RulerSettings } from './types/diagram';
+import { DEFAULT_DIAGRAM_SETTINGS } from './types/diagram';
 import './App.css';
 
 function App() {
   const [selectedTool, setSelectedTool] = useState<DrawingTool>('select');
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [showGrid, setShowGrid] = useState(true);
-  const [showRulers, setShowRulers] = useState(false);
-  const [snapToGrid, setSnapToGrid] = useState(true);
+  // Diagram settings state
+  const [diagramSettings, setDiagramSettings] = useState<DiagramSettings>(DEFAULT_DIAGRAM_SETTINGS);
+
+  // Backward compatibility - extract individual values from diagram settings
+  const showGrid = diagramSettings.grid.enabled;
+  const showRulers = diagramSettings.rulers.enabled;
+  const snapToGrid = diagramSettings.grid.snapToGrid;
   const [connectionMode, setConnectionMode] = useState<'loose' | 'strict'>('loose');
 
   // Sidebar collapse states with localStorage persistence
@@ -43,17 +48,19 @@ function App() {
   const canvasState = useCanvasState(initialDiagram);
 
 
-  // Convert React Flow nodes to diagram elements for PropertyPanel
-  // Optimized useMemo with dependency array that only includes selected nodes and their updates
+  // Convert React Flow nodes and edges to diagram elements for PropertyPanel
+  // Optimized useMemo that includes both nodes and edges in selection
   const selectedElements = useMemo(() => {
     const currentlySelectedNodes = nodes.filter(node => node.selected);
+    const currentlySelectedEdges = edges.filter(edge => edge.selected);
 
     // Early return if no selection to avoid expensive computation
-    if (currentlySelectedNodes.length === 0) {
+    if (currentlySelectedNodes.length === 0 && currentlySelectedEdges.length === 0) {
       return [];
     }
 
-    const elements = currentlySelectedNodes.map(node => {
+    // Convert selected nodes to diagram elements
+    const nodeElements = currentlySelectedNodes.map(node => {
       // Get complete style from node.data.style with efficient defaults
       const nodeStyle = node.data?.style as ElementStyle | undefined;
 
@@ -95,9 +102,56 @@ function App() {
       };
     });
 
-    console.log('🔄 selectedElements recomputed:', elements.length, 'selected');
-    return elements;
-  }, [nodes.filter(n => n.selected).map(n => n.id).join(','), nodes.length]); // Only recompute when selection changes
+    // Convert selected edges to diagram elements (simplified representation)
+    const edgeElements = currentlySelectedEdges.map(edge => {
+      return {
+        id: edge.id,
+        type: 'edge' as any,
+        position: { x: 0, y: 0 }, // Edges don't have fixed positions
+        size: { width: 0, height: 0 },
+        style: {
+          fill: 'transparent',
+          stroke: edge.style?.stroke || '#94a3b8',
+          strokeWidth: edge.style?.strokeWidth || 2,
+          opacity: 1,
+          fontSize: 12,
+          fontFamily: 'Arial, sans-serif',
+          fontWeight: 'normal' as const,
+          fontStyle: 'normal' as const,
+          textAlign: 'center' as const,
+          cornerRadius: 0,
+          color: '#000000',
+          textDecoration: 'none',
+          textTransform: 'none',
+          lineHeight: 1.4,
+          letterSpacing: 'normal',
+          wordSpacing: 'normal',
+        },
+        text: edge.label || '',
+        visible: true,
+        locked: false,
+        zIndex: 0,
+        properties: {
+          source: edge.source,
+          target: edge.target,
+          edgeType: edge.type
+        }
+      };
+    });
+
+    const allElements = [...nodeElements, ...edgeElements];
+    console.log('🔄 selectedElements recomputed:', {
+      nodes: nodeElements.length,
+      edges: edgeElements.length,
+      total: allElements.length
+    });
+    return allElements;
+  }, [
+    nodes.filter(n => n.selected).map(n => n.id).join(','),
+    edges.filter(e => e.selected).map(e => e.id).join(','),
+    nodes.length,
+    edges.length
+  ]); // Recompute when node or edge selection changes
 
   // PropertyPanel callback handlers that update React Flow nodes
   const handleUpdateElementStyle = useCallback((elementId: string, styleUpdates: any) => {
@@ -185,6 +239,32 @@ function App() {
     selectedTool,
     onNodesChange: setNodes,
   });
+
+  // Enhanced pane click handler that handles both shape creation and deselection
+  const handlePaneClick = useCallback((event: React.MouseEvent) => {
+    // First handle shape creation if a tool is selected
+    handleCanvasClick(event);
+
+    // Then handle deselection - clear all selected nodes
+    setNodes(currentNodes => {
+      const hasSelectedNodes = currentNodes.some(node => node.selected);
+      if (hasSelectedNodes) {
+        console.log('🎯 Pane clicked - deselecting all nodes');
+        return currentNodes.map(node => ({ ...node, selected: false }));
+      }
+      return currentNodes;
+    });
+
+    // Also clear selected edges
+    setEdges(currentEdges => {
+      const hasSelectedEdges = currentEdges.some(edge => edge.selected);
+      if (hasSelectedEdges) {
+        console.log('🎯 Pane clicked - deselecting all edges');
+        return currentEdges.map(edge => ({ ...edge, selected: false }));
+      }
+      return currentEdges;
+    });
+  }, [handleCanvasClick]);
 
   // Update all nodes when selectedTool changes to show connection mode
   useEffect(() => {
@@ -355,11 +435,53 @@ function App() {
   }, [canvasState]);
 
   const handleToggleGrid = useCallback(() => {
-    setShowGrid(prev => !prev);
+    setDiagramSettings(prev => ({
+      ...prev,
+      grid: { ...prev.grid, enabled: !prev.grid.enabled }
+    }));
   }, []);
 
   const handleToggleRulers = useCallback(() => {
-    setShowRulers(prev => !prev);
+    setDiagramSettings(prev => ({
+      ...prev,
+      rulers: { ...prev.rulers, enabled: !prev.rulers.enabled }
+    }));
+  }, []);
+
+  // Diagram settings handlers for PropertyPanel
+  const handleGridSettingsChange = useCallback((gridSettings: Partial<GridSettings>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      grid: { ...prev.grid, ...gridSettings }
+    }));
+  }, []);
+
+  const handleBackgroundSettingsChange = useCallback((backgroundSettings: Partial<BackgroundSettings>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      background: { ...prev.background, ...backgroundSettings }
+    }));
+  }, []);
+
+  const handlePaperSettingsChange = useCallback((paperSettings: Partial<PaperSettings>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      paper: { ...prev.paper, ...paperSettings }
+    }));
+  }, []);
+
+  const handleViewportSettingsChange = useCallback((viewportSettings: Partial<ViewportSettings>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      viewport: { ...prev.viewport, ...viewportSettings }
+    }));
+  }, []);
+
+  const handleRulerSettingsChange = useCallback((rulerSettings: Partial<RulerSettings>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      rulers: { ...prev.rulers, ...rulerSettings }
+    }));
   }, []);
 
   // Clipboard functionality
@@ -436,6 +558,7 @@ function App() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
         e.preventDefault();
         setNodes(nodes => nodes.map(n => ({ ...n, selected: true })));
+        setEdges(edges => edges.map(e => ({ ...e, selected: true })));
       }
 
       // Save (Ctrl+S / Cmd+S)
@@ -700,8 +823,10 @@ function App() {
                 };
                 setEdges(currentEdges => [...currentEdges, newEdge]);
               }}
-              onPaneClick={handleCanvasClick}
+              onPaneClick={handlePaneClick}
               showGrid={showGrid}
+              gridSize={diagramSettings.grid.size}
+              gridColor={diagramSettings.grid.color}
               showRulers={showRulers}
               snapToGrid={snapToGrid}
               connectionMode={connectionMode}
@@ -713,6 +838,12 @@ function App() {
             onUpdateElementText={handleUpdateElementText}
             onUpdateElementPosition={handleUpdateElementPosition}
             onUpdateElementSize={handleUpdateElementSize}
+            diagramSettings={diagramSettings}
+            onGridSettingsChange={handleGridSettingsChange}
+            onBackgroundSettingsChange={handleBackgroundSettingsChange}
+            onPaperSettingsChange={handlePaperSettingsChange}
+            onViewportSettingsChange={handleViewportSettingsChange}
+            onRulerSettingsChange={handleRulerSettingsChange}
             isVisible={!isRightSidebarCollapsed}
             onToggleVisibility={handleToggleRightSidebar}
           />

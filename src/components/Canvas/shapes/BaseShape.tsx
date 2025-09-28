@@ -142,12 +142,18 @@ export const BaseShape: React.FC<BaseShapeProps & {
       }
 
       // Update node dimensions and position atomically
+      // CRITICAL: Update both React Flow dimensions AND data dimensions for edge connections
       setNodes((nodes) =>
         nodes.map((node) =>
           node.id === id
             ? {
                 ...node,
                 position: newPosition,
+                // Update React Flow node-level dimensions for proper edge connection calculations
+                width: newWidth,
+                height: newHeight,
+                // CRITICAL: Set measured to true to force React Flow to use our dimensions
+                measured: { width: newWidth, height: newHeight },
                 data: {
                   ...node.data,
                   width: newWidth,
@@ -284,6 +290,8 @@ export const BaseShape: React.FC<BaseShapeProps & {
           boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
           width: isConnectionMode ? 14 : 10,
           height: isConnectionMode ? 14 : 10,
+          // Force position to ensure React Flow calculates correctly
+          position: 'absolute',
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}
@@ -306,6 +314,8 @@ export const BaseShape: React.FC<BaseShapeProps & {
           boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
           width: isConnectionMode ? 14 : 10,
           height: isConnectionMode ? 14 : 10,
+          // Force position to ensure React Flow calculates correctly
+          position: 'absolute',
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}
@@ -328,6 +338,8 @@ export const BaseShape: React.FC<BaseShapeProps & {
           boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
           width: isConnectionMode ? 14 : 10,
           height: isConnectionMode ? 14 : 10,
+          // Force position to ensure React Flow calculates correctly
+          position: 'absolute',
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}
@@ -350,6 +362,8 @@ export const BaseShape: React.FC<BaseShapeProps & {
           boxShadow: isConnecting ? '0 0 0 3px rgba(34, 197, 94, 0.3)' : isConnectionMode ? '0 0 0 3px rgba(245, 158, 11, 0.3)' : '0 0 0 2px rgba(59, 130, 246, 0.2)',
           width: isConnectionMode ? 14 : 10,
           height: isConnectionMode ? 14 : 10,
+          // Force position to ensure React Flow calculates correctly
+          position: 'absolute',
         }}
         onMouseEnter={() => setIsConnecting(true)}
         onMouseLeave={() => setIsConnecting(false)}

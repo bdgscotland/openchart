@@ -6,7 +6,7 @@
 }
 
 .dimension-input__label {
-  color: #9ca3af;
+  color: #6b7280;
   font-weight: 500;
   font-size: 11px;
   text-transform: uppercase;
@@ -29,10 +29,10 @@
   width: 100%;
   height: 28px;
   padding: 4px 24px 4px 8px;
-  border: 1px solid #374151;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  background: #1f2937;
-  color: #f9fafb;
+  background: #ffffff;
+  color: #1f2937;
   font-size: 12px;
   transition: all 0.15s ease;
   -moz-appearance: textfield; /* Hide Firefox spinner */
@@ -51,8 +51,8 @@
 }
 
 .dimension-input__input--disabled {
-  background: #111827;
-  color: #6b7280;
+  background: #f9fafb;
+  color: #9ca3af;
   cursor: not-allowed;
 }
 
@@ -70,9 +70,9 @@
   width: 16px;
   height: 11px;
   padding: 0;
-  border: none;
-  background: #374151;
-  color: #9ca3af;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #6b7280;
   font-size: 8px;
   line-height: 1;
   cursor: pointer;
@@ -84,22 +84,22 @@
 }
 
 .dimension-input__stepper:hover:not(:disabled) {
-  background: #4b5563;
-  color: #f3f4f6;
+  background: #e5e7eb;
+  color: #374151;
 }
 
 .dimension-input__stepper:active:not(:disabled) {
-  background: #6b7280;
+  background: #d1d5db;
 }
 
 .dimension-input__stepper:disabled {
-  background: #1f2937;
-  color: #4b5563;
+  background: #f9fafb;
+  color: #9ca3af;
   cursor: not-allowed;
 }
 
 .dimension-input__stepper--up {
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .dimension-input__unit-selector {
@@ -112,10 +112,10 @@
   gap: 4px;
   height: 28px;
   padding: 4px 8px;
-  border: 1px solid #374151;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  background: #1f2937;
-  color: #f9fafb;
+  background: #f9fafb;
+  color: #1f2937;
   font-size: 11px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -124,13 +124,13 @@
 }
 
 .dimension-input__unit-button:hover:not(:disabled) {
-  background: #374151;
-  border-color: #4b5563;
+  background: #e5e7eb;
+  border-color: #9ca3af;
 }
 
 .dimension-input__unit-button:disabled {
-  background: #111827;
-  color: #6b7280;
+  background: #f3f4f6;
+  color: #9ca3af;
   cursor: not-allowed;
 }
 
@@ -148,10 +148,10 @@
   top: calc(100% + 2px);
   right: 0;
   min-width: 60px;
-  background: #1f2937;
-  border: 1px solid #374151;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   overflow: hidden;
 }
@@ -162,7 +162,7 @@
   padding: 6px 12px;
   border: none;
   background: transparent;
-  color: #f9fafb;
+  color: #1f2937;
   font-size: 11px;
   text-align: left;
   cursor: pointer;
@@ -170,7 +170,7 @@
 }
 
 .dimension-input__unit-option:hover {
-  background: #374151;
+  background: #f3f4f6;
 }
 
 .dimension-input__unit-option--selected {

@@ -37,6 +37,7 @@
   padding: 0;
   gap: 2px;
   background: transparent;
+  flex-wrap: wrap; /* Allow wrapping on very narrow screens */
 }
 
 .format-button {
@@ -55,12 +56,13 @@
 }
 
 .text-format-toolbar.compact .format-button {
-  padding: 6px;
+  padding: 8px 6px;
   background: var(--color-bg-secondary, #f8f9fa);
   border: 1px solid var(--color-border, #dee2e6);
   border-radius: 4px;
-  flex: none;
-  min-width: 32px;
+  flex: 1 1 auto; /* Allow flexible growth and shrinking */
+  min-width: 36px; /* Slightly wider minimum */
+  max-width: 60px; /* Prevent buttons from getting too wide */
 }
 
 .format-button:hover {
@@ -139,6 +141,13 @@
 
 .format-button:hover::after {
   opacity: 1;
+}
+
+/* Property Panel specific styling */
+.property-panel .text-format-toolbar.compact .format-button {
+  min-width: 32px;
+  max-width: 48px;
+  padding: 6px 4px;
 }
 
 /* Responsive adjustments */

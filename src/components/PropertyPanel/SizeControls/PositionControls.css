@@ -1,8 +1,9 @@
 .position-controls {
-  background: #111827;
-  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
   padding: 16px;
-  color: #f9fafb;
+  color: #1f2937;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   margin-top: 12px;
 }
@@ -17,14 +18,15 @@
 .position-controls__title {
   font-size: 14px;
   font-weight: 600;
-  color: #f3f4f6;
+  color: #374151;
   margin: 0;
 }
 
 .position-controls__multi-note {
   font-size: 10px;
   color: #6b7280;
-  background: #374151;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   padding: 2px 6px;
   border-radius: 3px;
   font-style: italic;
@@ -44,7 +46,7 @@
 }
 
 .position-controls__label {
-  color: #9ca3af;
+  color: #6b7280;
   font-weight: 500;
   font-size: 11px;
   text-transform: uppercase;
@@ -59,10 +61,10 @@
   width: 100%;
   height: 32px;
   padding: 6px 24px 6px 8px;
-  border: 1px solid #374151;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  background: #1f2937;
-  color: #f9fafb;
+  background: #ffffff;
+  color: #1f2937;
   font-size: 13px;
   transition: all 0.15s ease;
   -moz-appearance: textfield; /* Hide Firefox spinner */
@@ -94,9 +96,9 @@
   width: 16px;
   height: 13px;
   padding: 0;
-  border: none;
-  background: #374151;
-  color: #9ca3af;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #6b7280;
   font-size: 8px;
   line-height: 1;
   cursor: pointer;
@@ -108,16 +110,16 @@
 }
 
 .position-controls__stepper:hover {
-  background: #4b5563;
-  color: #f3f4f6;
+  background: #e5e7eb;
+  color: #374151;
 }
 
 .position-controls__stepper:active {
-  background: #6b7280;
+  background: #d1d5db;
 }
 
 .position-controls__stepper--up {
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .position-controls__actions {
@@ -129,10 +131,10 @@
 
 .position-controls__action-button {
   height: 28px;
-  border: 1px solid #374151;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  background: #1f2937;
-  color: #f3f4f6;
+  background: #f9fafb;
+  color: #374151;
   font-size: 10px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -144,16 +146,16 @@
 }
 
 .position-controls__action-button:hover {
-  background: #374151;
-  border-color: #4b5563;
+  background: #e5e7eb;
+  border-color: #9ca3af;
 }
 
 .position-controls__action-button:active {
-  background: #4b5563;
+  background: #d1d5db;
 }
 
 .position-controls__hints {
-  border-top: 1px solid #374151;
+  border-top: 1px solid #e5e7eb;
   padding-top: 8px;
 }
 
@@ -170,14 +172,14 @@
 }
 
 .position-controls__hint-key {
-  background: #374151;
-  color: #d1d5db;
+  background: #f3f4f6;
+  color: #4b5563;
   padding: 1px 4px;
   border-radius: 3px;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 8px;
   font-weight: 500;
-  border: 1px solid #4b5563;
+  border: 1px solid #d1d5db;
 }
 
 .position-controls__hint-desc {
@@ -199,7 +201,8 @@
 }
 
 .position-controls__input:focus {
-  background: #374151;
+  background: #ffffff;
+  border-color: #3b82f6;
 }
 
 /* Responsive adjustments */

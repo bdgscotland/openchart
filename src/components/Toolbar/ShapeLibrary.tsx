@@ -326,7 +326,7 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
               aria-label="Collapse Shape Library"
               title="Collapse Shape Library"
             >
-              <PanelLeftClose size={16} />
+              <ChevronLeft size={16} />
             </button>
           )}
         </div>

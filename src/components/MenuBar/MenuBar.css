@@ -37,8 +37,10 @@
 
 .menu-trigger:hover,
 .menu-trigger.active {
-  background: var(--primary-surface-hover);
+  background: rgba(59, 130, 246, 0.1); /* Light blue highlight */
   color: var(--primary-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transform: translateY(-1px); /* Slight lift effect */
 }
 
 .menu-dropdown {

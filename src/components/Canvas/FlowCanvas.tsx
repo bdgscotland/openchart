@@ -52,6 +52,8 @@ export interface FlowCanvasProps {
   onEdgeDoubleClick?: (event: React.MouseEvent, edge: Edge) => void;
   onEdgeContextMenu?: (event: React.MouseEvent, edge: Edge) => void;
   showGrid?: boolean;
+  gridSize?: number;
+  gridColor?: string;
   showMiniMap?: boolean;
   showControls?: boolean;
   showRulers?: boolean;
@@ -79,6 +81,8 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     onEdgeDoubleClick,
     onEdgeContextMenu,
     showGrid = true,
+    gridSize = 20,
+    gridColor = '#888888',
     showMiniMap = true,
     showControls = true,
     showRulers = false,
@@ -97,7 +101,6 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const [selectedNodes, setSelectedNodes] = useState<Node[]>([]);
   const [selectedEdges, setSelectedEdges] = useState<Edge[]>([]);
   const snapToGrid = propSnapToGrid;
-  const [gridSize] = useState(20);
   const connectionMode = propConnectionMode;
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -753,7 +756,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         selectNodesOnDrag={false}
         selectionOnDrag={true}
         multiSelectionKeyCode="Ctrl"
-        selectionKeyCode={null}
+        selectionKeyCode="Shift"
         panOnDrag={[1, 2]}
         selectionMode="partial"
         deleteKeyCode="Delete"
@@ -775,7 +778,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
             zoomable={true}
           />
         )}
-        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} size={3} color="#888888" />}
+        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} size={3} color={gridColor} />}
 
 
         {/* Enhanced Rulers with mm/cm markings */}

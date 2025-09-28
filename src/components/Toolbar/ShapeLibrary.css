@@ -41,7 +41,8 @@
 /* Library header content wrapper */
 .library-header-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: var(--space-2);
 }
 
@@ -100,6 +101,8 @@
   border-radius: 8px;
   padding: 0 var(--space-2);
   transition: all var(--transition-fast);
+  flex: 1; /* Allow search bar to take available space */
+  min-width: 0; /* Allow search bar to shrink */
 }
 
 .search-bar:focus-within {

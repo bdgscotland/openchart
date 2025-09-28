@@ -197,6 +197,32 @@
   transition: background-color 0.2s ease;
 }
 
+/* Font Size Dropdown Container */
+.select-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.font-size-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding-right: 30px;
+  cursor: pointer;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: #6b7280;
+  pointer-events: none;
+}
+
 .number-input:focus + .input-unit + .input-accent {
   background: #3b82f6;
 }
@@ -266,6 +292,7 @@
 
 .color-swatch-wrapper {
   position: relative;
+  flex-shrink: 0; /* Don't allow swatch to shrink */
 }
 
 .property-color-swatch {
@@ -273,9 +300,24 @@
   transition: all 0.2s ease;
 }
 
+.prominent-swatch {
+  width: 52px !important; /* Override Tailwind size - make even more prominent */
+  height: 52px !important; /* Make it a prominent square */
+  border-radius: 8px; /* Rounded corners */
+  border: 3px solid #e5e7eb; /* Thicker border */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12); /* Enhanced shadow for prominence */
+  cursor: pointer; /* Ensure it's clearly clickable */
+}
+
 .property-color-swatch:hover {
   border-color: #3b82f6;
   transform: scale(1.05);
+}
+
+.prominent-swatch:hover {
+  border-color: #3b82f6 !important;
+  transform: scale(1.02) !important; /* Smaller scale for larger swatch */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important; /* Enhanced shadow on hover */
 }
 
 .property-color-swatch.changing {
@@ -311,11 +353,16 @@
 .color-input-wrapper {
   flex: 1;
   position: relative;
+  max-width: 75px; /* Make hex input even smaller and more compact */
+  min-width: 65px; /* Ensure minimum usability */
 }
 
 .color-input {
   width: 100%;
-  padding-right: 40px;
+  padding: 6px 8px; /* Smaller padding */
+  font-size: 11px; /* Smaller font */
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace; /* Monospace for hex codes */
+  text-align: center; /* Center the hex code */
 }
 
 .color-picker-popup {
@@ -337,7 +384,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(2px);
+  /* Removed backdrop-filter: blur(2px); to fix text readability */
 }
 
 /* Style Preview Hint */

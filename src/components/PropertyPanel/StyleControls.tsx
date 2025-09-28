@@ -129,10 +129,10 @@ const AdvancedColorPicker: React.FC<AdvancedColorPickerProps> = ({
         <div className="color-swatch-wrapper">
           <ColorSwatch
             color={displayValue || '#ffffff'}
-            size="medium"
+            size="large"
             onClick={handleSwatchClick}
             title={`${label}: ${displayValue}`}
-            className={`property-color-swatch ${
+            className={`property-color-swatch prominent-swatch ${
               isChanging ? 'changing' : ''
             }`}
           />
@@ -274,6 +274,56 @@ const NumberInput: React.FC<NumberInputProps> = ({
   );
 };
 
+// Font Size Dropdown Component
+interface FontSizeDropdownProps {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  isLoading?: boolean;
+}
+
+const FontSizeDropdown: React.FC<FontSizeDropdownProps> = ({
+  label,
+  value,
+  onChange,
+  isLoading = false,
+}) => {
+  const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72];
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = parseInt(e.target.value, 10);
+    onChange(newValue);
+  }, [onChange]);
+
+  return (
+    <div className="form-group">
+      <label className="form-label">
+        {label}
+        {isLoading && (
+          <span className="loading-indicator">
+            <div className="spinner" />
+          </span>
+        )}
+      </label>
+      <div className="select-container">
+        <select
+          value={value}
+          onChange={handleChange}
+          className="select-input font-size-select"
+          aria-label={`${label} value`}
+        >
+          {fontSizes.map(size => (
+            <option key={size} value={size}>
+              {size}px
+            </option>
+          ))}
+        </select>
+        <div className="select-arrow">▼</div>
+      </div>
+    </div>
+  );
+};
+
 export const StyleControls: React.FC<StyleControlsProps> = ({
   selectedElements = [],
   allElements = [],
@@ -329,11 +379,18 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
     });
   }, []);
 
-  // Get the first selected element for single-element editing
-  const primaryElement = selectedElements[0];
+  // Filter out edge elements for primary element selection (nodes have more detailed properties)
+  const nodeElements = selectedElements.filter(el => el.type !== 'edge');
+  const edgeElements = selectedElements.filter(el => el.type === 'edge');
+
+  // Get the first selected node for single-element editing (prefer nodes over edges)
+  const primaryElement = nodeElements[0] || selectedElements[0];
 
   // Check if multiple elements are selected
   const isMultiSelect = selectedElements.length > 1;
+  const hasNodes = nodeElements.length > 0;
+  const hasEdges = edgeElements.length > 0;
+  const mixedSelection = hasNodes && hasEdges;
 
   // Immediate style updates without loading states to prevent flashing
   const handleStyleUpdate = useCallback((styleUpdate: Partial<ElementStyle>) => {
@@ -502,13 +559,10 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
             />
           </div>
           <div className="form-row">
-            <NumberInput
+            <FontSizeDropdown
               label="Font Size"
               value={primaryElement?.style?.fontSize || 14}
               onChange={(value) => handleStyleUpdate({ fontSize: value })}
-              min={8}
-              max={72}
-              unit="px"
             />
             <div className="form-group">
               <label className="form-label">Font Weight</label>
@@ -547,9 +601,11 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
         >
           {/* Text Format Toolbar */}
           <div className="form-group">
+            <label className="form-label">Text Format</label>
             <TextFormatToolbar
               style={primaryElement?.style || {}}
               onStyleChange={handleStyleUpdate}
+              compact={true}
             />
           </div>
 
@@ -729,8 +785,22 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
       {/* Multi-selection info */}
       {isMultiSelect && (
         <div className="multi-select-info">
-          <p>Multiple elements selected</p>
-          <small>Style changes will apply to all selected elements</small>
+          {mixedSelection ? (
+            <>
+              <p>{nodeElements.length} nodes and {edgeElements.length} edges selected</p>
+              <small>Style changes will apply where supported</small>
+            </>
+          ) : hasEdges ? (
+            <>
+              <p>{edgeElements.length} edges selected</p>
+              <small>Edge style controls</small>
+            </>
+          ) : (
+            <>
+              <p>{nodeElements.length} elements selected</p>
+              <small>Style changes will apply to all selected elements</small>
+            </>
+          )}
         </div>
       )}
     </div>
