@@ -877,7 +877,8 @@ function App() {
                   target: connection.target,
                   sourceHandle: connection.sourceHandle,
                   targetHandle: connection.targetHandle,
-                  type: 'smoothstep',
+                  type: actionToolbar.edgeStyle === 'straight' ? 'straight' :
+                        actionToolbar.edgeStyle === 'curved' ? 'bezier' : 'smoothstep',
                   animated: false,
                   style: { stroke: '#94a3b8', strokeWidth: 2 },
                   markerEnd: {
