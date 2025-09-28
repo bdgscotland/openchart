@@ -1,0 +1,276 @@
+/**
+ * Context-Aware Style Controls Styles
+ *
+ * Provides styling for the new context-aware property interface,
+ * including responsive layouts and dark theme support.
+ */
+
+.context-aware-style-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Selection Information */
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.selection-info svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* Property Sections Container */
+.property-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.property-section-container {
+  /* Individual sections are styled by their own CSS files */
+}
+
+/* No Selection Placeholder */
+.no-selection-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 24px;
+}
+
+.placeholder-content {
+  text-align: center;
+  max-width: 280px;
+}
+
+.placeholder-content svg {
+  color: var(--color-text-placeholder);
+  margin-bottom: 16px;
+}
+
+.placeholder-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.placeholder-content p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.placeholder-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.tip svg {
+  flex-shrink: 0;
+  color: var(--color-text-placeholder);
+}
+
+/* Edge-specific Information */
+.edge-info-section {
+  padding: 16px;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.edge-info-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.edge-info-content p {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.edge-details {
+  padding: 8px 12px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: 4px;
+  border: 1px solid var(--color-border-secondary);
+}
+
+.edge-details small {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+}
+
+/* Mixed Selection Information */
+.mixed-selection-info {
+  padding: 16px;
+  background-color: var(--color-bg-info);
+  border: 1px solid var(--color-border-info);
+  border-radius: 8px;
+}
+
+.mixed-info-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.mixed-info-content p {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.selection-breakdown {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.selection-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .context-aware-style-controls {
+    gap: 8px;
+  }
+
+  .property-sections {
+    gap: 12px;
+  }
+
+  .selection-info {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .placeholder-content {
+    padding: 16px;
+  }
+
+  .placeholder-content svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .edge-info-section,
+  .mixed-selection-info {
+    padding: 12px;
+  }
+}
+
+/* Small panel adjustments */
+@media (max-width: 320px) {
+  .selection-breakdown {
+    flex-direction: column;
+  }
+
+  .placeholder-tips {
+    gap: 6px;
+  }
+
+  .tip {
+    font-size: 11px;
+  }
+}
+
+/* Animation Support */
+.property-section-container,
+.edge-info-section,
+.mixed-selection-info {
+  transition: all 0.2s ease-in-out;
+}
+
+.context-aware-style-controls {
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+.context-aware-style-controls:focus-within {
+  /* Ensure focus is visible within the container */
+}
+
+/* Dark theme specific adjustments - Disabled for light theme only app */
+/* @media (prefers-color-scheme: dark) {
+  .selection-info {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .edge-details {
+    background-color: var(--color-bg-primary);
+  }
+
+  .selection-type {
+    background-color: var(--color-bg-secondary);
+  }
+} */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .selection-info,
+  .edge-info-section,
+  .mixed-selection-info {
+    border-width: 2px;
+  }
+
+  .selection-type {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .property-section-container,
+  .edge-info-section,
+  .mixed-selection-info {
+    transition: none;
+  }
+
+  .context-aware-style-controls {
+    scroll-behavior: auto;
+  }
+}

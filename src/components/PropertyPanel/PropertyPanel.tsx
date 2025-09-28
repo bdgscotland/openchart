@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Settings, Palette, Layout, PanelRightClose } from 'lucide-react';
 import TabContainer from './TabContainer';
 import DiagramControls from './DiagramControls';
-import StyleControls from './StyleControls';
+import ContextAwareStyleControls from './ContextAwareStyleControls';
 import type {
   DiagramElement,
   ElementStyle,
@@ -113,7 +113,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       icon: <Palette size={16} />,
       badge: selectedElements.length > 1 ? selectedElements.length : undefined,
       content: (
-        <StyleControls
+        <ContextAwareStyleControls
           selectedElements={selectedElements}
           allElements={allElements}
           onUpdateElementStyle={onUpdateElementStyle}

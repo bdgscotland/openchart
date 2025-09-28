@@ -1,0 +1,60 @@
+/* VisualSection Component Styles */
+
+.visual-section-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.visual-section-row > * {
+  flex: 1;
+  min-width: 0; /* Allow shrinking */
+}
+
+.visual-section-info {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(var(--color-neutral-200), 0.3);
+  border-radius: 6px;
+  border: 1px solid rgba(var(--color-neutral-300), 0.5);
+}
+
+.visual-section-info small {
+  color: rgba(var(--color-text-secondary), 0.8);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .visual-section-info {
+  background: rgba(var(--color-neutral-800), 0.4);
+  border-color: rgba(var(--color-neutral-700), 0.6);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .visual-section-info {
+    background: rgba(var(--color-neutral-100), 0.9);
+    border-color: var(--color-neutral-400);
+  }
+
+  [data-theme="dark"] .visual-section-info {
+    background: rgba(var(--color-neutral-900), 0.9);
+    border-color: var(--color-neutral-600);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .visual-section-row {
+    transition: none;
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+  .visual-section-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
