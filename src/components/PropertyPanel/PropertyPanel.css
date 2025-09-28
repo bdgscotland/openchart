@@ -12,9 +12,9 @@
 }
 
 .property-panel-expanded {
-  width: 300px;
-  min-width: 280px;
-  max-width: 350px;
+  width: 260px;
+  min-width: 240px;
+  max-width: 300px;
 }
 
 .property-panel-collapsed {
