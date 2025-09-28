@@ -1,6 +1,7 @@
 import { useCallback, useRef, useMemo } from 'react'
 import type { Edge, Connection } from '@xyflow/react'
 import { MarkerType } from '@xyflow/react'
+import type { EdgeStyleConfig } from '../types/edgeTypes'
 
 interface ConnectionPoolStats {
   poolSize: number
@@ -15,7 +16,8 @@ interface ConnectionPoolStats {
 export function useConnectionPool(
   edges: Edge[],
   setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void,
-  maxPoolSize: number = 100
+  maxPoolSize: number = 100,
+  defaultEdgeStyle?: EdgeStyleConfig
 ) {
   const connectionPool = useRef<Connection[]>([])
   const processTimeoutRef = useRef<NodeJS.Timeout>()
@@ -46,15 +48,47 @@ export function useConnectionPool(
     const connectionsToProcess = [...connectionPool.current]
     connectionPool.current = []
 
-    const newEdges = connectionsToProcess.map((connection, index) => ({
-      id: `edge-${Date.now()}-${index}`,
-      source: connection.source!,
-      target: connection.target!,
-      sourceHandle: connection.sourceHandle,
-      targetHandle: connection.targetHandle,
-      type: 'default',
-      markerEnd: { type: MarkerType.Arrow }
-    }))
+    const newEdges = connectionsToProcess.map((connection, index) => {
+      // Get edge style from connection data or use default
+      const edgeStyle = (connection as any).edgeStyle || defaultEdgeStyle
+
+      // Determine edge type based on style
+      let edgeType = 'default'
+      if (edgeStyle) {
+        if (edgeStyle.lineStyle === 'dashed' || edgeStyle.lineStyle === 'dotted') {
+          edgeType = 'custom-dashed'
+        } else if (edgeStyle.curveStyle === 'bezier') {
+          edgeType = 'custom-curved'
+        } else if (edgeStyle.markerStart || edgeStyle.markerEnd !== 'arrow') {
+          edgeType = 'custom-arrow'
+        }
+      }
+
+      // Create marker configuration
+      const markerEnd = edgeStyle?.markerEnd
+        ? { type: edgeStyle.markerEnd === 'arrow' ? MarkerType.Arrow : MarkerType.ArrowClosed }
+        : { type: MarkerType.Arrow }
+
+      const markerStart = edgeStyle?.markerStart
+        ? { type: edgeStyle.markerStart === 'arrow' ? MarkerType.Arrow : MarkerType.ArrowClosed }
+        : undefined
+
+      return {
+        id: `edge-${Date.now()}-${index}`,
+        source: connection.source!,
+        target: connection.target!,
+        sourceHandle: connection.sourceHandle,
+        targetHandle: connection.targetHandle,
+        type: edgeType,
+        markerEnd,
+        markerStart,
+        data: { style: edgeStyle },
+        style: edgeStyle ? {
+          stroke: edgeStyle.strokeColor,
+          strokeWidth: edgeStyle.strokeWidth,
+        } : undefined
+      }
+    })
 
     setEdges((currentEdges) => {
       const updatedEdges = [...currentEdges, ...newEdges]

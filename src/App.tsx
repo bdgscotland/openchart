@@ -8,6 +8,7 @@ import { PropertyPanel } from './components/PropertyPanel/PropertyPanel';
 import { ActionToolbar } from './components/ActionToolbar';
 import { useCanvasState } from './hooks/useCanvasState';
 import { useActionToolbar } from './hooks/useActionToolbar';
+import { useClipboard } from './hooks/useClipboard';
 import { createEmptyDiagram } from './utils/diagramFactory';
 // React Flow types are imported but typed as any for flexibility
 import type { Node, Edge } from '@xyflow/react';
@@ -19,7 +20,6 @@ function App() {
   const [selectedTool, setSelectedTool] = useState<DrawingTool>('select');
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [copiedNodes, setCopiedNodes] = useState<Node[]>([]);
   const [showGrid, setShowGrid] = useState(true);
   const [showRulers, setShowRulers] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
@@ -362,6 +362,14 @@ function App() {
     setShowRulers(prev => !prev);
   }, []);
 
+  // Clipboard functionality
+  const clipboard = useClipboard({
+    nodes,
+    edges,
+    onNodesChange: setNodes,
+    onEdgesChange: setEdges,
+  });
+
   // Action toolbar functionality - after handlers are defined
   const actionToolbar = useActionToolbar({
     nodes,
@@ -409,28 +417,19 @@ function App() {
       // Copy (Ctrl+C / Cmd+C)
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         e.preventDefault();
-        const selectedNodesToCopy = nodes.filter(n => n.selected);
-        if (selectedNodesToCopy.length > 0) {
-          setCopiedNodes(selectedNodesToCopy);
-        }
+        clipboard.copySelection();
       }
 
       // Paste (Ctrl+V / Cmd+V)
       if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
         e.preventDefault();
-        if (copiedNodes.length > 0) {
-          const pasteOffset = 50;
-          const newNodes = copiedNodes.map((node, index) => ({
-            ...node,
-            id: `${node.id}_copy_${Date.now()}_${index}`,
-            position: {
-              x: node.position.x + pasteOffset,
-              y: node.position.y + pasteOffset,
-            },
-            selected: false,
-          }));
-          setNodes(nodes => [...nodes.map(n => ({ ...n, selected: false })), ...newNodes]);
-        }
+        clipboard.pasteSelection();
+      }
+
+      // Duplicate (Ctrl+D / Cmd+D)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        clipboard.duplicateSelection();
       }
 
       // Select All (Ctrl+A / Cmd+A)
@@ -472,7 +471,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nodes, edges, copiedNodes, handleSaveDiagram, handleNewDiagram, handleLoadDiagram, handleUndo, handleRedo]);
+  }, [nodes, edges, clipboard, handleSaveDiagram, handleNewDiagram, handleLoadDiagram, handleUndo, handleRedo]);
 
   // Auto-save functionality
   useEffect(() => {

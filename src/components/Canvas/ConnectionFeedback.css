@@ -1,0 +1,273 @@
+/* Enhanced Connection Point Targeting and Visual Feedback */
+
+/* Connection handles styling */
+.react-flow__handle {
+  position: relative;
+  border: 2px solid #ffffff;
+  background: #3b82f6;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: scale(0.8);
+  z-index: 10;
+}
+
+/* Show handles on node hover */
+.react-flow__node:hover .react-flow__handle {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Enhanced handle styles for better targeting */
+.react-flow__handle:hover {
+  background: #1d4ed8;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  transform: scale(1.2);
+  z-index: 20;
+}
+
+/* Valid connection target */
+.react-flow__handle.react-flow__handle-valid {
+  background: #10b981;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+/* Connection in progress */
+.react-flow__handle.react-flow__handle-connecting {
+  opacity: 1;
+  transform: scale(1.1);
+  animation: connectionPulse 1s ease-in-out infinite;
+}
+
+@keyframes connectionPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.1);
+  }
+}
+
+/* Connection line preview */
+.connection-preview {
+  pointer-events: none;
+  z-index: 15;
+}
+
+.connection-preview path {
+  stroke: #3b82f6;
+  stroke-width: 2;
+  stroke-dasharray: 5,5;
+  fill: none;
+  opacity: 0.7;
+  animation: connectionDash 0.5s linear infinite;
+}
+
+@keyframes connectionDash {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 10;
+  }
+}
+
+/* Connection feedback overlay */
+.connection-feedback {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.connection-feedback.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 2px solid #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.connection-feedback.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+.connection-feedback.hovering {
+  transform: scale(1.1);
+  opacity: 0.8;
+}
+
+/* Connection cursor styles */
+.connection-mode-straight {
+  cursor: copy;
+}
+
+.connection-mode-curved {
+  cursor: alias;
+}
+
+.connection-mode-step {
+  cursor: cell;
+}
+
+.connection-mode-dashed {
+  cursor: crosshair;
+}
+
+/* Enhanced edge styles for better visibility */
+.react-flow__edge {
+  transition: all 0.2s ease;
+}
+
+.react-flow__edge:hover {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.react-flow__edge.selected {
+  filter: drop-shadow(0 2px 8px rgba(59, 130, 246, 0.3));
+}
+
+/* Custom markers for enhanced arrows */
+.react-flow__edge-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Connection guidelines */
+.connection-guidelines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.connection-guideline {
+  stroke: #e5e7eb;
+  stroke-width: 1;
+  stroke-dasharray: 2,2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.connection-guidelines.active .connection-guideline {
+  opacity: 0.5;
+}
+
+/* Smart connection suggestions */
+.connection-suggestion {
+  position: absolute;
+  background: rgba(59, 130, 246, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 50;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.connection-suggestion.visible {
+  opacity: 1;
+  transform: translateY(-110%);
+}
+
+.connection-suggestion::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(59, 130, 246, 0.9);
+}
+
+/* Connection tool indicators */
+.connection-tool-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 40;
+  transition: all 0.2s ease;
+}
+
+.connection-tool-indicator.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+/* Connection snap points */
+.connection-snap-point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 15;
+}
+
+.connection-snap-point.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.2);
+  background: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  .react-flow__handle {
+    border-width: 3px;
+    box-shadow: 0 0 0 2px #000000;
+  }
+
+  .connection-feedback.valid {
+    border-width: 3px;
+    background: rgba(16, 185, 129, 0.3);
+  }
+
+  .connection-feedback.invalid {
+    border-width: 3px;
+    background: rgba(239, 68, 68, 0.3);
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__handle,
+  .connection-feedback,
+  .connection-suggestion,
+  .connection-snap-point {
+    transition: none;
+  }
+
+  .connection-preview path {
+    animation: none;
+  }
+
+  .react-flow__handle.react-flow__handle-connecting {
+    animation: none;
+  }
+}

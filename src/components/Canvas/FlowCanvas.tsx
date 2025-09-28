@@ -17,10 +17,14 @@ import type { Node, Edge, Connection } from '@xyflow/react';
 import { toPng, toSvg, toJpeg, toCanvas } from 'html-to-image';
 import '@xyflow/react/dist/style.css';
 import './FlowCanvas.css';
+import './ConnectionFeedback.css';
 
 import ShapeNode from './ShapeNode';
 import useShapeHandlers from './hooks/useShapeHandlers';
 import { useConnectionPool } from '../../hooks/useConnectionPool';
+import { useConnectionTools } from '../../hooks/useConnectionTools';
+import SelectionToolbar from './SelectionToolbar';
+import { edgeTypes } from './edges';
 
 // Memoized node types registry - defined outside component to avoid re-creation
 const nodeTypes = {
@@ -53,6 +57,10 @@ export interface FlowCanvasProps {
   showRulers?: boolean;
   snapToGrid?: boolean;
   connectionMode?: 'loose' | 'strict';
+  // Enhanced connection features
+  selectedConnectionTool?: string;
+  onConnectionToolChange?: (toolId: string) => void;
+  enableConnectionPreview?: boolean;
 }
 
 const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
@@ -85,6 +93,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   // Enhanced drag & drop states
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragPreview, setDragPreview] = useState<{ x: number; y: number; shapeType: string } | null>(null);
+  // Selection state management
+  const [selectedNodes, setSelectedNodes] = useState<Node[]>([]);
+  const [selectedEdges, setSelectedEdges] = useState<Edge[]>([]);
   const snapToGrid = propSnapToGrid;
   const [gridSize] = useState(20);
   const connectionMode = propConnectionMode;
@@ -95,15 +106,12 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   // Use connection pool for optimized edge creation
   const {
     addConnection: addPooledConnection,
-    removeConnection,
     hasConnection,
-    getPoolStats,
     cleanup: cleanupConnectionPool
   } = useConnectionPool(edges, setEdges, 100);
 
   // Use our custom shape handlers hook
   const {
-    handleConnect: handleConnectInternal,
     handleDeleteNodes,
     handleDuplicateNodes,
   } = useShapeHandlers({
@@ -325,17 +333,232 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     }
   }, []);
 
+  // Selection event handlers
+  const onSelectionChange = useCallback(({ nodes: selectedNodes, edges: selectedEdges }: { nodes: Node[], edges: Edge[] }) => {
+    console.log('🎯 Selection changed:', { nodes: selectedNodes.length, edges: selectedEdges.length });
+    setSelectedNodes(selectedNodes);
+    setSelectedEdges(selectedEdges);
+  }, []);
+
+  const onSelectionDragStart = useCallback((event: React.MouseEvent, nodes: Node[]) => {
+    console.log('🎯 Selection drag start:', nodes.length, 'nodes');
+    setIsDragging(true);
+  }, []);
+
+  const onSelectionDrag = useCallback((_event: React.MouseEvent, _nodes: Node[]) => {
+    // Don't log during drag for performance
+  }, []);
+
+  const onSelectionDragStop = useCallback((event: React.MouseEvent, nodes: Node[]) => {
+    console.log('🎯 Selection drag stop:', nodes.length, 'nodes');
+    setIsDragging(false);
+
+    // Apply snap-to-grid for all selected nodes after drag
+    if (snapToGrid && nodes.length > 0) {
+      setNodes((nds) =>
+        nds.map((node) => {
+          const isSelected = nodes.some(selectedNode => selectedNode.id === node.id);
+          if (isSelected) {
+            const snappedPosition = snapToGridPosition(node.position);
+            return { ...node, position: snappedPosition };
+          }
+          return node;
+        })
+      );
+    }
+
+    // Sync to external state after drag is complete
+    setTimeout(() => {
+      const updatedNodes = getNodes();
+      onNodesChange(updatedNodes);
+    }, 0);
+  }, [snapToGrid, snapToGridPosition, setNodes, getNodes, onNodesChange]);
+
+  const onSelectionContextMenu = useCallback((event: React.MouseEvent, nodes: Node[]) => {
+    event.preventDefault();
+    console.log('🎯 Selection context menu:', nodes.length, 'nodes');
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      nodeId: nodes.length === 1 ? nodes[0].id : undefined
+    });
+  }, []);
+
+  // Bulk operations for selection toolbar
+  const handleBulkDelete = useCallback(() => {
+    if (selectedNodes.length > 0) {
+      handleDeleteNodes(selectedNodes.map(node => node.id));
+    }
+  }, [selectedNodes, handleDeleteNodes]);
+
+  const handleBulkDuplicate = useCallback(() => {
+    if (selectedNodes.length > 0) {
+      handleDuplicateNodes(selectedNodes.map(node => node.id));
+    }
+  }, [selectedNodes, handleDuplicateNodes]);
+
+  const handleBulkAlign = useCallback((alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
+    if (selectedNodes.length < 2) return;
+
+    const nodePositions = selectedNodes.map(node => node.position);
+    let targetValue: number;
+
+    switch (alignment) {
+      case 'left':
+        targetValue = Math.min(...nodePositions.map(pos => pos.x));
+        setNodes((nds) =>
+          nds.map((node) =>
+            selectedNodes.some(selected => selected.id === node.id)
+              ? { ...node, position: { ...node.position, x: targetValue } }
+              : node
+          )
+        );
+        break;
+      case 'right':
+        targetValue = Math.max(...nodePositions.map(pos => pos.x));
+        setNodes((nds) =>
+          nds.map((node) =>
+            selectedNodes.some(selected => selected.id === node.id)
+              ? { ...node, position: { ...node.position, x: targetValue } }
+              : node
+          )
+        );
+        break;
+      case 'center': {
+        const minX = Math.min(...nodePositions.map(pos => pos.x));
+        const maxX = Math.max(...nodePositions.map(pos => pos.x));
+        targetValue = (minX + maxX) / 2;
+        setNodes((nds) =>
+          nds.map((node) =>
+            selectedNodes.some(selected => selected.id === node.id)
+              ? { ...node, position: { ...node.position, x: targetValue } }
+              : node
+          )
+        );
+        break;
+      }
+      case 'top':
+        targetValue = Math.min(...nodePositions.map(pos => pos.y));
+        setNodes((nds) =>
+          nds.map((node) =>
+            selectedNodes.some(selected => selected.id === node.id)
+              ? { ...node, position: { ...node.position, y: targetValue } }
+              : node
+          )
+        );
+        break;
+      case 'bottom':
+        targetValue = Math.max(...nodePositions.map(pos => pos.y));
+        setNodes((nds) =>
+          nds.map((node) =>
+            selectedNodes.some(selected => selected.id === node.id)
+              ? { ...node, position: { ...node.position, y: targetValue } }
+              : node
+          )
+        );
+        break;
+      case 'middle': {
+        const minY = Math.min(...nodePositions.map(pos => pos.y));
+        const maxY = Math.max(...nodePositions.map(pos => pos.y));
+        targetValue = (minY + maxY) / 2;
+        setNodes((nds) =>
+          nds.map((node) =>
+            selectedNodes.some(selected => selected.id === node.id)
+              ? { ...node, position: { ...node.position, y: targetValue } }
+              : node
+          )
+        );
+        break;
+      }
+    }
+
+    // Sync to external state
+    setTimeout(() => {
+      const updatedNodes = getNodes();
+      onNodesChange(updatedNodes);
+    }, 0);
+  }, [selectedNodes, setNodes, getNodes, onNodesChange]);
+
+  // Keyboard shortcuts for selection operations
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+A - Select all nodes
+      if (event.ctrlKey && event.key === 'a') {
+        event.preventDefault();
+        const allNodes = getNodes();
+        setNodes((nds) =>
+          nds.map((node) => ({ ...node, selected: true }))
+        );
+        console.log('🎯 Select All: Selected', allNodes.length, 'nodes');
+        return;
+      }
+
+      // Escape - Clear selection
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setNodes((nds) =>
+          nds.map((node) => ({ ...node, selected: false }))
+        );
+        setEdges((eds) =>
+          eds.map((edge) => ({ ...edge, selected: false }))
+        );
+        console.log('🎯 Escape: Cleared all selections');
+        return;
+      }
+
+      // Delete - Delete selected items
+      if (event.key === 'Delete' && (selectedNodes.length > 0 || selectedEdges.length > 0)) {
+        event.preventDefault();
+        if (selectedNodes.length > 0) {
+          handleDeleteNodes(selectedNodes.map(node => node.id));
+          console.log('🎯 Delete: Removed', selectedNodes.length, 'selected nodes');
+        }
+        return;
+      }
+
+      // Ctrl+D - Duplicate selected items
+      if (event.ctrlKey && event.key === 'd' && selectedNodes.length > 0) {
+        event.preventDefault();
+        handleDuplicateNodes(selectedNodes.map(node => node.id));
+        console.log('🎯 Ctrl+D: Duplicated', selectedNodes.length, 'selected nodes');
+        return;
+      }
+    };
+
+    // Add event listener to document
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedNodes, selectedEdges, setNodes, setEdges, getNodes, handleDeleteNodes, handleDuplicateNodes]);
+
   // Handle context menu actions
   const handleContextMenuAction = useCallback((action: string, nodeId?: string) => {
     switch (action) {
       case 'delete':
         if (nodeId) {
           handleDeleteNodes([nodeId]);
+        } else if (selectedNodes.length > 0) {
+          handleDeleteNodes(selectedNodes.map(node => node.id));
         }
         break;
       case 'duplicate':
         if (nodeId) {
           handleDuplicateNodes([nodeId]);
+        } else if (selectedNodes.length > 0) {
+          handleDuplicateNodes(selectedNodes.map(node => node.id));
+        }
+        break;
+      case 'bulk-delete':
+        if (selectedNodes.length > 0) {
+          handleDeleteNodes(selectedNodes.map(node => node.id));
+        }
+        break;
+      case 'bulk-duplicate':
+        if (selectedNodes.length > 0) {
+          handleDuplicateNodes(selectedNodes.map(node => node.id));
         }
         break;
       case 'toggle-snap':
@@ -346,7 +569,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         break;
     }
     setContextMenu(null);
-  }, [handleDeleteNodes, handleDuplicateNodes, snapToGrid, connectionMode]);
+  }, [handleDeleteNodes, handleDuplicateNodes, snapToGrid, connectionMode, selectedNodes]);
 
   // Export functions
   const exportToPng = useCallback(async () => {
@@ -513,18 +736,26 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         onEdgeClick={onEdgeClick}
         onEdgeDoubleClick={onEdgeDoubleClick}
         onEdgeContextMenu={onEdgeContextMenu}
+        onSelectionChange={onSelectionChange}
+        onSelectionDragStart={onSelectionDragStart}
+        onSelectionDrag={onSelectionDrag}
+        onSelectionDragStop={onSelectionDragStop}
+        onSelectionContextMenu={onSelectionContextMenu}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
         edgesSelectable={true}
         selectNodesOnDrag={false}
         selectionOnDrag={true}
-        multiSelectionKeyCode={null}
+        multiSelectionKeyCode="Ctrl"
         selectionKeyCode={null}
+        panOnDrag={[1, 2]}
+        selectionMode="partial"
         deleteKeyCode="Delete"
         nodeDragThreshold={0}
         connectionMode={connectionMode === 'loose' ? ConnectionMode.Loose : ConnectionMode.Strict}
@@ -604,6 +835,18 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
       </ReactFlow>
 
+      {/* Selection Toolbar - appears when items are selected */}
+      {(selectedNodes.length > 0 || selectedEdges.length > 0) && (
+        <SelectionToolbar
+          selectedNodes={selectedNodes}
+          selectedEdges={selectedEdges}
+          onBulkDelete={handleBulkDelete}
+          onBulkDuplicate={handleBulkDuplicate}
+          onBulkAlign={handleBulkAlign}
+          className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
+        />
+      )}
+
       {/* Enhanced drag preview */}
       {isDragOver && dragPreview && (
         <div
@@ -646,6 +889,31 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
                 className="px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-2"
               >
                 <span>Delete</span>
+              </div>
+            </>
+          ) : selectedNodes.length > 1 ? (
+            <>
+              <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b border-gray-200">
+                {selectedNodes.length} items selected
+              </div>
+              <div
+                onClick={() => handleContextMenuAction('bulk-duplicate')}
+                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+              >
+                <span>Duplicate All</span>
+              </div>
+              <div
+                onClick={() => handleContextMenuAction('bulk-delete')}
+                className="px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-2"
+              >
+                <span>Delete All</span>
+              </div>
+              <div className="border-t border-gray-200 my-1"></div>
+              <div
+                onClick={() => handleContextMenuAction('toggle-snap')}
+                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+              >
+                <span>{snapToGrid ? '✓' : ''} Snap to Grid</span>
               </div>
             </>
           ) : (

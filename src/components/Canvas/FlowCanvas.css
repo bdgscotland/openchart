@@ -234,10 +234,24 @@
   stroke-width: 1.5;
 }
 
-/* Selection box */
+/* Enhanced selection box */
 .react-flow__selection {
-  background: rgba(0, 102, 255, 0.1);
-  border: 1px solid #0066ff;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+  animation: selection-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes selection-pulse {
+  0%, 100% {
+    border-color: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    border-color: #60a5fa;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+  }
 }
 
 /* Background dots */
@@ -248,7 +262,53 @@
 /* Enhanced node selection */
 .react-flow__node.selected {
   outline: none !important;
-  box-shadow: 0 0 0 2px #3b82f6, 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 0 0 3px #3b82f6, 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+  transform: scale(1.02);
+  z-index: 1000;
+}
+
+/* Multi-selection indicator for nodes */
+.react-flow__node.selected::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+  z-index: 1001;
+  animation: check-appear 0.3s ease-out;
+}
+
+.react-flow__node.selected::after {
+  content: '✓';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  animation: check-appear 0.3s ease-out 0.1s both;
+}
+
+@keyframes check-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Enhanced drag preview */

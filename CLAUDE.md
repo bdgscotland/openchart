@@ -4,11 +4,12 @@
 OpenChart is an open-source, git-backed diagramming platform built with React + TypeScript + React Flow. This is a Lucidchart alternative focused on transparency, portability, and version control.
 
 ## ⚠️ IMPORTANT: Development Guidelines
-- **NEVER claim this is production-ready** - It's an early prototype
-- **Be honest about limitations** - Many features are incomplete or missing
-- **Keep it real** - This is a work in progress, not a Lucidchart killer
-- **Focus on what works** - Basic diagramming, save/load, simple shapes
-- **Acknowledge what doesn't** - No real resize, limited edge types, no undo/redo yet
+- **This is an experimental prototype** - Not ready for production use
+- **Be realistic about capabilities** - Many core features are still basic or missing
+- **Honest assessment** - This is a learning project, not a commercial competitor
+- **Focus on what actually works** - Basic shapes, multi-select, copy/paste, simple connections
+- **Acknowledge limitations** - No undo/redo, limited export options, basic edge styling only
+- **Avoid overpromising** - Don't claim "professional-grade" or "rivals commercial tools"
 
 ## 🛠️ Required Development Tools
 
