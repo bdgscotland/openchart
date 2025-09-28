@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Settings, Palette, Layout, PanelRightClose } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings, Palette, Layout, PanelRightClose } from 'lucide-react';
 import TabContainer from './TabContainer';
 import DiagramControls from './DiagramControls';
 import StyleControls from './StyleControls';
@@ -77,7 +77,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           aria-label="Show Properties Panel"
           title="Show Properties Panel"
         >
-          <ChevronLeft size={20} />
+          <ChevronRight size={20} />
         </button>
       </div>
     );

@@ -15,12 +15,33 @@ import type { Node, Edge } from '@xyflow/react';
 import { MarkerType } from '@xyflow/react';
 import type { ElementStyle, DiagramSettings, GridSettings, BackgroundSettings, PaperSettings, ViewportSettings, RulerSettings } from './types/diagram';
 import { DEFAULT_DIAGRAM_SETTINGS } from './types/diagram';
+import { migrateAllNodeDimensions, debugNodeMigration, hasNodesThatNeedMigration } from './utils/nodeMigration';
 import './App.css';
 
 function App() {
   const [selectedTool, setSelectedTool] = useState<DrawingTool>('select');
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodesInternal] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+
+  // Enhanced setNodes function with automatic migration
+  const setNodes = useCallback((nodesOrUpdater: Node[] | ((nodes: Node[]) => Node[])) => {
+    setNodesInternal(currentNodes => {
+      const newNodes = typeof nodesOrUpdater === 'function'
+        ? nodesOrUpdater(currentNodes)
+        : nodesOrUpdater;
+
+      // Check if any nodes need migration
+      if (hasNodesThatNeedMigration(newNodes)) {
+        console.log('🔧 Automatically migrating nodes for proper edge connections');
+        debugNodeMigration(newNodes, 'Before Migration');
+        const migratedNodes = migrateAllNodeDimensions(newNodes);
+        debugNodeMigration(migratedNodes, 'After Migration');
+        return migratedNodes;
+      }
+
+      return newNodes;
+    });
+  }, []);
   // Diagram settings state
   const [diagramSettings, setDiagramSettings] = useState<DiagramSettings>(DEFAULT_DIAGRAM_SETTINGS);
 
@@ -363,54 +384,65 @@ function App() {
     }
   }, []);
 
-  const handleLoadExample = useCallback((exampleName: string) => {
-    // Create example diagrams with React Flow nodes/edges
+  const handleLoadExample = useCallback(async (exampleName: string) => {
+    // Create example diagrams with proper React Flow nodes using createShapeNode
+    const { createShapeNode } = await import('./components/Canvas/shapes');
+
     switch (exampleName) {
       case 'flowchart':
-        setNodes([
-          { 
-            id: '1', 
-            position: { x: 250, y: 50 }, 
-            data: { label: 'Start', shape: 'rectangle' }, 
-            type: 'shape',
-            style: { width: 120, height: 60 }
-          },
-          { 
-            id: '2', 
-            position: { x: 250, y: 150 }, 
-            data: { label: 'Process', shape: 'rectangle' }, 
-            type: 'shape',
-            style: { width: 120, height: 60 }
-          },
-          { 
-            id: '3', 
-            position: { x: 250, y: 250 }, 
-            data: { label: 'Decision', shape: 'diamond' }, 
-            type: 'shape',
-            style: { width: 120, height: 120 }
-          },
-          { 
-            id: '4', 
-            position: { x: 100, y: 400 }, 
-            data: { label: 'Option A', shape: 'rectangle' }, 
-            type: 'shape',
-            style: { width: 120, height: 60 }
-          },
-          { 
-            id: '5', 
-            position: { x: 400, y: 400 }, 
-            data: { label: 'Option B', shape: 'rectangle' }, 
-            type: 'shape',
-            style: { width: 120, height: 60 }
-          },
-          { 
-            id: '6', 
-            position: { x: 250, y: 500 }, 
-            data: { label: 'End', shape: 'circle' }, 
-            type: 'shape',
-            style: { width: 80, height: 80 }
-          },
-        ]);
+        const exampleNodes = [
+          createShapeNode({
+            id: '1',
+            position: { x: 250, y: 50 },
+            shapeType: 'rectangle',
+            label: 'Start',
+            width: 120,
+            height: 60
+          }),
+          createShapeNode({
+            id: '2',
+            position: { x: 250, y: 150 },
+            shapeType: 'rectangle',
+            label: 'Process',
+            width: 120,
+            height: 60
+          }),
+          createShapeNode({
+            id: '3',
+            position: { x: 250, y: 250 },
+            shapeType: 'diamond',
+            label: 'Decision',
+            width: 120,
+            height: 120
+          }),
+          createShapeNode({
+            id: '4',
+            position: { x: 100, y: 400 },
+            shapeType: 'rectangle',
+            label: 'Option A',
+            width: 120,
+            height: 60
+          }),
+          createShapeNode({
+            id: '5',
+            position: { x: 400, y: 400 },
+            shapeType: 'rectangle',
+            label: 'Option B',
+            width: 120,
+            height: 60
+          }),
+          createShapeNode({
+            id: '6',
+            position: { x: 250, y: 500 },
+            shapeType: 'circle',
+            label: 'End',
+            width: 80,
+            height: 80
+          }),
+        ];
+
+        console.log('🔧 Loading example flowchart with properly configured nodes');
+        setNodes(exampleNodes);
         setEdges([
           { id: 'e1-2', source: '1', sourceHandle: 'bottom', target: '2', targetHandle: 'top', type: 'smoothstep' },
           { id: 'e2-3', source: '2', sourceHandle: 'bottom', target: '3', targetHandle: 'top', type: 'smoothstep' },
@@ -613,7 +645,7 @@ function App() {
     return () => clearInterval(autoSaveInterval);
   }, [nodes, edges]);
 
-  // Debug function for testing PropertyPanel integration
+  // Debug function for testing PropertyPanel integration and manual node migration
   useEffect(() => {
     (window as any).testPropertyPanel = () => {
       console.log('🧪 Testing PropertyPanel Integration...');
@@ -638,7 +670,38 @@ function App() {
       }
     };
 
-    console.log('🔧 Debug function added: window.testPropertyPanel()');
+    // Manual refresh function for fixing edge connections on existing canvases
+    (window as any).refreshNodeDimensions = () => {
+      console.log('🔧 Manual node dimension refresh triggered...');
+      debugNodeMigration(nodes, 'Current Nodes');
+
+      if (hasNodesThatNeedMigration(nodes)) {
+        console.log('📊 Migrating nodes for proper edge connections...');
+        const migratedNodes = migrateAllNodeDimensions(nodes);
+        setNodes(migratedNodes);
+        console.log('✅ Node migration complete! Edge connections should now work properly.');
+      } else {
+        console.log('✅ All nodes already have proper dimensions for edge connections.');
+      }
+    };
+
+    // Check nodes function for debugging
+    (window as any).checkNodeDimensions = () => {
+      console.log('🔍 Checking current node dimensions...');
+      debugNodeMigration(nodes, 'Dimension Check');
+
+      const needsMigration = hasNodesThatNeedMigration(nodes);
+      console.log(`📊 Migration needed: ${needsMigration ? 'YES' : 'NO'}`);
+
+      if (needsMigration) {
+        console.log('💡 Run window.refreshNodeDimensions() to fix edge connections');
+      }
+    };
+
+    console.log('🔧 Debug functions added:');
+    console.log('  - window.testPropertyPanel() - Test style updates');
+    console.log('  - window.refreshNodeDimensions() - Fix edge connections for existing shapes');
+    console.log('  - window.checkNodeDimensions() - Check if nodes need migration');
   }, [nodes, selectedElements, handleUpdateElementStyle]);
 
   // Load auto-saved diagram on mount
@@ -782,7 +845,10 @@ function App() {
         onZoomOut={actionToolbar.handleZoomOut}
         onFitToView={actionToolbar.handleFitToView}
         snapToGrid={snapToGrid}
-        onToggleSnapToGrid={() => setSnapToGrid(!snapToGrid)}
+        onToggleSnapToGrid={() => setDiagramSettings(prev => ({
+          ...prev,
+          grid: { ...prev.grid, snapToGrid: !prev.grid.snapToGrid }
+        }))}
         connectionMode={connectionMode}
         onToggleConnectionMode={() => setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose')}
       />

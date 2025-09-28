@@ -82,8 +82,9 @@
 }
 
 .menu-item:not(.disabled):hover {
-  background: var(--primary-surface-hover);
+  background: rgba(59, 130, 246, 0.1); /* Light blue highlight */
   color: var(--primary-text);
+  border-radius: 4px;
 }
 
 .menu-item.disabled {

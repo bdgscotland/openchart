@@ -230,7 +230,9 @@
 }
 
 .flow-minimap .react-flow__minimap-mask {
-  fill: rgba(255, 255, 255, 0.7);
+  fill: rgba(59, 130, 246, 0.2);
+  stroke: rgba(59, 130, 246, 0.8);
+  stroke-width: 2;
 }
 
 .flow-minimap .react-flow__minimap-node {
