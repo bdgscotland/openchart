@@ -139,8 +139,8 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     // Don't update during drag operations to prevent interference
     if (!isDragging) {
       // Check if we should sync by comparing timestamps or forcing sync
-      const shouldSync = nodes.length !== initialNodes.length ||
-        initialNodes.some(initialNode => {
+      const shouldSync = nodes.length !== (initialNodes?.length || 0) ||
+        (initialNodes || []).some(initialNode => {
           const currentNode = nodes.find(n => n.id === initialNode.id);
           return !currentNode ||
             currentNode.data?.lastStyleUpdate !== initialNode.data?.lastStyleUpdate ||
@@ -151,15 +151,15 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
       if (shouldSync) {
         console.log('🔄 FlowCanvas syncing nodes from parent:', initialNodes);
-        setNodes(initialNodes);
+        setNodes(initialNodes || []);
       }
     }
   }, [initialNodes, setNodes, isDragging, nodes]);
 
   useEffect(() => {
     // Update edges when external state changes
-    if (edges.length !== initialEdges.length) {
-      setEdges(initialEdges);
+    if (edges.length !== (initialEdges?.length || 0)) {
+      setEdges(initialEdges || []);
     }
   }, [initialEdges, setEdges, edges.length]);
 
@@ -752,7 +752,6 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
-        edgesSelectable={true}
         selectNodesOnDrag={false}
         selectionOnDrag={true}
         multiSelectionKeyCode="Ctrl"
