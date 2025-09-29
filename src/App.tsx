@@ -13,7 +13,15 @@ import { createEmptyDiagram } from './utils/diagramFactory';
 // React Flow types are imported but typed as any for flexibility
 import type { Node, Edge } from '@xyflow/react';
 import { MarkerType } from '@xyflow/react';
-import type { ElementStyle, DiagramSettings, GridSettings, BackgroundSettings, PaperSettings, ViewportSettings, RulerSettings } from './types/diagram';
+import type {
+  ElementStyle,
+  DiagramSettings,
+  GridSettings,
+  BackgroundSettings,
+  PaperSettings,
+  ViewportSettings,
+  RulerSettings
+} from './types/diagram';
 import { DEFAULT_DIAGRAM_SETTINGS } from './types/diagram';
 import { migrateAllNodeDimensions, debugNodeMigration, hasNodesThatNeedMigration } from './utils/nodeMigration';
 import './App.css';
@@ -516,6 +524,174 @@ function App() {
     }));
   }, []);
 
+  // Enhanced View Menu Handlers
+
+  // UI Panel Toggle Handlers
+  const handleToggleFormatPanel = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      uiPanels: { ...prev.uiPanels, formatPanel: !prev.uiPanels.formatPanel }
+    }));
+    // Also toggle the actual right sidebar
+    setIsRightSidebarCollapsed((prev: boolean) => {
+      const newValue = !prev;
+      localStorage.setItem('openchart-right-sidebar-collapsed', JSON.stringify(newValue));
+      return newValue;
+    });
+  }, []);
+
+  const handleToggleOutlinePanel = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      uiPanels: { ...prev.uiPanels, outlinePanel: !prev.uiPanels.outlinePanel }
+    }));
+    // TODO: Implement outline panel when built
+  }, []);
+
+  const handleToggleLayersPanel = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      uiPanels: { ...prev.uiPanels, layersPanel: !prev.uiPanels.layersPanel }
+    }));
+    // TODO: Implement layers panel when built
+  }, []);
+
+  const handleToggleShapesPanel = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      uiPanels: { ...prev.uiPanels, shapesPanel: !prev.uiPanels.shapesPanel }
+    }));
+    // Also toggle the actual left sidebar
+    setIsLeftSidebarCollapsed((prev: boolean) => {
+      const newValue = !prev;
+      localStorage.setItem('openchart-left-sidebar-collapsed', JSON.stringify(newValue));
+      return newValue;
+    });
+  }, []);
+
+  const handleToggleSearchShapes = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      uiPanels: { ...prev.uiPanels, searchShapes: !prev.uiPanels.searchShapes }
+    }));
+    // TODO: Implement search shapes panel when built
+  }, []);
+
+  const handleToggleScratchpad = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      uiPanels: { ...prev.uiPanels, scratchpad: !prev.uiPanels.scratchpad }
+    }));
+    // TODO: Implement scratchpad panel when built
+  }, []);
+
+  const handleToggleTags = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      uiPanels: { ...prev.uiPanels, tags: !prev.uiPanels.tags }
+    }));
+    // TODO: Implement tags panel when built
+  }, []);
+
+  // Display Toggle Handlers
+  const handleToggleTooltips = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      display: { ...prev.display, tooltips: !prev.display.tooltips }
+    }));
+  }, []);
+
+  const handleToggleAnimations = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      display: { ...prev.display, animations: !prev.display.animations }
+    }));
+  }, []);
+
+  const handleToggleGuides = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      display: { ...prev.display, guides: !prev.display.guides }
+    }));
+  }, []);
+
+  const handleTogglePageTabs = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      display: { ...prev.display, pageTabs: !prev.display.pageTabs }
+    }));
+    // TODO: Implement page tabs when built
+  }, []);
+
+  const handleTogglePageView = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      display: { ...prev.display, pageView: !prev.display.pageView }
+    }));
+    // TODO: Implement page view mode when built
+  }, []);
+
+  // Connection Visualization Toggle Handlers
+  const handleToggleConnectionArrows = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      connectionVisualization: {
+        ...prev.connectionVisualization,
+        connectionArrows: !prev.connectionVisualization.connectionArrows
+      }
+    }));
+    // TODO: Apply to existing edges and canvas rendering
+  }, []);
+
+  const handleToggleConnectionPoints = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      connectionVisualization: {
+        ...prev.connectionVisualization,
+        connectionPoints: !prev.connectionVisualization.connectionPoints
+      }
+    }));
+    // TODO: Apply to canvas rendering to show/hide connection points
+  }, []);
+
+  // View Control Handlers
+  const handleResetView = useCallback(() => {
+    if (flowRef.current) {
+      flowRef.current.setViewport({ x: 0, y: 0, zoom: 1 });
+    }
+  }, []);
+
+
+  const handleToggleFullscreen = useCallback(() => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      view: { ...prev.view, fullscreen: !prev.view.fullscreen }
+    }));
+
+    // Actually toggle fullscreen
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  }, []);
+
+  // Units and Scale Handlers
+  const handleChangeUnits = useCallback((units: 'px' | 'cm' | 'in' | 'pt' | 'mm') => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      view: { ...prev.view, units }
+    }));
+  }, []);
+
+  const handleChangePageScale = useCallback((scale: number) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      view: { ...prev.view, scale }
+    }));
+    // TODO: Apply scale to canvas/viewport when implemented
+  }, []);
+
   // Clipboard functionality
   const clipboard = useClipboard({
     nodes,
@@ -537,9 +713,22 @@ function App() {
     flowCanvasRef: flowRef,
   });
 
+  // Zoom handlers - using actionToolbar functions
+  const handleZoomIn = useCallback(() => {
+    actionToolbar.handleZoomIn();
+  }, [actionToolbar.handleZoomIn]);
+
+  const handleZoomOut = useCallback(() => {
+    actionToolbar.handleZoomOut();
+  }, [actionToolbar.handleZoomOut]);
+
+  const handleFitToView = useCallback(() => {
+    actionToolbar.handleFitToView();
+  }, [actionToolbar.handleFitToView]);
+
   // Sidebar collapse handlers
   const handleToggleLeftSidebar = useCallback(() => {
-    setIsLeftSidebarCollapsed(prev => {
+    setIsLeftSidebarCollapsed((prev: boolean) => {
       const newValue = !prev;
       localStorage.setItem('openchart-left-sidebar-collapsed', JSON.stringify(newValue));
       return newValue;
@@ -547,7 +736,7 @@ function App() {
   }, []);
 
   const handleToggleRightSidebar = useCallback(() => {
-    setIsRightSidebarCollapsed(prev => {
+    setIsRightSidebarCollapsed((prev: boolean) => {
       const newValue = !prev;
       localStorage.setItem('openchart-right-sidebar-collapsed', JSON.stringify(newValue));
       return newValue;
@@ -817,8 +1006,34 @@ function App() {
         onRedo={handleRedo}
         canUndo={canvasState.canUndo}
         canRedo={canvasState.canRedo}
+
+        // Legacy view toggles
         onToggleGrid={handleToggleGrid}
         onToggleRulers={handleToggleRulers}
+
+        // Enhanced View menu handlers
+        onToggleFormatPanel={handleToggleFormatPanel}
+        onToggleOutlinePanel={handleToggleOutlinePanel}
+        onToggleLayersPanel={handleToggleLayersPanel}
+        onToggleShapesPanel={handleToggleShapesPanel}
+        onToggleSearchShapes={handleToggleSearchShapes}
+        onToggleScratchpad={handleToggleScratchpad}
+        onToggleTags={handleToggleTags}
+        onToggleTooltips={handleToggleTooltips}
+        onToggleAnimations={handleToggleAnimations}
+        onToggleGuides={handleToggleGuides}
+        onTogglePageTabs={handleTogglePageTabs}
+        onTogglePageView={handleTogglePageView}
+        onToggleConnectionArrows={handleToggleConnectionArrows}
+        onToggleConnectionPoints={handleToggleConnectionPoints}
+        onResetView={handleResetView}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onFitToView={handleFitToView}
+        onToggleFullscreen={handleToggleFullscreen}
+        onChangeUnits={handleChangeUnits}
+        onChangePageScale={handleChangePageScale}
+        diagramSettings={diagramSettings}
       />
 
       <header className="app-header">

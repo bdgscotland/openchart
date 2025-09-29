@@ -15,8 +15,45 @@ export interface MenuBarProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+
+  // Legacy view toggles (keeping for backward compatibility)
   onToggleGrid?: () => void;
   onToggleRulers?: () => void;
+
+  // Enhanced View menu handlers
+  // UI Panel Toggles
+  onToggleFormatPanel?: () => void;
+  onToggleOutlinePanel?: () => void;
+  onToggleLayersPanel?: () => void;
+  onToggleShapesPanel?: () => void;
+  onToggleSearchShapes?: () => void;
+  onToggleScratchpad?: () => void;
+  onToggleTags?: () => void;
+
+  // Display Toggles
+  onToggleTooltips?: () => void;
+  onToggleAnimations?: () => void;
+  onToggleGuides?: () => void;
+  onTogglePageTabs?: () => void;
+  onTogglePageView?: () => void;
+
+  // Connection Visualization
+  onToggleConnectionArrows?: () => void;
+  onToggleConnectionPoints?: () => void;
+
+  // View Controls
+  onResetView?: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onFitToView?: () => void;
+  onToggleFullscreen?: () => void;
+
+  // Units and Scale
+  onChangeUnits?: (units: 'px' | 'cm' | 'in' | 'pt' | 'mm') => void;
+  onChangePageScale?: (scale: number) => void;
+
+  // Current state for checkmarks
+  diagramSettings?: import('../../types/diagram').DiagramSettings;
 }
 
 interface MenuItem {
@@ -26,6 +63,7 @@ interface MenuItem {
   separator?: boolean;
   disabled?: boolean;
   shortcut?: string;
+  checked?: boolean; // For toggle/checkbox menu items
 }
 
 export const MenuBar: React.FC<MenuBarProps> = ({
@@ -42,8 +80,34 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onRedo,
   canUndo,
   canRedo,
+
+  // Legacy view toggles
   onToggleGrid,
   onToggleRulers,
+
+  // Enhanced View menu handlers
+  onToggleFormatPanel,
+  onToggleOutlinePanel,
+  onToggleLayersPanel,
+  onToggleShapesPanel,
+  onToggleSearchShapes,
+  onToggleScratchpad,
+  onToggleTags,
+  onToggleTooltips,
+  onToggleAnimations,
+  onToggleGuides,
+  onTogglePageTabs,
+  onTogglePageView,
+  onToggleConnectionArrows,
+  onToggleConnectionPoints,
+  onResetView,
+  onZoomIn,
+  onZoomOut,
+  onFitToView,
+  onToggleFullscreen,
+  onChangeUnits,
+  onChangePageScale,
+  diagramSettings,
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
@@ -97,13 +161,140 @@ export const MenuBar: React.FC<MenuBarProps> = ({
       { label: 'Delete Selected', onClick: () => {}, shortcut: 'Delete' },
     ],
     view: [
-      { label: 'Zoom In', onClick: () => {}, shortcut: 'Ctrl++' },
-      { label: 'Zoom Out', onClick: () => {}, shortcut: 'Ctrl+-' },
-      { label: 'Zoom to Fit', onClick: () => {}, shortcut: 'Ctrl+0' },
-      { label: 'Actual Size', onClick: () => {}, shortcut: 'Ctrl+1' },
+      // Panel Toggles
+      { 
+        label: 'Format', 
+        onClick: onToggleFormatPanel || (() => {}), 
+        shortcut: 'Cmd+Shift+P',
+        checked: diagramSettings?.uiPanels.formatPanel
+      },
+      { 
+        label: 'Outline', 
+        onClick: onToggleOutlinePanel || (() => {}), 
+        shortcut: 'Cmd+Shift+O',
+        checked: diagramSettings?.uiPanels.outlinePanel
+      },
+      { 
+        label: 'Layers', 
+        onClick: onToggleLayersPanel || (() => {}), 
+        shortcut: 'Cmd+Shift+L',
+        checked: diagramSettings?.uiPanels.layersPanel
+      },
+      { 
+        label: 'Tags', 
+        onClick: onToggleTags || (() => {}), 
+        shortcut: 'Cmd+K',
+        checked: diagramSettings?.uiPanels.tags
+      },
       { separator: true, label: '' },
-      { label: 'Show Grid', onClick: onToggleGrid || (() => {}) },
-      { label: 'Show Rulers', onClick: onToggleRulers || (() => {}) },
+      
+      // Search and Tools
+      { 
+        label: 'Search Shapes', 
+        onClick: onToggleSearchShapes || (() => {}), 
+        checked: diagramSettings?.uiPanels.searchShapes
+      },
+      { 
+        label: 'Scratchpad', 
+        onClick: onToggleScratchpad || (() => {}), 
+        checked: diagramSettings?.uiPanels.scratchpad
+      },
+      { 
+        label: 'Shapes', 
+        onClick: onToggleShapesPanel || (() => {}), 
+        shortcut: 'Cmd+Shift+K',
+        checked: diagramSettings?.uiPanels.shapesPanel
+      },
+      { separator: true, label: '' },
+
+      // Page and View Settings
+      { 
+        label: 'Page View', 
+        onClick: onTogglePageView || (() => {}), 
+        checked: diagramSettings?.display.pageView
+      },
+      {
+        label: 'Page Scale...',
+        submenu: [
+          { label: '50%', onClick: () => onChangePageScale?.(50) },
+          { label: '75%', onClick: () => onChangePageScale?.(75) },
+          { label: '100%', onClick: () => onChangePageScale?.(100) },
+          { label: '125%', onClick: () => onChangePageScale?.(125) },
+          { label: '150%', onClick: () => onChangePageScale?.(150) },
+          { label: '200%', onClick: () => onChangePageScale?.(200) },
+        ]
+      },
+      {
+        label: 'Units',
+        submenu: [
+          { label: 'Pixels (px)', onClick: () => onChangeUnits?.('px') },
+          { label: 'Centimeters (cm)', onClick: () => onChangeUnits?.('cm') },
+          { label: 'Inches (in)', onClick: () => onChangeUnits?.('in') },
+          { label: 'Points (pt)', onClick: () => onChangeUnits?.('pt') },
+          { label: 'Millimeters (mm)', onClick: () => onChangeUnits?.('mm') },
+        ]
+      },
+      { separator: true, label: '' },
+
+      // Display Elements
+      { 
+        label: 'Page Tabs', 
+        onClick: onTogglePageTabs || (() => {}), 
+        checked: diagramSettings?.display.pageTabs
+      },
+      { 
+        label: 'Ruler', 
+        onClick: onToggleRulers || (() => {}), 
+        checked: diagramSettings?.rulers.enabled
+      },
+      { 
+        label: 'Tooltips', 
+        onClick: onToggleTooltips || (() => {}), 
+        checked: diagramSettings?.display.tooltips
+      },
+      { 
+        label: 'Animations', 
+        onClick: onToggleAnimations || (() => {}), 
+        checked: diagramSettings?.display.animations
+      },
+      { separator: true, label: '' },
+
+      // Grid and Guides
+      { 
+        label: 'Grid', 
+        onClick: onToggleGrid || (() => {}), 
+        shortcut: 'Cmd+Shift+G',
+        checked: diagramSettings?.grid.enabled
+      },
+      { 
+        label: 'Guides', 
+        onClick: onToggleGuides || (() => {}), 
+        checked: diagramSettings?.display.guides
+      },
+      { separator: true, label: '' },
+
+      // Connection Visualization
+      { 
+        label: 'Connection Arrows', 
+        onClick: onToggleConnectionArrows || (() => {}), 
+        shortcut: 'Ctrl+Shift+A',
+        checked: diagramSettings?.connectionVisualization.connectionArrows
+      },
+      { 
+        label: 'Connection Points', 
+        onClick: onToggleConnectionPoints || (() => {}), 
+        shortcut: 'Ctrl+Shift+O',
+        checked: diagramSettings?.connectionVisualization.connectionPoints
+      },
+      { separator: true, label: '' },
+
+      // View Controls
+      { label: 'Reset View', onClick: onResetView || (() => {}), shortcut: 'Enter/Home' },
+      { label: 'Zoom In', onClick: onZoomIn || (() => {}), shortcut: 'Cmd + / Alt+Mousewheel' },
+      { label: 'Zoom Out', onClick: onZoomOut || (() => {}), shortcut: 'Cmd - / Alt+Mousewheel' },
+      { label: 'Fit to View', onClick: onFitToView || (() => {}), shortcut: 'Ctrl+0' },
+      { separator: true, label: '' },
+      { label: 'Fullscreen', onClick: onToggleFullscreen || (() => {}) },
     ],
   };
 
@@ -139,7 +330,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
     return (
       <div
         key={key}
-        className={`menu-item ${item.disabled ? 'disabled' : ''} ${item.submenu ? 'has-submenu' : ''}`}
+        className={`menu-item ${item.disabled ? 'disabled' : ''} ${item.submenu ? 'has-submenu' : ''} ${item.checked ? 'checked' : ''}`}
         onClick={() => handleMenuItemClick(item)}
         onMouseEnter={() => item.submenu && setHoveredMenu(item.label)}
         onMouseLeave={(e) => {
@@ -150,6 +341,9 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           }
         }}
       >
+        <span className="menu-item-check">
+          {item.checked ? '✓' : ''}
+        </span>
         <span className="menu-item-label">{item.label}</span>
         {item.shortcut && <span className="menu-item-shortcut">{item.shortcut}</span>}
         {item.submenu && <span className="menu-item-arrow">▶</span>}

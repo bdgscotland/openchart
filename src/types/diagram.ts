@@ -103,12 +103,46 @@ export interface RulerSettings {
 }
 
 // Combined diagram settings interface
+// Enhanced View Menu Settings Interfaces
+export interface UIPanelSettings {
+  formatPanel: boolean;      // ⌘+⇧+P - Property/Format panel
+  outlinePanel: boolean;     // ⌘+⇧+O - Document outline 
+  layersPanel: boolean;      // ⌘+⇧+L - Layers management
+  shapesPanel: boolean;      // ⌘+⇧+K - Shape library panel
+  searchShapes: boolean;     // Search shapes panel
+  scratchpad: boolean;       // Scratchpad panel
+  tags: boolean;             // ⌘+K - Tags panel
+}
+
+export interface DisplaySettings {
+  tooltips: boolean;         // Show/hide tooltips
+  animations: boolean;       // Enable/disable animations
+  guides: boolean;           // Show/hide snap guides
+  pageTabs: boolean;         // Show/hide page tabs
+  pageView: boolean;         // Toggle page view mode
+}
+
+export interface ConnectionVisualizationSettings {
+  connectionArrows: boolean;   // ⌃+⇧+A - Show connection arrows
+  connectionPoints: boolean;   // ⌃+⇧+O - Show connection points
+}
+
+export interface ViewSettings {
+  fullscreen: boolean;         // Fullscreen mode
+  units: 'px' | 'cm' | 'in' | 'pt' | 'mm';  // Display units
+  scale: number;              // Page scale percentage (100 = 100%)
+}
+
 export interface DiagramSettings {
   grid: GridSettings;
   background: BackgroundSettings;
   paper: PaperSettings;
   viewport: ViewportSettings;
   rulers: RulerSettings;
+  uiPanels: UIPanelSettings;
+  display: DisplaySettings;
+  connectionVisualization: ConnectionVisualizationSettings;
+  view: ViewSettings;
 }
 
 export interface Point {
@@ -269,12 +303,44 @@ export const DEFAULT_RULER_SETTINGS: RulerSettings = {
   guidesColor: '#4a90e2',
 };
 
+export const DEFAULT_UI_PANEL_SETTINGS: UIPanelSettings = {
+  formatPanel: true,        // PropertyPanel visible by default
+  outlinePanel: false,      // Outline not implemented yet
+  layersPanel: false,       // Layers panel not implemented yet  
+  shapesPanel: true,        // Shape library visible by default
+  searchShapes: false,      // Search shapes closed by default
+  scratchpad: false,        // Scratchpad closed by default
+  tags: false,              // Tags not implemented yet
+};
+
+export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
+  tooltips: true,           // Tooltips enabled by default
+  animations: true,         // Animations enabled by default
+  guides: true,             // Snap guides enabled by default
+  pageTabs: false,          // Single page by default
+  pageView: true,           // Page view enabled by default
+};
+
+export const DEFAULT_CONNECTION_VISUALIZATION_SETTINGS: ConnectionVisualizationSettings = {
+  connectionArrows: true,   // Show connection arrows by default
+  connectionPoints: false,  // Hide connection points by default
+};
+
+export const DEFAULT_VIEW_SETTINGS: ViewSettings = {
+  fullscreen: false,        // Windowed mode by default
+  units: 'px',              // Pixel units by default
+  scale: 100,               // 100% scale by default
+};
 export const DEFAULT_DIAGRAM_SETTINGS: DiagramSettings = {
   grid: DEFAULT_GRID_SETTINGS,
   background: DEFAULT_BACKGROUND_SETTINGS,
   paper: DEFAULT_PAPER_SETTINGS,
   viewport: DEFAULT_VIEWPORT_SETTINGS,
   rulers: DEFAULT_RULER_SETTINGS,
+  uiPanels: DEFAULT_UI_PANEL_SETTINGS,
+  display: DEFAULT_DISPLAY_SETTINGS,
+  connectionVisualization: DEFAULT_CONNECTION_VISUALIZATION_SETTINGS,
+  view: DEFAULT_VIEW_SETTINGS,
 };
 
 // Paper size presets in pixels (at 96 DPI)
