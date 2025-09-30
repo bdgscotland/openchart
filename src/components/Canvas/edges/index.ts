@@ -1,21 +1,25 @@
 // Enhanced Edge Components for OpenChart
 
-export { CustomDashedEdge } from './CustomDashedEdge';
-export { CustomCurvedEdge } from './CustomCurvedEdge';
-export { CustomArrowEdge } from './CustomArrowEdge';
+import { CustomDashedEdge } from './CustomDashedEdge';
+import { CustomCurvedEdge } from './CustomCurvedEdge';
+import { CustomArrowEdge } from './CustomArrowEdge';
+
+export { CustomDashedEdge, CustomCurvedEdge, CustomArrowEdge };
 
 // Edge type registry for React Flow
-
+// Re-enabled custom edge types to support edge styling (colors, labels, line styles, markers)
 export const edgeTypes = {
-  // Using React Flow's built-in edge types for now
-  // Custom edge components will be re-enabled once positioning issues are resolved
-  // 'straight': CustomArrowEdge,      // For straight connections
-  // 'bezier': CustomCurvedEdge,       // For curved connections
-  // 'smoothstep': CustomDashedEdge,   // For step connections (handles all curve styles)
+  // Default edge type that supports all styling features
+  'default': CustomCurvedEdge,
 
-  // Legacy custom edge types (disabled)
-  // 'custom-dashed': CustomDashedEdge,
-  // 'custom-dotted': CustomDashedEdge,
-  // 'custom-curved': CustomCurvedEdge,
-  // 'custom-arrow': CustomArrowEdge,
+  // Specific edge types for different connection styles
+  'straight': CustomCurvedEdge,
+  'bezier': CustomCurvedEdge,
+  'smoothstep': CustomCurvedEdge,
+
+  // Legacy custom edge types
+  'custom-dashed': CustomCurvedEdge,
+  'custom-dotted': CustomCurvedEdge,
+  'custom-curved': CustomCurvedEdge,
+  'custom-arrow': CustomCurvedEdge,
 };

@@ -3,6 +3,8 @@ import type { Node, Edge } from '@xyflow/react';
 import { diagramPersistence } from '../utils/diagramPersistence';
 import { createEmptyDiagram } from '../utils/diagramFactory';
 import type { DiagramSettings } from '../types/diagram';
+import type { Layer } from '../types/layers';
+import { DEFAULT_LAYER } from '../types/layers';
 
 interface FileOperationsContextType {
   handleNewDiagram: () => void;
@@ -14,6 +16,8 @@ interface FileOperationsContextType {
   handleExportSVG: () => Promise<void>;
   handleExportPDF: () => Promise<void>;
   handleLoadExample: (exampleName: string) => void;
+  flowRef: React.RefObject<any>;
+  fileInputRef: React.RefObject<HTMLInputElement>;
 }
 
 interface FileOperationsProviderProps {
@@ -21,9 +25,13 @@ interface FileOperationsProviderProps {
   nodes: Node[];
   edges: Edge[];
   diagramSettings: DiagramSettings;
+  layers: Layer[];
+  activeLayerId: string;
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   setDiagramSettings: React.Dispatch<React.SetStateAction<DiagramSettings>>;
+  setLayers: React.Dispatch<React.SetStateAction<Layer[]>>;
+  setActiveLayerId: React.Dispatch<React.SetStateAction<string>>;
   flowRef: React.RefObject<any>;
   fileInputRef: React.RefObject<HTMLInputElement>;
 }
@@ -35,9 +43,13 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
   nodes,
   edges,
   diagramSettings,
+  layers,
+  activeLayerId,
   setNodes,
   setEdges,
   setDiagramSettings,
+  setLayers,
+  setActiveLayerId,
   flowRef,
   fileInputRef,
 }) => {
@@ -47,24 +59,37 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
     setEdges(emptyDiagram.edges);
     setDiagramSettings(emptyDiagram.settings);
 
+    // Reset layers to default
+    setLayers([DEFAULT_LAYER]);
+    setActiveLayerId(DEFAULT_LAYER.id);
+
     // Reset viewport
     if (flowRef.current) {
       flowRef.current.setViewport({ x: 0, y: 0, zoom: 1 });
     }
-  }, [setNodes, setEdges, setDiagramSettings, flowRef]);
+  }, [setNodes, setEdges, setDiagramSettings, setLayers, setActiveLayerId, flowRef]);
 
   const handleSaveDiagram = useCallback(async () => {
     try {
-      const diagram = {
+      // Get viewport from flow ref
+      const viewport = flowRef.current?.getViewport() || { x: 0, y: 0, zoom: 1 };
+
+      // Use saveDiagramToFile with layers
+      await diagramPersistence.saveDiagramToFile(
         nodes,
         edges,
-        settings: diagramSettings,
-      };
-      await diagramPersistence.saveDiagram(diagram);
+        viewport,
+        layers,
+        activeLayerId,
+        {
+          title: 'OpenChart Diagram',
+          createdWith: 'OpenChart',
+        }
+      );
     } catch (error) {
       console.error('Error saving diagram:', error);
     }
-  }, [nodes, edges, diagramSettings]);
+  }, [nodes, edges, layers, activeLayerId, flowRef]);
 
   const handleLoadDiagram = useCallback(async (file?: File) => {
     // If no file provided, trigger file input
@@ -76,19 +101,33 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
     if (!file) return;
 
     try {
-      const diagram = await diagramPersistence.loadDiagram(file);
-      setNodes(diagram.nodes);
-      setEdges(diagram.edges);
-      setDiagramSettings(diagram.settings);
+      // Read the file content
+      const fileContent = await file.text();
+      const diagramData = JSON.parse(fileContent);
 
-      // Reset viewport after loading
-      if (flowRef.current) {
-        flowRef.current.setViewport({ x: 0, y: 0, zoom: 1 });
+      // Import using the persistence layer
+      const imported = await diagramPersistence.importDiagram(diagramData);
+
+      // Update all state
+      setNodes(imported.nodes);
+      setEdges(imported.edges);
+      setLayers(imported.layers);
+      setActiveLayerId(imported.activeLayerId);
+
+      // Set viewport after loading
+      if (flowRef.current && imported.viewport) {
+        flowRef.current.setViewport(imported.viewport);
+      }
+
+      // Log restored features
+      if (imported.restoredFeatures.length > 0) {
+        console.log('Restored features:', imported.restoredFeatures.join(', '));
       }
     } catch (error) {
       console.error('Error loading diagram:', error);
+      alert('Failed to load diagram. Please check the file format.');
     }
-  }, [setNodes, setEdges, setDiagramSettings, flowRef, fileInputRef]);
+  }, [setNodes, setEdges, setLayers, setActiveLayerId, flowRef, fileInputRef]);
 
   const handleExportPNG = useCallback(async () => {
     try {
@@ -145,6 +184,8 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
     handleExportSVG,
     handleExportPDF,
     handleLoadExample,
+    flowRef,
+    fileInputRef,
   };
 
   return (

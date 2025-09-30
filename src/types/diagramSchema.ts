@@ -1,4 +1,5 @@
 import type { Node, Edge, Viewport } from '@xyflow/react';
+import type { Layer } from './layers';
 
 /**
  * Current schema version
@@ -16,6 +17,8 @@ export interface DiagramData {
   viewport: Viewport;
   metadata?: DiagramMetadata;
   propertyPanelData?: PropertyPanelData;
+  layers?: Layer[];
+  activeLayerId?: string;
 }
 
 /**

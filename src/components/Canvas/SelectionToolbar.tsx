@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Copy, Trash2, AlignCenter, AlignLeft, AlignRight, Group, Ungroup } from 'lucide-react';
+import { Copy, Trash2, AlignCenter, AlignLeft, AlignRight, Group, Ungroup, BringToFront, SendToBack, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Node, Edge } from '@xyflow/react';
 
 interface SelectionToolbarProps {
@@ -10,6 +10,10 @@ interface SelectionToolbarProps {
   onBulkAlign?: (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void;
   onBulkGroup?: () => void;
   onBulkUngroup?: () => void;
+  onBringToFront?: () => void;
+  onBringForward?: () => void;
+  onSendBackward?: () => void;
+  onSendToBack?: () => void;
   position?: { x: number; y: number };
   className?: string;
 }
@@ -22,6 +26,10 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
   onBulkAlign,
   onBulkGroup,
   onBulkUngroup,
+  onBringToFront,
+  onBringForward,
+  onSendBackward,
+  onSendToBack,
   position,
   className = '',
 }) => {
@@ -117,6 +125,51 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                 title="Ungroup selected nodes"
               >
                 <Ungroup className="w-4 h-4 text-gray-600 group-hover:text-purple-600" />
+              </button>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Layer management tools (only for nodes) */}
+      {selectedNodes.length > 0 && (
+        <>
+          <div className="w-px h-6 bg-gray-200 mx-1" />
+          <div className="flex items-center gap-1">
+            {onBringToFront && (
+              <button
+                onClick={onBringToFront}
+                className="p-2 hover:bg-orange-50 rounded-md transition-colors group"
+                title="Bring to Front (Ctrl+Shift+])"
+              >
+                <BringToFront className="w-4 h-4 text-gray-600 group-hover:text-orange-600" />
+              </button>
+            )}
+            {onBringForward && (
+              <button
+                onClick={onBringForward}
+                className="p-2 hover:bg-orange-50 rounded-md transition-colors group"
+                title="Bring Forward (Ctrl+])"
+              >
+                <ChevronUp className="w-4 h-4 text-gray-600 group-hover:text-orange-600" />
+              </button>
+            )}
+            {onSendBackward && (
+              <button
+                onClick={onSendBackward}
+                className="p-2 hover:bg-orange-50 rounded-md transition-colors group"
+                title="Send Backward (Ctrl+[)"
+              >
+                <ChevronDown className="w-4 h-4 text-gray-600 group-hover:text-orange-600" />
+              </button>
+            )}
+            {onSendToBack && (
+              <button
+                onClick={onSendToBack}
+                className="p-2 hover:bg-orange-50 rounded-md transition-colors group"
+                title="Send to Back (Ctrl+Shift+[)"
+              >
+                <SendToBack className="w-4 h-4 text-gray-600 group-hover:text-orange-600" />
               </button>
             )}
           </div>

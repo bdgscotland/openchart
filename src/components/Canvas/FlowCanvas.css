@@ -261,9 +261,14 @@
   }
 }
 
-/* Background dots */
-.react-flow__background pattern circle {
-  fill: rgba(0, 0, 0, 0.15);
+/* Background grid - visible lines like draw.io/Lucidchart */
+.react-flow__background {
+  background-color: var(--primary-bg);
+}
+
+.react-flow__background-pattern {
+  stroke: #b0b0b0 !important;
+  stroke-width: 1 !important;
 }
 
 /* Enhanced node selection */

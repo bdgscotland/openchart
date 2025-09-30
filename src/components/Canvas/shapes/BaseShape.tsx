@@ -175,7 +175,7 @@ export const BaseShape: React.FC<BaseShapeProps & {
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [data.width, data.height, id, setNodes]);
+  }, [data.width, data.height, id, setNodes, getNodes]);
 
   // Prevent drag when resizing
   useEffect(() => {
@@ -503,12 +503,13 @@ export const BaseShape: React.FC<BaseShapeProps & {
     return false; // Force re-render
   }
 
-  // Check other critical props including resize version
+  // Check other critical props including resize version and style version
   const shouldRerender = (
     prevProps.data.label !== nextProps.data.label ||
     prevProps.data.width !== nextProps.data.width ||
     prevProps.data.height !== nextProps.data.height ||
     prevProps.data.resizeVersion !== nextProps.data.resizeVersion ||
+    prevProps.data.styleVersion !== nextProps.data.styleVersion ||
     prevProps.selected !== nextProps.selected ||
     prevProps.id !== nextProps.id
   );

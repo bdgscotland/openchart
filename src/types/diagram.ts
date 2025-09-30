@@ -236,6 +236,17 @@ export interface Connection {
   waypoints?: Point[]; // Custom routing points
   label?: string;
   labelPosition?: 'start' | 'middle' | 'end';
+  labelStyle?: {
+    fontSize?: number;
+    fontFamily?: string;
+    fontWeight?: 'normal' | 'bold';
+    fontStyle?: 'normal' | 'italic';
+    color?: string;
+    backgroundColor?: string;
+    padding?: number;
+  };
+  labelOffset?: Point;
+  labelVisible?: boolean;
 }
 
 export interface DiagramSchema {

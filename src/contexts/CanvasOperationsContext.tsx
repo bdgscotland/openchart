@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useCallback, ReactNode } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import type { DiagramSettings, ElementStyle } from '../types/diagram';
+import type { EdgeStyleConfig } from '../types/edgeTypes';
 import useShapeCreation from '../components/Canvas/hooks/useShapeCreation';
 import { useClipboard } from '../hooks/useClipboard';
 import { useActionToolbar } from '../hooks/useActionToolbar';
@@ -15,6 +16,9 @@ interface CanvasOperationsContextType {
   handleUpdateElementText: (elementId: string, text: string) => void;
   handleUpdateElementPosition: (elementId: string, x: number, y: number) => void;
   handleUpdateElementSize: (elementId: string, width: number, height: number) => void;
+
+  // Edge update handlers
+  handleUpdateEdgeStyle: (edgeId: string, styleUpdates: Partial<EdgeStyleConfig>) => void;
 
   // Zoom and view control handlers
   handleZoomIn: () => void;
@@ -192,6 +196,42 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
         : node
     ));
   }, [setNodes]);
+  // Edge update handler
+  const handleUpdateEdgeStyle = useCallback((edgeId: string, styleUpdates: Partial<EdgeStyleConfig>) => {
+    console.log('🎨 handleUpdateEdgeStyle called:', { edgeId, styleUpdates });
+
+    setEdges(currentEdges => {
+      return currentEdges.map(edge => {
+        if (edge.id === edgeId) {
+          // Get current style and merge with updates
+          const currentStyle = edge.data?.style || {};
+          const newStyle = { ...currentStyle, ...styleUpdates };
+
+          // Create a completely new edge object to force React Flow re-render
+          const updatedEdge = {
+            ...edge,
+            // Force React Flow to detect change with a new data object
+            data: {
+              ...edge.data,
+              style: newStyle,
+              // Add a timestamp to force re-render
+              lastStyleUpdate: Date.now(),
+            },
+          };
+
+          console.log('🎨 Edge updated with new style:', {
+            id: updatedEdge.id,
+            oldStyle: currentStyle,
+            newStyle,
+            timestamp: updatedEdge.data.lastStyleUpdate
+          });
+
+          return updatedEdge;
+        }
+        return edge;
+      });
+    });
+  }, [setEdges]);
 
   // Zoom handlers - using actionToolbar functions
   const handleZoomIn = useCallback(() => {
@@ -222,6 +262,7 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
     handleUpdateElementText,
     handleUpdateElementPosition,
     handleUpdateElementSize,
+    handleUpdateEdgeStyle,
     handleZoomIn,
     handleZoomOut,
     handleFitToView,

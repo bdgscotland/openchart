@@ -1,13 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import type { Node, Edge, Connection } from '@xyflow/react';
+import { MarkerType } from '@xyflow/react';
 import { MenuBar } from '../MenuBar/MenuBar';
 import { ActionToolbar } from '../ActionToolbar';
 import { ShapeLibrary } from '../Toolbar';
 import { FlowCanvas } from '../Canvas';
 import { PropertyPanel } from '../PropertyPanel';
+import { LayersPanel } from '../LayersPanel';
 import { useFileOperations } from '../../contexts/FileOperationsContext';
 import { useViewOperations } from '../../contexts/ViewOperationsContext';
 import { useCanvasOperations } from '../../contexts/CanvasOperationsContext';
+import { useLayerOperations } from '../../contexts/LayerOperationsContext';
+import { useLayers } from '../../contexts/LayerContext';
 import type { DrawingTool } from '../../types/shapes';
 import type { DiagramSettings } from '../../types/diagram';
 
@@ -17,6 +21,8 @@ interface AppContentProps {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   diagramSettings: DiagramSettings;
+  selectedTool: DrawingTool;
+  setSelectedTool: React.Dispatch<React.SetStateAction<DrawingTool>>;
 }
 
 const AppContent: React.FC<AppContentProps> = ({
@@ -24,15 +30,17 @@ const AppContent: React.FC<AppContentProps> = ({
   edges,
   setNodes,
   setEdges,
-  diagramSettings
+  diagramSettings,
+  selectedTool,
+  setSelectedTool
 }) => {
-  // Local state for tool selection
-  const [selectedTool, setSelectedTool] = useState<DrawingTool>('select');
 
   // Get all operations from contexts
   const fileOps = useFileOperations();
   const viewOps = useViewOperations();
   const canvasOps = useCanvasOperations();
+  const layerOps = useLayerOperations();
+  const { getActiveLayer } = useLayers();
 
   // We need to get the actual nodes and edges state from App component
   // For now, we'll access them through the context providers
@@ -48,6 +56,25 @@ const AppContent: React.FC<AppContentProps> = ({
     const saved = localStorage.getItem('openchart-right-sidebar-collapsed');
     return saved ? JSON.parse(saved) : false;
   });
+
+  // Helper function to convert React Flow Nodes to DiagramElements
+  const nodesToDiagramElements = useCallback((nodes: Node[]) => {
+    return nodes.map(node => ({
+      id: node.id,
+      type: node.type || 'rectangle',
+      position: node.position,
+      size: {
+        width: node.data?.width || node.width || 120,
+        height: node.data?.height || node.height || 80,
+      },
+      style: node.data?.style || {},
+      text: node.data?.label || '',
+      locked: node.data?.locked,
+      visible: node.data?.visible,
+      zIndex: node.data?.zIndex,
+      properties: node.data?.properties,
+    }));
+  }, []);
 
   // Sidebar toggle handlers
   const handleToggleLeftSidebar = useCallback(() => {
@@ -111,11 +138,45 @@ const AppContent: React.FC<AppContentProps> = ({
         e.preventDefault();
         fileOps.handleLoadDiagram();
       }
+
+      // Toggle Layers Panel (F7 or Ctrl+Shift+L / Cmd+Shift+L)
+      if (e.key === 'F7' || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'l')) {
+        e.preventDefault();
+        viewOps.handleToggleLayersPanel();
+      }
+
+      // Layer operations shortcuts
+      const selectedNodeIds = nodes.filter(node => node.selected).map(node => node.id);
+      if (selectedNodeIds.length > 0) {
+        // Bring to Front (Ctrl+Shift+] / Cmd+Shift+])
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === ']') {
+          e.preventDefault();
+          layerOps.bringToFront(selectedNodeIds);
+        }
+
+        // Bring Forward (Ctrl+] / Cmd+])
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === ']') {
+          e.preventDefault();
+          layerOps.bringForward(selectedNodeIds);
+        }
+
+        // Send Backward (Ctrl+[ / Cmd+[)
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === '[') {
+          e.preventDefault();
+          layerOps.sendBackward(selectedNodeIds);
+        }
+
+        // Send to Back (Ctrl+Shift+[ / Cmd+Shift+[)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '[') {
+          e.preventDefault();
+          layerOps.sendToBack(selectedNodeIds);
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canvasOps.clipboard, fileOps]);
+  }, [canvasOps.clipboard, fileOps, layerOps, nodes, viewOps]);
 
   return (
     <div className="app">
@@ -165,8 +226,6 @@ const AppContent: React.FC<AppContentProps> = ({
         // View operations
         onToggleGrid={viewOps.handleToggleGrid}
         onToggleRulers={viewOps.handleToggleRulers}
-        showGrid={true} // This will be managed by the context
-        showRulers={false} // Temporarily disabled to test canvas functionality
         onToggleLeftSidebar={handleToggleLeftSidebar}
         onToggleRightSidebar={handleToggleRightSidebar}
         isLeftSidebarCollapsed={isLeftSidebarCollapsed}
@@ -191,23 +250,53 @@ const AppContent: React.FC<AppContentProps> = ({
         onToggleFullscreen={viewOps.handleToggleFullscreen}
         onChangeUnits={viewOps.handleChangeUnits}
         onChangePageScale={viewOps.handleChangePageScale}
-        diagramSettings={undefined} // This will be provided by context
+        diagramSettings={diagramSettings}
       />
 
       <ActionToolbar
-        selectedTool={selectedTool}
-        onToolChange={setSelectedTool}
+        // Undo/Redo
+        canUndo={canvasOps.actionToolbar.canUndo}
+        canRedo={canvasOps.actionToolbar.canRedo}
+        onUndo={canvasOps.handleUndo}
+        onRedo={canvasOps.handleRedo}
+
+        // Selection and deletion
+        hasSelection={canvasOps.actionToolbar.hasSelection}
+        onDelete={canvasOps.actionToolbar.handleDelete}
+
+        // Layer management
+        onBringToFront={() => {
+          const selectedNodeIds = nodes.filter(node => node.selected).map(node => node.id);
+          layerOps.bringToFront(selectedNodeIds);
+        }}
+        onBringForward={() => {
+          const selectedNodeIds = nodes.filter(node => node.selected).map(node => node.id);
+          layerOps.bringForward(selectedNodeIds);
+        }}
+        onSendBackward={() => {
+          const selectedNodeIds = nodes.filter(node => node.selected).map(node => node.id);
+          layerOps.sendBackward(selectedNodeIds);
+        }}
+        onSendToBack={() => {
+          const selectedNodeIds = nodes.filter(node => node.selected).map(node => node.id);
+          layerOps.sendToBack(selectedNodeIds);
+        }}
+
+        // Edge styles
+        edgeStyle={canvasOps.actionToolbar.edgeStyle}
+        onEdgeStyleChange={canvasOps.actionToolbar.handleEdgeStyleChange}
+
+        // Zoom controls
+        zoom={canvasOps.actionToolbar.zoom}
         onZoomIn={canvasOps.handleZoomIn}
         onZoomOut={canvasOps.handleZoomOut}
         onFitToView={canvasOps.handleFitToView}
-        onUndo={canvasOps.handleUndo}
-        onRedo={canvasOps.handleRedo}
-        onToggleGrid={viewOps.handleToggleGrid}
-        onToggleRulers={viewOps.handleToggleRulers}
-        showGrid={true} // This will be managed by the context
-        showRulers={false} // Temporarily disabled to test canvas functionality
-        canUndo={canvasOps.actionToolbar.canUndo}
-        canRedo={canvasOps.actionToolbar.canRedo}
+
+        // Canvas settings
+        snapToGrid={diagramSettings.grid.snapToGrid}
+        onToggleSnapToGrid={viewOps.handleToggleGrid}
+        connectionMode="loose" // This will be managed by the context
+        onToggleConnectionMode={() => {}} // TODO: Implement connection mode toggle
       />
 
       <main className="app-main">
@@ -221,45 +310,59 @@ const AppContent: React.FC<AppContentProps> = ({
         <div className="canvas-area">
           <div className="canvas-container">
             <FlowCanvas
+              ref={fileOps.flowRef}
               nodes={nodes || []}
               edges={edges || []}
               onNodesChange={setNodes}
               onEdgesChange={setEdges}
               onConnect={(connection) => {
                 // Handle new edge creation
-                const newEdge = {
+                const activeLayer = getActiveLayer();
+                const newEdge: Edge = {
                   id: `edge-${Date.now()}`,
                   source: connection.source!,
                   target: connection.target!,
                   sourceHandle: connection.sourceHandle,
                   targetHandle: connection.targetHandle,
+                  type: 'smoothstep', // Default edge type with curved lines
+                  markerEnd: { type: MarkerType.Arrow }, // Add arrow marker
+                  data: { layerId: activeLayer.id }, // Assign to active layer
                 };
+                console.log('🔗 Creating new edge:', newEdge);
                 setEdges(edges => [...edges, newEdge]);
               }}
-              selectedTool={selectedTool}
-              onToolChange={setSelectedTool}
               onPaneClick={canvasOps.handlePaneClick}
-              showGrid={true} // This will be managed by the context
-              showRulers={false} // Temporarily disabled to test canvas functionality
-              snapToGrid={true} // This will be managed by the context
-              diagramSettings={diagramSettings}
+              showGrid={diagramSettings.grid.enabled}
+              gridSize={diagramSettings.grid.size}
+              showRulers={diagramSettings.rulers.enabled}
+              snapToGrid={diagramSettings.grid.snapToGrid}
             />
           </div>
         </div>
 
         <PropertyPanel
           isCollapsed={isRightSidebarCollapsed}
-          selectedElements={nodes?.filter(node => node.selected) || []} // Get selected nodes with safety check
+          selectedElements={nodesToDiagramElements(nodes?.filter(node => node.selected) || [])}
+          allElements={nodesToDiagramElements(nodes || [])}
+          selectedEdges={edges?.filter(edge => edge.selected) || []}
           diagramSettings={diagramSettings}
           onUpdateElementStyle={canvasOps.handleUpdateElementStyle}
           onUpdateElementText={canvasOps.handleUpdateElementText}
           onUpdateElementPosition={canvasOps.handleUpdateElementPosition}
           onUpdateElementSize={canvasOps.handleUpdateElementSize}
+          onUpdateEdgeStyle={canvasOps.handleUpdateEdgeStyle}
           onGridSettingsChange={() => {}} // This will be managed by context
           onBackgroundSettingsChange={() => {}} // This will be managed by context
           onPaperSettingsChange={() => {}} // This will be managed by context
           onViewportSettingsChange={() => {}} // This will be managed by context
           onRulerSettingsChange={() => {}} // This will be managed by context
+        />
+
+        <LayersPanel
+          nodes={nodes}
+          onNodesChange={setNodes}
+          isCollapsed={!diagramSettings.uiPanels.layersPanel}
+          onToggleCollapse={() => viewOps.handleToggleLayersPanel()}
         />
         </div>
       </main>

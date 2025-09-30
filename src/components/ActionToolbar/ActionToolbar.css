@@ -123,6 +123,11 @@
   position: relative;
 }
 
+/* Layer Dropdown - shares similar styling with edge-style-dropdown */
+.layer-dropdown {
+  position: relative;
+}
+
 .edge-style-menu {
   position: absolute;
   top: 100%;
@@ -152,6 +157,14 @@
   border-radius: 3px;
   transition: all 0.1s ease;
   text-align: left;
+  justify-content: space-between;
+}
+
+.edge-style-option .shortcut {
+  margin-left: auto;
+  font-size: 10px;
+  color: #9ca3af;
+  font-weight: 400;
 }
 
 .edge-style-option:hover {

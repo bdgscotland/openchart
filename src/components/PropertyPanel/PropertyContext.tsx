@@ -309,9 +309,9 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
     // Add other element properties
     combined['position.x'] = firstElement.position.x;
     combined['position.y'] = firstElement.position.y;
-    combined['size.width'] = firstElement.size.width;
-    combined['size.height'] = firstElement.size.height;
-    combined['text'] = firstElement.text;
+    combined['size.width'] = firstElement.size?.width || firstElement.data?.width || firstElement.style?.width || 150;
+    combined['size.height'] = firstElement.size?.height || firstElement.data?.height || firstElement.style?.height || 100;
+    combined['text'] = firstElement.text || firstElement.data?.label;
 
     return combined;
   }, [selectedElements]);
