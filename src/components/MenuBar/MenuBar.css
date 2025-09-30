@@ -79,6 +79,24 @@
   transition: all var(--transition-fast);
   font-size: 0.8rem;
   position: relative;
+  gap: 0.5rem;
+}
+
+.menu-item-check {
+  width: 1rem;
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  font-weight: 600;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.menu-item.checked .menu-item-check {
+  opacity: 1;
+}
+
+.menu-item:not(.checked) .menu-item-check {
+  opacity: 0;
 }
 
 .menu-item:not(.disabled):hover {

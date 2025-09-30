@@ -59,7 +59,8 @@ export const useActionToolbar = ({
   const updateZoom = useCallback(() => {
     if (flowCanvasRef?.current?.getZoom) {
       const currentZoom = flowCanvasRef.current.getZoom();
-      setZoom(currentZoom);
+      // Ensure we always have a valid zoom value
+      setZoom((currentZoom !== undefined && !isNaN(currentZoom)) ? currentZoom : 1);
     }
   }, [flowCanvasRef]);
 
@@ -137,6 +138,8 @@ export const useActionToolbar = ({
 
   // Handle edge style changes
   const handleEdgeStyleChange = useCallback((style: 'straight' | 'curved' | 'step') => {
+    if (selectedEdges.length === 0) return;
+
     setEdgeStyle(style);
 
     // Convert style to React Flow edge type
@@ -155,14 +158,19 @@ export const useActionToolbar = ({
         edgeType = 'smoothstep';
     }
 
-    // Update existing edges with new style
-    const updatedEdges = edges.map(edge => ({
-      ...edge,
-      type: edgeType,
-    }));
+    // Update only selected edges with new style
+    const updatedEdges = edges.map(edge => {
+      if (edge.selected) {
+        return {
+          ...edge,
+          type: edgeType,
+        };
+      }
+      return edge;
+    });
 
     onEdgesChange(updatedEdges);
-  }, [edges, onEdgesChange]);
+  }, [selectedEdges, edges, onEdgesChange]);
 
   // Zoom controls
   const handleZoomIn = useCallback(() => {

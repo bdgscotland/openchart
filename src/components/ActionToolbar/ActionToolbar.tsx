@@ -13,6 +13,9 @@ import {
   GitBranch,
   Grid3X3,
   Link,
+  Layers,
+  BringToFront,
+  SendToBack,
 } from 'lucide-react';
 import './ActionToolbar.css';
 
@@ -29,6 +32,8 @@ export interface ActionToolbarProps {
 
   // Layer management
   onBringToFront: () => void;
+  onBringForward: () => void;
+  onSendBackward: () => void;
   onSendToBack: () => void;
 
   // Edge styles
@@ -59,6 +64,8 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
   hasSelection,
   onDelete,
   onBringToFront,
+  onBringForward,
+  onSendBackward,
   onSendToBack,
   edgeStyle,
   onEdgeStyleChange,
@@ -73,6 +80,7 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
   isCompact = false,
 }) => {
   const [showEdgeStyleMenu, setShowEdgeStyleMenu] = useState(false);
+  const [showLayerMenu, setShowLayerMenu] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -149,6 +157,20 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
     }
   }, [showEdgeStyleMenu]);
 
+  // Close layer menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!e.target || !(e.target as Element).closest('.layer-dropdown')) {
+        setShowLayerMenu(false);
+      }
+    };
+
+    if (showLayerMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showLayerMenu]);
+
   const edgeStyleIcon = () => {
     switch (edgeStyle) {
       case 'straight':
@@ -205,24 +227,67 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
 
       {/* Layer Group */}
       <div className="toolbar-group">
-        <button
-          className="toolbar-button"
-          onClick={onBringToFront}
-          disabled={!hasSelection}
-          title="Bring to front"
-          aria-label="Bring selected elements to front"
-        >
-          <ChevronUp className="w-1.5 h-1.5" />
-        </button>
-        <button
-          className="toolbar-button"
-          onClick={onSendToBack}
-          disabled={!hasSelection}
-          title="Send to back"
-          aria-label="Send selected elements to back"
-        >
-          <ChevronDown className="w-1.5 h-1.5" />
-        </button>
+        <div className="layer-dropdown">
+          <button
+            className="toolbar-button"
+            onClick={() => setShowLayerMenu(!showLayerMenu)}
+            disabled={!hasSelection}
+            title="Layer order"
+            aria-label="Change layer order"
+          >
+            <Layers className="w-1.5 h-1.5" />
+            <span className="toolbar-text">Layers</span>
+          </button>
+
+          {showLayerMenu && hasSelection && (
+            <div className="edge-style-menu">
+              <button
+                className="edge-style-option"
+                onClick={() => {
+                  onBringToFront();
+                  setShowLayerMenu(false);
+                }}
+              >
+                <BringToFront className="w-1.5 h-1.5" />
+                <span>Bring to Front</span>
+                <span className="shortcut">Ctrl+Shift+]</span>
+              </button>
+              <button
+                className="edge-style-option"
+                onClick={() => {
+                  onBringForward();
+                  setShowLayerMenu(false);
+                }}
+              >
+                <ChevronUp className="w-1.5 h-1.5" />
+                <span>Bring Forward</span>
+                <span className="shortcut">Ctrl+]</span>
+              </button>
+              <button
+                className="edge-style-option"
+                onClick={() => {
+                  onSendBackward();
+                  setShowLayerMenu(false);
+                }}
+              >
+                <ChevronDown className="w-1.5 h-1.5" />
+                <span>Send Backward</span>
+                <span className="shortcut">Ctrl+[</span>
+              </button>
+              <button
+                className="edge-style-option"
+                onClick={() => {
+                  onSendToBack();
+                  setShowLayerMenu(false);
+                }}
+              >
+                <SendToBack className="w-1.5 h-1.5" />
+                <span>Send to Back</span>
+                <span className="shortcut">Ctrl+Shift+[</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="toolbar-separator" />

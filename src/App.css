@@ -176,6 +176,38 @@
   text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
   letter-spacing: -0.02em;
   transition: all var(--transition-normal);
+  position: relative;
+  display: inline-block;
+}
+
+.app-header h1::after {
+  content: 'OpenChart';
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(255, 255, 255, 0.8) 50%,
+    transparent 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: sparkle 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes sparkle {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .app-header h1:hover {

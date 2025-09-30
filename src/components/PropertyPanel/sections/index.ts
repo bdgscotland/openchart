@@ -8,7 +8,9 @@
 export { VisualSection } from './VisualSection';
 export { LayoutSection } from './LayoutSection';
 export { TypographySection } from './TypographySection';
+export { LayerSection } from './LayerSection';
 
 export type { VisualSectionProps } from './VisualSection';
 export type { LayoutSectionProps } from './LayoutSection';
 export type { TypographySectionProps } from './TypographySection';
+export type { LayerSectionProps } from './LayerSection';
