@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useCallback, ReactNode } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import { diagramPersistence } from '../utils/diagramPersistence';
-import { createEmptyDiagram } from '../utils/diagramFactory';
 import type { DiagramSettings } from '../types/diagram';
 import type { Layer } from '../types/layers';
 import { DEFAULT_LAYER } from '../types/layers';
@@ -54,10 +53,12 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
   fileInputRef,
 }) => {
   const handleNewDiagram = useCallback(() => {
-    const emptyDiagram = createEmptyDiagram();
-    setNodes(emptyDiagram.nodes);
-    setEdges(emptyDiagram.edges);
-    setDiagramSettings(emptyDiagram.settings);
+    // Reset to empty diagram state
+    setNodes([]);
+    setEdges([]);
+
+    // Note: We don't reset diagramSettings here - it maintains user's view preferences
+    // This is intentional to preserve grid, rulers, panel visibility, etc.
 
     // Reset layers to default
     setLayers([DEFAULT_LAYER]);
@@ -67,7 +68,7 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
     if (flowRef.current) {
       flowRef.current.setViewport({ x: 0, y: 0, zoom: 1 });
     }
-  }, [setNodes, setEdges, setDiagramSettings, setLayers, setActiveLayerId, flowRef]);
+  }, [setNodes, setEdges, setLayers, setActiveLayerId, flowRef]);
 
   const handleSaveDiagram = useCallback(async () => {
     try {

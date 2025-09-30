@@ -120,6 +120,11 @@ export function migrateNodeDimensions(node: Node): Node {
  * Migrate multiple nodes to have proper React Flow dimensions
  */
 export function migrateAllNodeDimensions(nodes: Node[]): Node[] {
+  // Safety check: handle undefined/null/empty arrays
+  if (!nodes || !Array.isArray(nodes) || nodes.length === 0) {
+    return [];
+  }
+
   const migratedNodes = nodes.map(migrateNodeDimensions);
 
   const migrationCount = migratedNodes.filter((_, index) =>
@@ -137,6 +142,10 @@ export function migrateAllNodeDimensions(nodes: Node[]): Node[] {
  * Utility to check if any nodes in an array need migration
  */
 export function hasNodesThatNeedMigration(nodes: Node[]): boolean {
+  // Safety check: handle undefined/null/empty arrays
+  if (!nodes || !Array.isArray(nodes) || nodes.length === 0) {
+    return false;
+  }
   return nodes.some(needsDimensionMigration);
 }
 
