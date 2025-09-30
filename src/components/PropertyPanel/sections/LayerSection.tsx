@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
 import { Layers } from 'lucide-react';
-import { useNodes } from '@xyflow/react';
 import PropertySection from '../PropertySection';
 import PropertyField, { PropertyFieldGroup } from '../PropertyField';
 import { SelectField } from '../fields';
@@ -29,20 +28,15 @@ export const LayerSection: React.FC<LayerSectionProps> = ({
   const { selectedElements, selectionType } = context;
   const { layers, moveElementsToLayer } = useLayers();
 
-  // Get live node data from React Flow to ensure fresh layer assignments
-  const nodes = useNodes();
-
-  // Get current layer(s) of selected elements using live node data
+  // Get current layer(s) of selected elements
+  // Note: selectedElements may be stale after layer changes, but will update on next selection change
   const currentLayerInfo = useMemo(() => {
     if (selectedElements.length === 0) {
       return { layerId: undefined, isMixed: false };
     }
 
-    // Get layer IDs from live node data (not stale selectedElements)
-    const selectedIds = new Set(selectedElements.map(el => el.id));
-    const selectedNodes = nodes.filter(node => selectedIds.has(node.id));
-
-    const layerIds = selectedNodes.map(node => node.data?.layerId || 'layer-default');
+    // Get layer IDs from selected elements
+    const layerIds = selectedElements.map(el => el.data?.layerId || 'layer-default');
     const uniqueLayerIds = [...new Set(layerIds)];
 
     if (uniqueLayerIds.length === 1) {
@@ -50,7 +44,7 @@ export const LayerSection: React.FC<LayerSectionProps> = ({
     } else {
       return { layerId: undefined, isMixed: true };
     }
-  }, [selectedElements, nodes]);
+  }, [selectedElements]);
 
   // Convert layers to options for SelectField
   const layerOptions = useMemo(() => {
