@@ -7,6 +7,7 @@
 }
 
 /* Override React Flow defaults to respect theme */
+/* Commented out - inline styles should take precedence
 .react-flow {
   background: var(--primary-bg);
 }
@@ -14,6 +15,7 @@
 .react-flow__renderer {
   background: var(--primary-bg);
 }
+*/
 
 /* Custom node styling */
 .shape-node-container {
@@ -262,14 +264,18 @@
 }
 
 /* Background grid - visible lines like draw.io/Lucidchart */
+/* Commented out - inline styles should take precedence
 .react-flow__background {
   background-color: var(--primary-bg);
 }
+*/
 
+/* Removed hardcoded grid color - now controlled by Background component props
 .react-flow__background-pattern {
   stroke: #b0b0b0 !important;
   stroke-width: 1 !important;
 }
+*/
 
 /* Enhanced node selection */
 .react-flow__node.selected {
