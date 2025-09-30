@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useCallback, ReactNode } from 'react';
 import type { Node } from '@xyflow/react';
+import { useUndoRedo } from './UndoRedoContext';
+import { ZOrderCommand } from '../core/commands/ZOrderCommand';
 
 interface LayerOperationsContextType {
   // Layer ordering operations
@@ -26,6 +28,9 @@ export const LayerOperationsProvider: React.FC<LayerOperationsProviderProps> = (
   nodes,
   setNodes,
 }) => {
+  // Get undo/redo context
+  const undoRedo = useUndoRedo();
+
   // Get the current z-index of a node (default to 0 if not set)
   const getNodeZIndex = useCallback((nodeId: string): number => {
     const node = nodes.find(n => n.id === nodeId);
@@ -43,19 +48,22 @@ export const LayerOperationsProvider: React.FC<LayerOperationsProviderProps> = (
 
     // Find the current maximum z-index
     const maxZIndex = Math.max(...nodes.map(node => node.zIndex ?? 0), 0);
+    const newZIndex = maxZIndex + 1;
 
-    setNodes(currentNodes => {
-      return currentNodes.map(node => {
-        if (nodeIds.includes(node.id)) {
-          return {
-            ...node,
-            zIndex: maxZIndex + 1,
-          };
-        }
-        return node;
-      });
+    // Create z-order changes for command
+    const changes = nodeIds.map(nodeId => {
+      const node = nodes.find(n => n.id === nodeId);
+      return {
+        nodeId,
+        previousZIndex: node?.zIndex,
+        newZIndex,
+      };
     });
-  }, [nodes, setNodes]);
+
+    // Execute command
+    const command = new ZOrderCommand(changes, 'Bring to front');
+    undoRedo.executeCommand(command);
+  }, [nodes, undoRedo]);
 
   // Move selected nodes forward one layer
   const bringForward = useCallback((nodeIds: string[]) => {
@@ -135,19 +143,22 @@ export const LayerOperationsProvider: React.FC<LayerOperationsProviderProps> = (
 
     // Find the current minimum z-index
     const minZIndex = Math.min(...nodes.map(node => node.zIndex ?? 0), 0);
+    const newZIndex = minZIndex - 1;
 
-    setNodes(currentNodes => {
-      return currentNodes.map(node => {
-        if (nodeIds.includes(node.id)) {
-          return {
-            ...node,
-            zIndex: minZIndex - 1,
-          };
-        }
-        return node;
-      });
+    // Create z-order changes for command
+    const changes = nodeIds.map(nodeId => {
+      const node = nodes.find(n => n.id === nodeId);
+      return {
+        nodeId,
+        previousZIndex: node?.zIndex,
+        newZIndex,
+      };
     });
-  }, [nodes, setNodes]);
+
+    // Execute command
+    const command = new ZOrderCommand(changes, 'Send to back');
+    undoRedo.executeCommand(command);
+  }, [nodes, undoRedo]);
 
   // Normalize z-indices to be sequential integers (0, 1, 2, 3, ...)
   // This prevents floating point accumulation from bringForward/sendBackward

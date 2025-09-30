@@ -3,6 +3,8 @@ import type { Node } from '@xyflow/react';
 import type { DrawingTool } from '../../../types/shapes';
 import { createShapeNode, isValidShapeType } from '../shapes';
 import { useLayers } from '../../../contexts/LayerContext';
+import { useUndoRedo } from '../../../contexts/UndoRedoContext';
+import { CreateNodeCommand } from '../../../core/commands/CreateNodeCommand';
 
 interface UseShapeCreationOptions {
   selectedTool: DrawingTool;
@@ -11,6 +13,7 @@ interface UseShapeCreationOptions {
 
 export const useShapeCreation = ({ selectedTool, onNodesChange }: UseShapeCreationOptions) => {
   const { getActiveLayer } = useLayers();
+  const { executeCommand } = useUndoRedo();
 
   const handleCanvasClick = useCallback((event: React.MouseEvent) => {
     // Only create shapes when a drawing tool is selected (not select)
@@ -59,9 +62,10 @@ export const useShapeCreation = ({ selectedTool, onNodesChange }: UseShapeCreati
       layerId: activeLayer.id,
     };
 
-    // Add the new node to the canvas
-    onNodesChange((nodes) => [...nodes, newNode]);
-  }, [selectedTool, onNodesChange, getActiveLayer]);
+    // Add the new node to the canvas using CreateNodeCommand for undo/redo support
+    const command = new CreateNodeCommand(newNode);
+    executeCommand(command);
+  }, [selectedTool, onNodesChange, getActiveLayer, executeCommand]);
 
   return {
     handleCanvasClick,

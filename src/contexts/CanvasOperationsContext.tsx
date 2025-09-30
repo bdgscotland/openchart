@@ -5,6 +5,10 @@ import type { EdgeStyleConfig } from '../types/edgeTypes';
 import useShapeCreation from '../components/Canvas/hooks/useShapeCreation';
 import { useClipboard } from '../hooks/useClipboard';
 import { useActionToolbar } from '../hooks/useActionToolbar';
+import { useUndoRedo } from './UndoRedoContext';
+import { UpdateStyleCommand } from '../core/commands/UpdateStyleCommand';
+import { UpdateTextCommand } from '../core/commands/UpdateTextCommand';
+import { UpdateEdgeStyleCommand } from '../core/commands/UpdateEdgeStyleCommand';
 
 interface CanvasOperationsContextType {
   // Canvas interaction handlers
@@ -63,6 +67,9 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
   canvasState,
   flowRef,
 }) => {
+  // Get undo/redo context
+  const undoRedo = useUndoRedo();
+
   // Shape creation hook
   const { handleCanvasClick } = useShapeCreation({
     selectedTool,
@@ -83,10 +90,10 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
     edges,
     onNodesChange: setNodes,
     onEdgesChange: setEdges,
-    canUndo: canvasState.canUndo,
-    canRedo: canvasState.canRedo,
-    onUndo: () => canvasState.undo(),
-    onRedo: () => canvasState.redo(),
+    canUndo: undoRedo.canUndo,
+    canRedo: undoRedo.canRedo,
+    onUndo: undoRedo.undo,
+    onRedo: undoRedo.redo,
     flowCanvasRef: flowRef,
   });
 
@@ -120,62 +127,46 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
   const handleUpdateElementStyle = useCallback((elementId: string, styleUpdates: any) => {
     console.log('🎨 handleUpdateElementStyle called:', { elementId, styleUpdates });
 
-    setNodes(currentNodes => {
-      return currentNodes.map(node => {
-        if (node.id === elementId) {
-          // Get current style and merge with updates
-          const currentStyle = node.data?.style || {};
-          const newStyle = { ...currentStyle, ...styleUpdates };
+    // Find the node to get its current style
+    const node = nodes.find(n => n.id === elementId);
+    if (!node) return;
 
-          // Create a completely new node object to force React Flow re-render
-          const updatedNode = {
-            ...node,
-            // Force React Flow to detect change with a new data object
-            data: {
-              ...node.data,
-              style: newStyle,
-              // Also update legacy properties for backward compatibility
-              backgroundColor: newStyle.fill || node.data?.backgroundColor,
-              borderColor: newStyle.stroke || node.data?.borderColor,
-              // Add a timestamp to force re-render
-              lastStyleUpdate: Date.now(),
-            },
-          };
+    const currentStyle = node.data?.style || {};
 
-          console.log('🎨 Node updated with new style:', {
-            id: updatedNode.id,
-            oldStyle: currentStyle,
-            newStyle,
-            timestamp: updatedNode.data.lastStyleUpdate
-          });
+    // Create and execute style update command
+    const command = new UpdateStyleCommand(
+      [{
+        nodeId: elementId,
+        previousStyle: currentStyle,
+        newStyle: styleUpdates,
+      }],
+      'Update style'
+    );
 
-          return updatedNode;
-        }
-        return node;
-      });
-    });
-  }, [setNodes]);
+    undoRedo.executeCommand(command);
+  }, [nodes, undoRedo]);
 
   const handleUpdateElementText = useCallback((elementId: string, text: string) => {
     console.log('🎨 handleUpdateElementText called:', { elementId, text });
 
-    setNodes(currentNodes => {
-      return currentNodes.map(node => {
-        if (node.id === elementId) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              label: text,
-              // Add timestamp to force re-render
-              lastTextUpdate: Date.now(),
-            }
-          };
-        }
-        return node;
-      });
-    });
-  }, [setNodes]);
+    // Find the node to get its current text
+    const node = nodes.find(n => n.id === elementId);
+    if (!node) return;
+
+    const previousText = node.data?.label || '';
+
+    // Create and execute text update command
+    const command = new UpdateTextCommand(
+      [{
+        nodeId: elementId,
+        previousText,
+        newText: text,
+      }],
+      'Update text'
+    );
+
+    undoRedo.executeCommand(command);
+  }, [nodes, undoRedo]);
 
   const handleUpdateElementPosition = useCallback((elementId: string, x: number, y: number) => {
     setNodes(nodes => nodes.map(node =>
@@ -200,38 +191,24 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
   const handleUpdateEdgeStyle = useCallback((edgeId: string, styleUpdates: Partial<EdgeStyleConfig>) => {
     console.log('🎨 handleUpdateEdgeStyle called:', { edgeId, styleUpdates });
 
-    setEdges(currentEdges => {
-      return currentEdges.map(edge => {
-        if (edge.id === edgeId) {
-          // Get current style and merge with updates
-          const currentStyle = edge.data?.style || {};
-          const newStyle = { ...currentStyle, ...styleUpdates };
+    // Find the edge to get its current style
+    const edge = edges.find(e => e.id === edgeId);
+    if (!edge) return;
 
-          // Create a completely new edge object to force React Flow re-render
-          const updatedEdge = {
-            ...edge,
-            // Force React Flow to detect change with a new data object
-            data: {
-              ...edge.data,
-              style: newStyle,
-              // Add a timestamp to force re-render
-              lastStyleUpdate: Date.now(),
-            },
-          };
+    const currentStyle = edge.data?.style || {};
 
-          console.log('🎨 Edge updated with new style:', {
-            id: updatedEdge.id,
-            oldStyle: currentStyle,
-            newStyle,
-            timestamp: updatedEdge.data.lastStyleUpdate
-          });
+    // Create and execute edge style update command
+    const command = new UpdateEdgeStyleCommand(
+      [{
+        edgeId,
+        previousStyle: currentStyle,
+        newStyle: styleUpdates,
+      }],
+      'Update edge style'
+    );
 
-          return updatedEdge;
-        }
-        return edge;
-      });
-    });
-  }, [setEdges]);
+    undoRedo.executeCommand(command);
+  }, [edges, undoRedo]);
 
   // Zoom handlers - using actionToolbar functions
   const handleZoomIn = useCallback(() => {
@@ -246,14 +223,14 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
     actionToolbar.handleFitToView();
   }, [actionToolbar.handleFitToView]);
 
-  // Undo/redo handlers
+  // Undo/redo handlers - now using UndoRedoContext
   const handleUndo = useCallback(() => {
-    canvasState.undo();
-  }, [canvasState]);
+    undoRedo.undo();
+  }, [undoRedo]);
 
   const handleRedo = useCallback(() => {
-    canvasState.redo();
-  }, [canvasState]);
+    undoRedo.redo();
+  }, [undoRedo]);
 
   const contextValue: CanvasOperationsContextType = {
     handlePaneClick,

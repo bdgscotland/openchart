@@ -5,6 +5,7 @@ import { ViewOperationsProvider } from './contexts/ViewOperationsContext';
 import { LayerProvider } from './contexts/LayerContext';
 import { CanvasOperationsProvider } from './contexts/CanvasOperationsContext';
 import { LayerOperationsProvider } from './contexts/LayerOperationsContext';
+import { UndoRedoProvider } from './contexts/UndoRedoContext';
 import AppContent from './components/App/AppContent';
 import type { DiagramSettings } from './types/diagram';
 import { DEFAULT_DIAGRAM_SETTINGS } from './types/diagram';
@@ -93,64 +94,72 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <FileOperationsProvider
+    <UndoRedoProvider
       nodes={nodes}
       edges={edges}
-      diagramSettings={diagramSettings}
-      layers={layers}
-      activeLayerId={activeLayerId}
       setNodes={setNodes}
       setEdges={setEdges}
-      setDiagramSettings={setDiagramSettings}
-      setLayers={setLayers}
-      setActiveLayerId={setActiveLayerId}
-      flowRef={flowRef}
-      fileInputRef={fileInputRef}
+      maxHistorySize={50}
     >
-      <ViewOperationsProvider
+      <FileOperationsProvider
+        nodes={nodes}
+        edges={edges}
         diagramSettings={diagramSettings}
+        layers={layers}
+        activeLayerId={activeLayerId}
+        setNodes={setNodes}
+        setEdges={setEdges}
         setDiagramSettings={setDiagramSettings}
-        setIsLeftSidebarCollapsed={setIsLeftSidebarCollapsed}
-        setIsRightSidebarCollapsed={setIsRightSidebarCollapsed}
+        setLayers={setLayers}
+        setActiveLayerId={setActiveLayerId}
         flowRef={flowRef}
+        fileInputRef={fileInputRef}
       >
-        <LayerProvider
-          nodes={nodes}
-          setNodes={setNodes}
-          edges={edges}
-          setEdges={setEdges}
-          layers={layers}
-          setLayers={setLayers}
-          activeLayerId={activeLayerId}
-          setActiveLayerId={setActiveLayerId}
+        <ViewOperationsProvider
+          diagramSettings={diagramSettings}
+          setDiagramSettings={setDiagramSettings}
+          setIsLeftSidebarCollapsed={setIsLeftSidebarCollapsed}
+          setIsRightSidebarCollapsed={setIsRightSidebarCollapsed}
+          flowRef={flowRef}
         >
-          <LayerOperationsProvider
+          <LayerProvider
             nodes={nodes}
             setNodes={setNodes}
+            edges={edges}
+            setEdges={setEdges}
+            layers={layers}
+            setLayers={setLayers}
+            activeLayerId={activeLayerId}
+            setActiveLayerId={setActiveLayerId}
           >
-            <CanvasOperationsProvider
+            <LayerOperationsProvider
               nodes={nodes}
-              edges={edges}
               setNodes={setNodes}
-              setEdges={setEdges}
-              selectedTool={selectedTool}
-              canvasState={canvasState}
-              flowRef={flowRef}
             >
-              <AppContent
+              <CanvasOperationsProvider
                 nodes={nodes}
                 edges={edges}
                 setNodes={setNodes}
                 setEdges={setEdges}
-                diagramSettings={diagramSettings}
                 selectedTool={selectedTool}
-                setSelectedTool={setSelectedTool}
-              />
-            </CanvasOperationsProvider>
-          </LayerOperationsProvider>
-        </LayerProvider>
-      </ViewOperationsProvider>
-    </FileOperationsProvider>
+                canvasState={canvasState}
+                flowRef={flowRef}
+              >
+                <AppContent
+                  nodes={nodes}
+                  edges={edges}
+                  setNodes={setNodes}
+                  setEdges={setEdges}
+                  diagramSettings={diagramSettings}
+                  selectedTool={selectedTool}
+                  setSelectedTool={setSelectedTool}
+                />
+              </CanvasOperationsProvider>
+            </LayerOperationsProvider>
+          </LayerProvider>
+        </ViewOperationsProvider>
+      </FileOperationsProvider>
+    </UndoRedoProvider>
   );
 }
 
