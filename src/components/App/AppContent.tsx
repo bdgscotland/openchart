@@ -21,6 +21,7 @@ interface AppContentProps {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   diagramSettings: DiagramSettings;
+  setDiagramSettings: React.Dispatch<React.SetStateAction<DiagramSettings>>;
   selectedTool: DrawingTool;
   setSelectedTool: React.Dispatch<React.SetStateAction<DrawingTool>>;
 }
@@ -31,6 +32,7 @@ const AppContent: React.FC<AppContentProps> = ({
   setNodes,
   setEdges,
   diagramSettings,
+  setDiagramSettings,
   selectedTool,
   setSelectedTool
 }) => {
@@ -92,6 +94,42 @@ const AppContent: React.FC<AppContentProps> = ({
       return newValue;
     });
   }, []);
+
+  // Diagram settings handlers
+  const handleGridSettingsChange = useCallback((updates: Partial<typeof diagramSettings.grid>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      grid: { ...prev.grid, ...updates }
+    }));
+  }, [setDiagramSettings]);
+
+  const handleBackgroundSettingsChange = useCallback((updates: Partial<typeof diagramSettings.background>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      background: { ...prev.background, ...updates }
+    }));
+  }, [setDiagramSettings]);
+
+  const handlePaperSettingsChange = useCallback((updates: Partial<typeof diagramSettings.paper>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      paper: { ...prev.paper, ...updates }
+    }));
+  }, [setDiagramSettings]);
+
+  const handleViewportSettingsChange = useCallback((updates: Partial<typeof diagramSettings.viewport>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      viewport: { ...prev.viewport, ...updates }
+    }));
+  }, [setDiagramSettings]);
+
+  const handleRulerSettingsChange = useCallback((updates: Partial<typeof diagramSettings.rulers>) => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      rulers: { ...prev.rulers, ...updates }
+    }));
+  }, [setDiagramSettings]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -351,11 +389,11 @@ const AppContent: React.FC<AppContentProps> = ({
           onUpdateElementPosition={canvasOps.handleUpdateElementPosition}
           onUpdateElementSize={canvasOps.handleUpdateElementSize}
           onUpdateEdgeStyle={canvasOps.handleUpdateEdgeStyle}
-          onGridSettingsChange={() => {}} // This will be managed by context
-          onBackgroundSettingsChange={() => {}} // This will be managed by context
-          onPaperSettingsChange={() => {}} // This will be managed by context
-          onViewportSettingsChange={() => {}} // This will be managed by context
-          onRulerSettingsChange={() => {}} // This will be managed by context
+          onGridSettingsChange={handleGridSettingsChange}
+          onBackgroundSettingsChange={handleBackgroundSettingsChange}
+          onPaperSettingsChange={handlePaperSettingsChange}
+          onViewportSettingsChange={handleViewportSettingsChange}
+          onRulerSettingsChange={handleRulerSettingsChange}
         />
 
         <LayersPanel

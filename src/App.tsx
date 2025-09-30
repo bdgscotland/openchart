@@ -151,6 +151,7 @@ function App() {
                   setNodes={setNodes}
                   setEdges={setEdges}
                   diagramSettings={diagramSettings}
+                  setDiagramSettings={setDiagramSettings}
                   selectedTool={selectedTool}
                   setSelectedTool={setSelectedTool}
                 />
