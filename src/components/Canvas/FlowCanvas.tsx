@@ -56,6 +56,7 @@ export interface FlowCanvasProps {
   showGrid?: boolean;
   gridSize?: number;
   gridColor?: string;
+  backgroundColor?: string;
   showMiniMap?: boolean;
   showControls?: boolean;
   showRulers?: boolean;
@@ -84,7 +85,8 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     onEdgeContextMenu,
     showGrid = true,
     gridSize = 20,
-    gridColor = '#888888',
+    gridColor = '#e0e0e0',
+    backgroundColor = '#ffffff',
     showMiniMap = true,
     showControls = true,
     showRulers = false,
@@ -698,8 +700,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   }), [fitView, getViewport, setViewport, nodes, edges, exportToPng, exportToSvg, exportToJpeg, exportToWebp, exportToPdf, snapToGrid, connectionMode, gridSize]);
 
   return (
-    <div className="flow-canvas" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
+    <div className="flow-canvas" ref={reactFlowWrapper} style={{ width: '100%', height: '100%', backgroundColor }}>
       <ReactFlow
+        style={{ backgroundColor }}
         nodes={nodesWithLayerProps}
         edges={edgesWithLayerProps}
         onNodesChange={handleNodesChange}
@@ -783,7 +786,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
             zoomable={true}
           />
         )}
-        {showGrid && <Background variant={BackgroundVariant.Lines} gap={gridSize} color="#b0b0b0" />}
+        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} color={gridColor} />}
 
 
         {/* Enhanced Rulers with mm/cm markings */}

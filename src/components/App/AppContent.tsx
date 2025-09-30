@@ -372,6 +372,8 @@ const AppContent: React.FC<AppContentProps> = ({
               onPaneClick={canvasOps.handlePaneClick}
               showGrid={diagramSettings.grid.enabled}
               gridSize={diagramSettings.grid.size}
+              gridColor={diagramSettings.grid.color}
+              backgroundColor={diagramSettings.background.color}
               showRulers={diagramSettings.rulers.enabled}
               snapToGrid={diagramSettings.grid.snapToGrid}
             />
