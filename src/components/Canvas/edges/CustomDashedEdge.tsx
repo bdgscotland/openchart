@@ -55,7 +55,7 @@ export const CustomDashedEdge: React.FC<CustomDashedEdgeProps> = ({
     }
   };
 
-  const [edgePath] = getEdgePath();
+  const [edgePath, labelX, labelY] = getEdgePath();
 
   // Create stroke-dasharray based on line style
   const getDashArray = () => {
@@ -81,6 +81,24 @@ export const CustomDashedEdge: React.FC<CustomDashedEdgeProps> = ({
     filter: style.shadowBlur ? `drop-shadow(${style.shadowOffsetX || 0}px ${style.shadowOffsetY || 0}px ${style.shadowBlur}px ${style.shadowColor || 'rgba(0,0,0,0.3)'})` : undefined
   };
 
+  // Calculate label position based on labelPosition prop
+  let finalLabelX = labelX;
+  let finalLabelY = labelY;
+
+  if (style.labelPosition === 'start') {
+    finalLabelX = sourceX + (labelX - sourceX) * 0.25;
+    finalLabelY = sourceY + (labelY - sourceY) * 0.25;
+  } else if (style.labelPosition === 'end') {
+    finalLabelX = targetX + (labelX - targetX) * 0.25;
+    finalLabelY = targetY + (labelY - targetY) * 0.25;
+  }
+
+  // Apply label offset if provided
+  if (style.labelOffset) {
+    finalLabelX += style.labelOffset.x;
+    finalLabelY += style.labelOffset.y;
+  }
+
   return (
     <BaseEdge
       id={id}
@@ -88,6 +106,17 @@ export const CustomDashedEdge: React.FC<CustomDashedEdgeProps> = ({
       markerEnd={markerEnd}
       markerStart={markerStart}
       style={edgeStyle}
+      labelX={finalLabelX}
+      labelY={finalLabelY}
+      label={style.label}
+      labelStyle={style.labelStyle}
+      labelShowBg={true}
+      labelBgPadding={[4, 4]}
+      labelBgBorderRadius={3}
+      labelBgStyle={{
+        fill: style.labelStyle?.backgroundColor || '#ffffff',
+        fillOpacity: 1,
+      }}
       {...props}
     />
   );

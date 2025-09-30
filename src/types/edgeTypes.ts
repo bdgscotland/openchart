@@ -44,7 +44,43 @@ export interface EdgeStyleConfig {
   shadowColor?: string;
   shadowOffsetX?: number;
   shadowOffsetY?: number;
+  // Label properties
+  label?: string;
+  labelStyle?: EdgeLabelStyle;
+  labelPosition?: 'start' | 'middle' | 'end';
+  labelOffset?: { x: number; y: number };
+  labelVisible?: boolean;
 }
+
+// Edge label styling
+export interface EdgeLabelStyle {
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+  fontStyle?: 'normal' | 'italic' | 'oblique';
+  color?: string;
+  backgroundColor?: string;
+  padding?: number;
+  borderRadius?: number;
+  border?: string;
+  maxWidth?: number;
+  textAlign?: 'left' | 'center' | 'right';
+}
+
+// Default edge label style
+export const DEFAULT_EDGE_LABEL_STYLE: EdgeLabelStyle = {
+  fontSize: 12,
+  fontFamily: 'Arial, sans-serif',
+  fontWeight: 'normal',
+  fontStyle: 'normal',
+  color: '#000000',
+  backgroundColor: '#ffffff',
+  padding: 4,
+  borderRadius: 3,
+  border: '1px solid #e0e0e0',
+  maxWidth: 200,
+  textAlign: 'center',
+};
 
 export interface ConnectionToolConfig {
   id: string;

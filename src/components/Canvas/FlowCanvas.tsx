@@ -1,19 +1,18 @@
-import React, { useCallback, useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useImperativeHandle, forwardRef, useEffect, useMemo } from 'react';
 import {
   ReactFlow,
   Controls,
   Background,
   BackgroundVariant,
-  useNodesState,
-  useEdgesState,
   useReactFlow,
   ReactFlowProvider,
   MiniMap,
   ConnectionMode,
   MarkerType,
   applyNodeChanges,
+  applyEdgeChanges,
 } from '@xyflow/react';
-import type { Node, Edge, Connection } from '@xyflow/react';
+import type { Node, Edge, Connection, NodeChange, EdgeChange } from '@xyflow/react';
 import { toPng, toSvg, toJpeg, toCanvas } from 'html-to-image';
 import '@xyflow/react/dist/style.css';
 import './FlowCanvas.css';
@@ -23,8 +22,11 @@ import ShapeNode from './ShapeNode';
 import useShapeHandlers from './hooks/useShapeHandlers';
 import { useConnectionPool } from '../../hooks/useConnectionPool';
 import { useConnectionTools } from '../../hooks/useConnectionTools';
+import { useLayerOperations } from '../../contexts/LayerOperationsContext';
+import { useLayers } from '../../contexts/LayerContext';
 import SelectionToolbar from './SelectionToolbar';
 import { edgeTypes } from './edges';
+import CanvasContextMenu from './ContextMenu/CanvasContextMenu';
 
 // Memoized node types registry - defined outside component to avoid re-creation
 const nodeTypes = {
@@ -67,8 +69,8 @@ export interface FlowCanvasProps {
 
 const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const {
-    nodes: initialNodes,
-    edges: initialEdges,
+    nodes,
+    edges,
     onNodesChange,
     onEdgesChange,
     onConnect,
@@ -90,9 +92,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     connectionMode: propConnectionMode = 'loose',
   } = props;
 
-  const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string; edgeId?: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   // Enhanced drag & drop states
   const [isDragOver, setIsDragOver] = useState(false);
@@ -104,14 +104,73 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const connectionMode = propConnectionMode;
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { fitView, getViewport, setViewport, getNodes, getEdges, screenToFlowPosition } = useReactFlow();
+  const { fitView, getViewport, setViewport, screenToFlowPosition } = useReactFlow();
+
+  // Get layer operations and data from contexts
+  const layerOps = useLayerOperations();
+  const { getLayers, getLayer, getActiveLayer } = useLayers();
+
+  // Create derived nodes array that applies layer properties (visibility, locked, opacity)
+  const nodesWithLayerProps = useMemo(() => {
+    return nodes.map(node => {
+      const layer = getLayer(node.data?.layerId);
+      if (!layer) return node;
+
+      // Get existing style safely
+      const existingStyle = node.data?.style && typeof node.data.style === 'object' ? node.data.style : {};
+      const existingOpacity = typeof existingStyle === 'object' && 'opacity' in existingStyle
+        ? (existingStyle.opacity as number)
+        : 1;
+
+      return {
+        ...node,
+        hidden: node.hidden || !layer.visible,  // Hide if layer is hidden
+        draggable: node.draggable !== false && !layer.locked,  // Lock if layer is locked
+        selectable: node.selectable !== false && !layer.locked,
+        data: {
+          ...node.data,
+          style: {
+            ...existingStyle,
+            opacity: existingOpacity * layer.opacity  // Apply layer opacity
+          }
+        }
+      };
+    });
+  }, [nodes, getLayers, getLayer]);
+
+  // Create derived edges array that applies layer properties (visibility, locked, opacity)
+  const edgesWithLayerProps = useMemo(() => {
+    return edges.map(edge => {
+      const layer = getLayer(edge.data?.layerId);
+      if (!layer) return edge;
+
+      // Get existing style safely
+      const existingStyle = edge.data?.style && typeof edge.data.style === 'object' ? edge.data.style : {};
+      const existingOpacity = typeof existingStyle === 'object' && 'opacity' in existingStyle
+        ? (existingStyle.opacity as number)
+        : 1;
+
+      return {
+        ...edge,
+        hidden: edge.hidden || !layer.visible,
+        selectable: edge.selectable !== false && !layer.locked,
+        data: {
+          ...edge.data,
+          style: {
+            ...existingStyle,
+            opacity: existingOpacity * layer.opacity
+          }
+        }
+      };
+    });
+  }, [edges, getLayers, getLayer]);
 
   // Use connection pool for optimized edge creation
   const {
     addConnection: addPooledConnection,
     hasConnection,
     cleanup: cleanupConnectionPool
-  } = useConnectionPool(edges, setEdges, 100);
+  } = useConnectionPool(edges, onEdgesChange, 100);
 
   // Use our custom shape handlers hook
   const {
@@ -120,8 +179,8 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   } = useShapeHandlers({
     nodes,
     edges,
-    onNodesChange: setNodes,
-    onEdgesChange: setEdges,
+    onNodesChange,
+    onEdgesChange,
   });
 
   // Helper function to snap position to grid
@@ -133,85 +192,28 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     };
   }, [snapToGrid, gridSize]);
 
-  // Initialize internal state on mount and when external state changes
-  useEffect(() => {
-    // Update if nodes changed (count, style, or data changes)
-    // Don't update during drag operations to prevent interference
-    if (!isDragging) {
-      // Check if we should sync by comparing timestamps or forcing sync
-      const shouldSync = nodes.length !== initialNodes.length ||
-        initialNodes.some(initialNode => {
-          const currentNode = nodes.find(n => n.id === initialNode.id);
-          return !currentNode ||
-            currentNode.data?.lastStyleUpdate !== initialNode.data?.lastStyleUpdate ||
-            currentNode.data?.lastTextUpdate !== initialNode.data?.lastTextUpdate ||
-            currentNode.data?.label !== initialNode.data?.label ||
-            JSON.stringify(currentNode.data?.style) !== JSON.stringify(initialNode.data?.style);
-        });
+  // Wrapper to convert React Flow's NodeChange[] events to Node[] for parent callback
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
+    // Apply changes to current nodes to get updated nodes array
+    const updatedNodes = applyNodeChanges(changes, nodes);
+    // Call parent's onNodesChange with the updated nodes array
+    onNodesChange(updatedNodes);
+  }, [nodes, onNodesChange]);
 
-      if (shouldSync) {
-        console.log('🔄 FlowCanvas syncing nodes from parent:', initialNodes);
-        setNodes(initialNodes);
-      }
-    }
-  }, [initialNodes, setNodes, isDragging, nodes]);
+  // Wrapper to convert React Flow's EdgeChange[] events to Edge[] for parent callback
+  const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
+    // Apply changes to current edges to get updated edges array
+    const updatedEdges = applyEdgeChanges(changes, edges);
+    // Call parent's onEdgesChange with the updated edges array
+    onEdgesChange(updatedEdges);
+  }, [edges, onEdgesChange]);
 
-  useEffect(() => {
-    // Update edges when external state changes
-    if (edges.length !== initialEdges.length) {
-      setEdges(initialEdges);
-    }
-  }, [initialEdges, setEdges, edges.length]);
-
-  // Performance-optimized node changes with requestAnimationFrame
-  const animationFrameRef = useRef<number | null>(null);
-
-  const handleNodesChange = useCallback((changes: any) => {
-    onNodesChangeInternal(changes);
-
-    // Only sync to external state if not dragging and if the changes are significant
-    // This prevents excessive re-renders during drag operations
-    if (!isDragging) {
-      // Cancel previous animation frame to debounce updates
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-
-      // Use requestAnimationFrame for smooth performance
-      animationFrameRef.current = requestAnimationFrame(() => {
-        const hasSignificantChanges = changes.some((change: any) =>
-          change.type === 'add' || change.type === 'remove' ||
-          (change.type === 'position' && !change.dragging)
-        );
-
-        if (hasSignificantChanges) {
-          const updatedNodes = applyNodeChanges(changes, nodes);
-          onNodesChange(updatedNodes);
-        }
-      });
-    }
-  }, [onNodesChangeInternal, onNodesChange, nodes, isDragging]);
-
-  // Cleanup animation frame and connection pool on unmount
+  // Cleanup connection pool on unmount
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
       cleanupConnectionPool();
     };
   }, [cleanupConnectionPool]);
-
-  // Handle edges change with external callback
-  const handleEdgesChange = useCallback((changes: any) => {
-    onEdgesChangeInternal(changes);
-
-    // Use getEdges() to get the most current edge state instead of stale closure
-    setTimeout(() => {
-      const currentEdges = getEdges();
-      onEdgesChange(currentEdges);
-    }, 0);
-  }, [onEdgesChangeInternal, onEdgesChange, getEdges]);
 
   // Handle new connections with connection pooling
   const handleConnect = useCallback((connection: Connection) => {
@@ -260,6 +262,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
     console.log('🎯 Position calculated:', position, 'snapped from:', rawPosition);
 
+    // Get the active layer
+    const activeLayer = getActiveLayer();
+
     // Import the shape factory at runtime to avoid circular imports
     import('./shapes').then(({ createShapeNode, isValidShapeType }) => {
       console.log('🎯 Shape module imported successfully');
@@ -276,35 +281,33 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         position,
         shapeType,
         onTextChange: (text: string) => {
-          setNodes((nds) =>
-            nds.map((node) =>
-              node.id === newNode.id
-                ? { ...node, data: { ...node.data, label: text } }
-                : node
-            )
+          // Update through parent's onNodesChange
+          const updatedNodes = nodes.map((node) =>
+            node.id === newNode.id
+              ? { ...node, data: { ...node.data, label: text } }
+              : node
           );
+          onNodesChange(updatedNodes);
         },
       });
 
+      // Add layerId to the node's data
+      newNode.data = {
+        ...newNode.data,
+        layerId: activeLayer.id,
+      };
+
       console.log('🎯 New node created:', newNode);
 
-      // Update local state and immediately sync to external state
-      setNodes((nds) => {
-        const updatedNodes = nds.concat(newNode);
-        console.log('🎯 Updated nodes array:', updatedNodes);
-
-        // Immediately call the external onNodesChange callback
-        setTimeout(() => {
-          console.log('🎯 Calling external onNodesChange with:', updatedNodes);
-          onNodesChange(updatedNodes);
-        }, 0);
-
-        return updatedNodes;
-      });
+      // Add new node to the parent's state
+      const updatedNodes = nodes.concat(newNode);
+      console.log('🎯 Updated nodes array:', updatedNodes);
+      console.log('🎯 Calling external onNodesChange with:', updatedNodes);
+      onNodesChange(updatedNodes);
     }).catch((error) => {
       console.error('❌ Error importing shapes module:', error);
     });
-  }, [screenToFlowPosition, setNodes, onNodesChange, snapToGridPosition]);
+  }, [screenToFlowPosition, nodes, onNodesChange, snapToGridPosition, getActiveLayer]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -352,30 +355,23 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     // Don't log during drag for performance
   }, []);
 
-  const onSelectionDragStop = useCallback((event: React.MouseEvent, nodes: Node[]) => {
-    console.log('🎯 Selection drag stop:', nodes.length, 'nodes');
+  const onSelectionDragStop = useCallback((event: React.MouseEvent, draggedNodes: Node[]) => {
+    console.log('🎯 Selection drag stop:', draggedNodes.length, 'nodes');
     setIsDragging(false);
 
     // Apply snap-to-grid for all selected nodes after drag
-    if (snapToGrid && nodes.length > 0) {
-      setNodes((nds) =>
-        nds.map((node) => {
-          const isSelected = nodes.some(selectedNode => selectedNode.id === node.id);
-          if (isSelected) {
-            const snappedPosition = snapToGridPosition(node.position);
-            return { ...node, position: snappedPosition };
-          }
-          return node;
-        })
-      );
-    }
-
-    // Sync to external state after drag is complete
-    setTimeout(() => {
-      const updatedNodes = getNodes();
+    if (snapToGrid && draggedNodes.length > 0) {
+      const updatedNodes = nodes.map((node) => {
+        const isSelected = draggedNodes.some(selectedNode => selectedNode.id === node.id);
+        if (isSelected) {
+          const snappedPosition = snapToGridPosition(node.position);
+          return { ...node, position: snappedPosition };
+        }
+        return node;
+      });
       onNodesChange(updatedNodes);
-    }, 0);
-  }, [snapToGrid, snapToGridPosition, setNodes, getNodes, onNodesChange]);
+    }
+  }, [snapToGrid, snapToGridPosition, nodes, onNodesChange]);
 
   const onSelectionContextMenu = useCallback((event: React.MouseEvent, nodes: Node[]) => {
     event.preventDefault();
@@ -405,82 +401,99 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
     const nodePositions = selectedNodes.map(node => node.position);
     let targetValue: number;
+    let updatedNodes: Node[];
 
     switch (alignment) {
       case 'left':
         targetValue = Math.min(...nodePositions.map(pos => pos.x));
-        setNodes((nds) =>
-          nds.map((node) =>
-            selectedNodes.some(selected => selected.id === node.id)
-              ? { ...node, position: { ...node.position, x: targetValue } }
-              : node
-          )
+        updatedNodes = nodes.map((node) =>
+          selectedNodes.some(selected => selected.id === node.id)
+            ? { ...node, position: { ...node.position, x: targetValue } }
+            : node
         );
         break;
       case 'right':
         targetValue = Math.max(...nodePositions.map(pos => pos.x));
-        setNodes((nds) =>
-          nds.map((node) =>
-            selectedNodes.some(selected => selected.id === node.id)
-              ? { ...node, position: { ...node.position, x: targetValue } }
-              : node
-          )
+        updatedNodes = nodes.map((node) =>
+          selectedNodes.some(selected => selected.id === node.id)
+            ? { ...node, position: { ...node.position, x: targetValue } }
+            : node
         );
         break;
       case 'center': {
         const minX = Math.min(...nodePositions.map(pos => pos.x));
         const maxX = Math.max(...nodePositions.map(pos => pos.x));
         targetValue = (minX + maxX) / 2;
-        setNodes((nds) =>
-          nds.map((node) =>
-            selectedNodes.some(selected => selected.id === node.id)
-              ? { ...node, position: { ...node.position, x: targetValue } }
-              : node
-          )
+        updatedNodes = nodes.map((node) =>
+          selectedNodes.some(selected => selected.id === node.id)
+            ? { ...node, position: { ...node.position, x: targetValue } }
+            : node
         );
         break;
       }
       case 'top':
         targetValue = Math.min(...nodePositions.map(pos => pos.y));
-        setNodes((nds) =>
-          nds.map((node) =>
-            selectedNodes.some(selected => selected.id === node.id)
-              ? { ...node, position: { ...node.position, y: targetValue } }
-              : node
-          )
+        updatedNodes = nodes.map((node) =>
+          selectedNodes.some(selected => selected.id === node.id)
+            ? { ...node, position: { ...node.position, y: targetValue } }
+            : node
         );
         break;
       case 'bottom':
         targetValue = Math.max(...nodePositions.map(pos => pos.y));
-        setNodes((nds) =>
-          nds.map((node) =>
-            selectedNodes.some(selected => selected.id === node.id)
-              ? { ...node, position: { ...node.position, y: targetValue } }
-              : node
-          )
+        updatedNodes = nodes.map((node) =>
+          selectedNodes.some(selected => selected.id === node.id)
+            ? { ...node, position: { ...node.position, y: targetValue } }
+            : node
         );
         break;
       case 'middle': {
         const minY = Math.min(...nodePositions.map(pos => pos.y));
         const maxY = Math.max(...nodePositions.map(pos => pos.y));
         targetValue = (minY + maxY) / 2;
-        setNodes((nds) =>
-          nds.map((node) =>
-            selectedNodes.some(selected => selected.id === node.id)
-              ? { ...node, position: { ...node.position, y: targetValue } }
-              : node
-          )
+        updatedNodes = nodes.map((node) =>
+          selectedNodes.some(selected => selected.id === node.id)
+            ? { ...node, position: { ...node.position, y: targetValue } }
+            : node
         );
         break;
       }
+      default:
+        return;
     }
 
-    // Sync to external state
-    setTimeout(() => {
-      const updatedNodes = getNodes();
-      onNodesChange(updatedNodes);
-    }, 0);
-  }, [selectedNodes, setNodes, getNodes, onNodesChange]);
+    onNodesChange(updatedNodes);
+  }, [selectedNodes, nodes, onNodesChange]);
+
+  // Layer management: Bring selected nodes to front
+  // Layer operation handlers using the new context
+  const handleBringToFront = useCallback(() => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map(node => node.id);
+    console.log('🔼 Bring to Front:', selectedIds.length, 'nodes');
+    layerOps.bringToFront(selectedIds);
+  }, [selectedNodes, layerOps]);
+
+  const handleBringForward = useCallback(() => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map(node => node.id);
+    console.log('🔼 Bring Forward:', selectedIds.length, 'nodes');
+    layerOps.bringForward(selectedIds);
+  }, [selectedNodes, layerOps]);
+
+  const handleSendBackward = useCallback(() => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map(node => node.id);
+    console.log('🔽 Send Backward:', selectedIds.length, 'nodes');
+    layerOps.sendBackward(selectedIds);
+  }, [selectedNodes, layerOps]);
+
+  const handleSendToBack = useCallback(() => {
+    if (selectedNodes.length === 0) return;
+    const selectedIds = selectedNodes.map(node => node.id);
+    console.log('🔽 Send to Back:', selectedIds.length, 'nodes');
+    layerOps.sendToBack(selectedIds);
+  }, [selectedNodes, layerOps]);
 
   // Keyboard shortcuts for selection operations
   useEffect(() => {
@@ -488,23 +501,19 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
       // Ctrl+A - Select all nodes
       if (event.ctrlKey && event.key === 'a') {
         event.preventDefault();
-        const allNodes = getNodes();
-        setNodes((nds) =>
-          nds.map((node) => ({ ...node, selected: true }))
-        );
-        console.log('🎯 Select All: Selected', allNodes.length, 'nodes');
+        const updatedNodes = nodes.map((node) => ({ ...node, selected: true }));
+        onNodesChange(updatedNodes);
+        console.log('🎯 Select All: Selected', updatedNodes.length, 'nodes');
         return;
       }
 
       // Escape - Clear selection
       if (event.key === 'Escape') {
         event.preventDefault();
-        setNodes((nds) =>
-          nds.map((node) => ({ ...node, selected: false }))
-        );
-        setEdges((eds) =>
-          eds.map((edge) => ({ ...edge, selected: false }))
-        );
+        const updatedNodes = nodes.map((node) => ({ ...node, selected: false }));
+        const updatedEdges = edges.map((edge) => ({ ...edge, selected: false }));
+        onNodesChange(updatedNodes);
+        onEdgesChange(updatedEdges);
         console.log('🎯 Escape: Cleared all selections');
         return;
       }
@@ -535,7 +544,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedNodes, selectedEdges, setNodes, setEdges, getNodes, handleDeleteNodes, handleDuplicateNodes]);
+  }, [selectedNodes, selectedEdges, nodes, edges, onNodesChange, onEdgesChange, handleDeleteNodes, handleDuplicateNodes]);
 
   // Handle context menu actions
   const handleContextMenuAction = useCallback((action: string, nodeId?: string) => {
@@ -564,12 +573,8 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
           handleDuplicateNodes(selectedNodes.map(node => node.id));
         }
         break;
-      case 'toggle-snap':
-        setSnapToGrid(!snapToGrid);
-        break;
-      case 'toggle-connection-mode':
-        setConnectionMode(connectionMode === 'loose' ? 'strict' : 'loose');
-        break;
+      // Note: toggle-snap and toggle-connection-mode would need to be handled
+      // by the parent component since snapToGrid and connectionMode are now props
     }
     setContextMenu(null);
   }, [handleDeleteNodes, handleDuplicateNodes, snapToGrid, connectionMode, selectedNodes]);
@@ -668,8 +673,8 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     fitView,
     getViewport,
     setViewport,
-    getNodes,
-    getEdges,
+    getNodes: () => nodes,
+    getEdges: () => edges,
     exportToPng,
     exportToSvg,
     exportToJpeg,
@@ -685,14 +690,18 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
       const currentZoom = getViewport().zoom;
       setViewport({ ...getViewport(), zoom: Math.max(currentZoom / 1.2, 0.1) });
     },
-    getZoom: () => getViewport().zoom,
-  }), [fitView, getViewport, setViewport, getNodes, getEdges, exportToPng, exportToSvg, exportToJpeg, exportToWebp, exportToPdf, snapToGrid, connectionMode, gridSize]);
+    getZoom: () => {
+      const viewport = getViewport();
+      const zoom = viewport?.zoom;
+      return (zoom !== undefined && !isNaN(zoom)) ? zoom : 1;
+    },
+  }), [fitView, getViewport, setViewport, nodes, edges, exportToPng, exportToSvg, exportToJpeg, exportToWebp, exportToPdf, snapToGrid, connectionMode, gridSize]);
 
   return (
     <div className="flow-canvas" ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={nodesWithLayerProps}
+        edges={edgesWithLayerProps}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
@@ -708,19 +717,12 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
           if (snapToGrid) {
             const snappedPosition = snapToGridPosition(node.position);
             if (snappedPosition.x !== node.position.x || snappedPosition.y !== node.position.y) {
-              setNodes((nds) =>
-                nds.map((n) =>
-                  n.id === node.id ? { ...n, position: snappedPosition } : n
-                )
+              const updatedNodes = nodes.map((n) =>
+                n.id === node.id ? { ...n, position: snappedPosition } : n
               );
+              onNodesChange(updatedNodes);
             }
           }
-
-          // Sync to external state after drag is complete
-          setTimeout(() => {
-            const updatedNodes = getNodes();
-            onNodesChange(updatedNodes);
-          }, 0);
         }}
         onPaneClick={(event) => {
           setContextMenu(null);
@@ -738,7 +740,11 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         }}
         onEdgeClick={onEdgeClick}
         onEdgeDoubleClick={onEdgeDoubleClick}
-        onEdgeContextMenu={onEdgeContextMenu}
+        onEdgeContextMenu={(event, edge) => {
+          event.preventDefault();
+          setContextMenu({ x: event.clientX, y: event.clientY, edgeId: edge.id });
+          onEdgeContextMenu?.(event, edge);
+        }}
         onSelectionChange={onSelectionChange}
         onSelectionDragStart={onSelectionDragStart}
         onSelectionDrag={onSelectionDrag}
@@ -752,11 +758,10 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
-        edgesSelectable={true}
         selectNodesOnDrag={false}
         selectionOnDrag={true}
-        multiSelectionKeyCode="Ctrl"
-        selectionKeyCode="Shift"
+        multiSelectionKeyCode="Shift"
+        selectionKeyCode={null}
         panOnDrag={[1, 2]}
         selectionMode="partial"
         deleteKeyCode="Delete"
@@ -778,7 +783,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
             zoomable={true}
           />
         )}
-        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} size={3} color={gridColor} />}
+        {showGrid && <Background variant={BackgroundVariant.Lines} gap={gridSize} color="#b0b0b0" />}
 
 
         {/* Enhanced Rulers with mm/cm markings */}
@@ -846,6 +851,10 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
           onBulkDelete={handleBulkDelete}
           onBulkDuplicate={handleBulkDuplicate}
           onBulkAlign={handleBulkAlign}
+          onBringToFront={handleBringToFront}
+          onBringForward={handleBringForward}
+          onSendBackward={handleSendBackward}
+          onSendToBack={handleSendToBack}
           className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
         />
       )}
@@ -870,72 +879,47 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         </div>
       )}
 
-      {/* Enhanced Context Menu */}
+      {/* Canvas Context Menu */}
       {contextMenu && (
-        <div
-          className="fixed bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 min-w-[160px]"
-          style={{
-            top: contextMenu.y,
-            left: contextMenu.x,
+        <CanvasContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          selectedNodes={selectedNodes}
+          selectedEdges={selectedEdges}
+          contextNode={contextMenu.nodeId ? nodes.find(n => n.id === contextMenu.nodeId) : undefined}
+          contextEdge={contextMenu.edgeId ? edges.find(e => e.id === contextMenu.edgeId) : undefined}
+          onDelete={() => {
+            if (contextMenu.nodeId) {
+              handleDeleteNodes([contextMenu.nodeId]);
+            } else if (contextMenu.edgeId) {
+              const updatedEdges = edges.filter(e => e.id !== contextMenu.edgeId);
+              onEdgesChange(updatedEdges);
+            } else if (selectedNodes.length > 0) {
+              handleDeleteNodes(selectedNodes.map(n => n.id));
+            } else if (selectedEdges.length > 0) {
+              const selectedEdgeIds = selectedEdges.map(e => e.id);
+              const updatedEdges = edges.filter(e => !selectedEdgeIds.includes(e.id));
+              onEdgesChange(updatedEdges);
+            }
           }}
-        >
-          {contextMenu.nodeId ? (
-            <>
-              <div
-                onClick={() => handleContextMenuAction('duplicate', contextMenu.nodeId)}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>Duplicate</span>
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('delete', contextMenu.nodeId)}
-                className="px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-2"
-              >
-                <span>Delete</span>
-              </div>
-            </>
-          ) : selectedNodes.length > 1 ? (
-            <>
-              <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b border-gray-200">
-                {selectedNodes.length} items selected
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('bulk-duplicate')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>Duplicate All</span>
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('bulk-delete')}
-                className="px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-2"
-              >
-                <span>Delete All</span>
-              </div>
-              <div className="border-t border-gray-200 my-1"></div>
-              <div
-                onClick={() => handleContextMenuAction('toggle-snap')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>{snapToGrid ? '✓' : ''} Snap to Grid</span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div
-                onClick={() => handleContextMenuAction('toggle-snap')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>{snapToGrid ? '✓' : ''} Snap to Grid</span>
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('toggle-connection-mode')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>Connection: {connectionMode}</span>
-              </div>
-            </>
-          )}
-        </div>
+          onUpdateEdgeStyle={(edgeId, styleUpdates) => {
+            const updatedEdges = edges.map(edge =>
+              edge.id === edgeId
+                ? { ...edge, type: styleUpdates.type || edge.type }
+                : edge
+            );
+            onEdgesChange(updatedEdges);
+          }}
+          onUpdateEdgeLabel={(edgeId, label) => {
+            const updatedEdges = edges.map(edge =>
+              edge.id === edgeId
+                ? { ...edge, label }
+                : edge
+            );
+            onEdgesChange(updatedEdges);
+          }}
+        />
       )}
     </div>
   );

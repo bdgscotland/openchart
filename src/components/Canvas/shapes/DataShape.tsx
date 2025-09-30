@@ -1,23 +1,36 @@
 import React from 'react';
-import { BaseShape } from './BaseShape';
-import type { ShapeComponentProps } from './BaseShape';
+import BaseShape, { type BaseShapeProps } from './BaseShape';
 
-export const DataShape: React.FC<ShapeComponentProps> = (props) => {
-  const { width = 120, height = 60 } = props;
+export const DataShape: React.FC<BaseShapeProps> = (props) => {
+  const { data } = props;
+  const width = data.width || 120;
+  const height = data.height || 60;
   const skew = width * 0.15;
+
+  // Get colors from style object or fallback to defaults
+  const fillColor = data.style?.fill || data.backgroundColor || '#f0f9ff';
+  const strokeColor = data.style?.stroke || data.borderColor || '#d1d5db';
+  const strokeWidth = data.style?.strokeWidth || 2;
 
   return (
     <BaseShape {...props}>
-      <path
-        d={`M ${skew} 0
-           L ${width} 0
-           L ${width - skew} ${height}
-           L 0 ${height}
-           Z`}
-        fill="currentColor"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
+      <svg
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+      >
+        <path
+          d={`M ${skew} 0
+             L ${width} 0
+             L ${width - skew} ${height}
+             L 0 ${height}
+             Z`}
+          fill={fillColor}
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+        />
+      </svg>
     </BaseShape>
   );
 };

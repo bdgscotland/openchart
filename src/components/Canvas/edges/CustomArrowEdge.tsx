@@ -151,7 +151,7 @@ export const CustomArrowEdge: React.FC<CustomArrowEdgeProps> = ({
   const color = style.strokeColor || '#000000';
 
   // Create path
-  const [edgePath] = getStraightPath({
+  const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
     sourceY,
     targetX,
@@ -169,6 +169,24 @@ export const CustomArrowEdge: React.FC<CustomArrowEdgeProps> = ({
     filter: style.shadowBlur ? `drop-shadow(${style.shadowOffsetX || 0}px ${style.shadowOffsetY || 0}px ${style.shadowBlur}px ${style.shadowColor || 'rgba(0,0,0,0.3)'})` : undefined
   };
 
+  // Calculate label position based on labelPosition prop
+  let finalLabelX = labelX;
+  let finalLabelY = labelY;
+
+  if (style.labelPosition === 'start') {
+    finalLabelX = sourceX + (labelX - sourceX) * 0.25;
+    finalLabelY = sourceY + (labelY - sourceY) * 0.25;
+  } else if (style.labelPosition === 'end') {
+    finalLabelX = targetX + (labelX - targetX) * 0.25;
+    finalLabelY = targetY + (labelY - targetY) * 0.25;
+  }
+
+  // Apply label offset if provided
+  if (style.labelOffset) {
+    finalLabelX += style.labelOffset.x;
+    finalLabelY += style.labelOffset.y;
+  }
+
   return (
     <>
       {/* Define custom markers */}
@@ -183,6 +201,17 @@ export const CustomArrowEdge: React.FC<CustomArrowEdgeProps> = ({
         markerStart={startMarker ? `url(#${startMarker.id})` : markerStart}
         markerEnd={endMarker ? `url(#${endMarker.id})` : markerEnd}
         style={edgeStyle}
+        labelX={finalLabelX}
+        labelY={finalLabelY}
+        label={style.label}
+        labelStyle={style.labelStyle}
+        labelShowBg={true}
+        labelBgPadding={[4, 4]}
+        labelBgBorderRadius={3}
+        labelBgStyle={{
+          fill: style.labelStyle?.backgroundColor || '#ffffff',
+          fillOpacity: 1,
+        }}
         {...props}
       />
     </>

@@ -1,0 +1,282 @@
+/* NewPropertyPanel Component Styles */
+
+.property-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--panel-bg, #ffffff);
+  border-left: 1px solid var(--panel-border, #e5e7eb);
+  width: 280px;
+  min-width: 240px;
+  max-width: 400px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.property-panel--collapsed {
+  width: 48px;
+  min-width: 48px;
+  border-left: 1px solid var(--panel-border, #e5e7eb);
+}
+
+.property-panel--visible {
+  width: 280px;
+}
+
+/* Header */
+.property-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--panel-border, #e5e7eb);
+  background: var(--panel-header-bg, #f9fafb);
+  flex-shrink: 0;
+}
+
+.property-panel__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+}
+
+.property-panel__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--button-bg, #f3f4f6);
+  color: var(--button-text, #6b7280);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.property-panel__toggle:hover {
+  background: var(--button-bg-hover, #e5e7eb);
+  color: var(--button-text-hover, #374151);
+}
+
+.property-panel__toggle--collapsed {
+  width: 32px;
+  height: 32px;
+  margin: 8px;
+  border-radius: 6px;
+}
+
+.property-panel--collapsed .property-panel__toggle--collapsed {
+  transform: rotate(0deg);
+}
+
+.property-panel--visible .property-panel__toggle {
+  transform: rotate(180deg);
+}
+
+/* Content Area */
+.property-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Selection Info */
+.property-panel__selection-info {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--selection-info-bg, #f0f9ff);
+  border: 1px solid var(--selection-info-border, #bae6fd);
+  border-radius: 6px;
+}
+
+.property-panel__selection-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--selection-info-title, #0c4a6e);
+}
+
+.property-panel__selection-info p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--selection-info-text, #0369a1);
+  line-height: 1.4;
+}
+
+/* Empty State */
+.property-panel__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+}
+
+.property-panel__empty p {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.property-panel__empty span {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Basic Input Styles */
+.property-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--input-border, #d1d5db);
+  border-radius: 4px;
+  background: var(--input-bg, #ffffff);
+  color: var(--input-text, #111827);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.property-input:focus {
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 0 0 1px var(--primary-color, #3b82f6);
+}
+
+.property-input::placeholder {
+  color: var(--input-placeholder, #9ca3af);
+}
+
+.property-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color, #3b82f6);
+  cursor: pointer;
+}
+
+/* Scrollbar Styling */
+.property-panel__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.property-panel__content::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #f1f5f9);
+}
+
+.property-panel__content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #cbd5e1);
+  border-radius: 3px;
+}
+
+.property-panel__content::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #94a3b8);
+}
+
+/* Dark Theme Support - Disabled for light theme only app */
+/* @media (prefers-color-scheme: dark) {
+  .property-panel {
+    --panel-bg: #1f2937;
+    --panel-border: #374151;
+    --panel-header-bg: #111827;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --button-bg: #374151;
+    --button-bg-hover: #4b5563;
+    --button-text: #9ca3af;
+    --button-text-hover: #d1d5db;
+    --selection-info-bg: #1e3a8a;
+    --selection-info-border: #3b82f6;
+    --selection-info-title: #93c5fd;
+    --selection-info-text: #dbeafe;
+    --input-bg: #374151;
+    --input-border: #4b5563;
+    --input-text: #f9fafb;
+    --input-placeholder: #9ca3af;
+    --scrollbar-track: #374151;
+    --scrollbar-thumb: #4b5563;
+    --scrollbar-thumb-hover: #6b7280;
+  }
+} */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .property-panel {
+    width: 100%;
+    max-width: none;
+    border-left: none;
+    border-top: 1px solid var(--panel-border, #e5e7eb);
+  }
+
+  .property-panel--collapsed {
+    width: 100%;
+    height: 48px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .property-panel__header {
+    padding: 12px 16px;
+  }
+
+  .property-panel__content {
+    padding: 12px;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .property-panel {
+    border-width: 2px;
+  }
+
+  .property-panel__header {
+    border-bottom-width: 2px;
+  }
+
+  .property-panel__title {
+    font-weight: 700;
+  }
+
+  .property-input {
+    border-width: 2px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .property-panel,
+  .property-panel__toggle {
+    transition: none;
+  }
+}
+
+/* Focus Management */
+.property-panel:focus-within {
+  border-left-color: var(--primary-color, #3b82f6);
+}
+
+/* RTL Support */
+[dir="rtl"] .property-panel {
+  border-left: none;
+  border-right: 1px solid var(--panel-border, #e5e7eb);
+}
+
+[dir="rtl"] .property-panel:focus-within {
+  border-left-color: transparent;
+  border-right-color: var(--primary-color, #3b82f6);
+}
+
+[dir="rtl"] .property-panel__toggle {
+  transform: rotate(0deg);
+}
+
+[dir="rtl"] .property-panel--visible .property-panel__toggle {
+  transform: rotate(180deg);
+}

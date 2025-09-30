@@ -13,16 +13,20 @@ import {
   CURRENT_SCHEMA_VERSION,
   STORAGE_KEYS,
 } from '../types/diagramSchema';
+import type { Layer } from '../types/layers';
+import { DEFAULT_LAYER } from '../types/layers';
 
 class DiagramPersistence {
 
   /**
-   * Export diagram data including all property panel configurations
+   * Export diagram data including all property panel configurations and layers
    */
   async exportDiagram(
     nodes: Node[],
     edges: Edge[],
     viewport: Viewport,
+    layers?: Layer[],
+    activeLayerId?: string,
     metadata?: DiagramMetadata,
     options: ExportOptions = {}
   ): Promise<DiagramData> {
@@ -32,21 +36,32 @@ class DiagramPersistence {
       ? await this.collectPropertyPanelData()
       : undefined;
 
+    // Ensure nodes preserve their zIndex during export
+    const nodesWithZIndex = nodes.map(node => ({
+      ...node,
+      data: {
+        ...node.data,
+        zIndex: node.data?.zIndex ?? node.zIndex ?? 0,
+      },
+    }));
+
     const diagram: DiagramData = {
-      nodes,
+      nodes: nodesWithZIndex,
       edges,
       viewport,
       version: CURRENT_SCHEMA_VERSION,
       timestamp: new Date().toISOString(),
       metadata: options.includeMetadata !== false ? metadata : undefined,
       propertyPanelData,
+      layers: layers || [DEFAULT_LAYER],
+      activeLayerId: activeLayerId || DEFAULT_LAYER.id,
     };
 
     return diagram;
   }
 
   /**
-   * Import diagram data and restore property panel configurations
+   * Import diagram data and restore property panel configurations and layers
    */
   async importDiagram(
     diagramData: DiagramData,
@@ -55,6 +70,8 @@ class DiagramPersistence {
     nodes: Node[];
     edges: Edge[];
     viewport: Viewport;
+    layers: Layer[];
+    activeLayerId: string;
     restoredFeatures: string[];
   }> {
     // Validate data first
@@ -70,35 +87,66 @@ class DiagramPersistence {
       await this.restorePropertyPanelData(diagramData.propertyPanelData, restoredFeatures);
     }
 
-    // Re-attach onTextChange callbacks to loaded nodes
-    const nodesWithCallbacks = diagramData.nodes.map((node: any) => ({
-      ...node,
-      data: {
-        ...node.data,
-        onTextChange: (newText: string) => {
-          console.log(`Text changed for node ${node.id}: ${newText}`);
+    // Handle layer migration for legacy diagrams
+    let layers: Layer[] = diagramData.layers || [DEFAULT_LAYER];
+    let activeLayerId: string = diagramData.activeLayerId || DEFAULT_LAYER.id;
+
+    // Ensure at least the default layer exists
+    if (layers.length === 0) {
+      layers = [DEFAULT_LAYER];
+      activeLayerId = DEFAULT_LAYER.id;
+      restoredFeatures.push('Migrated to layer system');
+    }
+
+    // Migrate nodes without layerId to DEFAULT_LAYER
+    const nodesWithCallbacks = diagramData.nodes.map((node: any) => {
+      const layerId = node.data?.layerId || DEFAULT_LAYER.id;
+      const zIndex = node.data?.zIndex ?? node.zIndex ?? 0;
+
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          layerId,
+          zIndex,
+          onTextChange: (newText: string) => {
+            console.log(`Text changed for node ${node.id}: ${newText}`);
+          },
         },
+      };
+    });
+
+    // Migrate edges without layerId to DEFAULT_LAYER
+    const edgesWithLayerId = diagramData.edges.map((edge: any) => ({
+      ...edge,
+      data: {
+        ...edge.data,
+        layerId: edge.data?.layerId || DEFAULT_LAYER.id,
       },
     }));
 
     return {
       nodes: nodesWithCallbacks,
-      edges: diagramData.edges,
+      edges: edgesWithLayerId,
       viewport: diagramData.viewport,
+      layers,
+      activeLayerId,
       restoredFeatures,
     };
   }
 
   /**
-   * Save diagram to file with comprehensive data
+   * Save diagram to file with comprehensive data including layers
    */
   async saveDiagramToFile(
     nodes: Node[],
     edges: Edge[],
     viewport: Viewport,
+    layers?: Layer[],
+    activeLayerId?: string,
     metadata?: DiagramMetadata
   ): Promise<void> {
-    const diagram = await this.exportDiagram(nodes, edges, viewport, metadata);
+    const diagram = await this.exportDiagram(nodes, edges, viewport, layers, activeLayerId, metadata);
     const dataStr = JSON.stringify(diagram, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
@@ -110,20 +158,22 @@ class DiagramPersistence {
   }
 
   /**
-   * Auto-save diagram to localStorage with property panel data
+   * Auto-save diagram to localStorage with property panel data and layers
    */
   async autoSaveDiagram(
     nodes: Node[],
     edges: Edge[],
-    viewport: Viewport
+    viewport: Viewport,
+    layers?: Layer[],
+    activeLayerId?: string
   ): Promise<void> {
     if (nodes.length === 0 && edges.length === 0) {
       return; // Don't auto-save empty diagrams
     }
 
-    const diagram = await this.exportDiagram(nodes, edges, viewport);
+    const diagram = await this.exportDiagram(nodes, edges, viewport, layers, activeLayerId);
     localStorage.setItem(STORAGE_KEYS.AUTO_SAVE, JSON.stringify(diagram));
-    console.log('Auto-saved diagram with property panel data');
+    console.log('Auto-saved diagram with property panel data and layers');
   }
 
   /**
