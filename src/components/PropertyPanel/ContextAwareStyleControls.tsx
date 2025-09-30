@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { Layout, Palette, Type, Info } from 'lucide-react';
 import { PropertyProvider } from './PropertyContext';
-import { VisualSection, LayoutSection, TypographySection } from './sections';
+import { VisualSection, LayoutSection, TypographySection, LayerSection } from './sections';
 import { memoizedAnalyzeSelection } from './utils/selectionContext';
 import type {
   DiagramElement,
@@ -174,6 +174,11 @@ export const ContextAwareStyleControls: React.FC<ContextAwareStyleControlsProps>
         onUpdateElementSize={stableCallbacks.onUpdateElementSize}
       >
         <div className="property-sections">
+          {/* Layer Section - show for all selections */}
+          <div className="property-section-container">
+            <LayerSection />
+          </div>
+
           {/* Visual Section - show for all selections, but adapt content */}
           {showVisualSection && (
             <div className="property-section-container">

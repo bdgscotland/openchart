@@ -26,6 +26,7 @@ import { useLayerOperations } from '../../contexts/LayerOperationsContext';
 import { useLayers } from '../../contexts/LayerContext';
 import SelectionToolbar from './SelectionToolbar';
 import { edgeTypes } from './edges';
+import CanvasContextMenu from './ContextMenu/CanvasContextMenu';
 
 // Memoized node types registry - defined outside component to avoid re-creation
 const nodeTypes = {
@@ -91,7 +92,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     connectionMode: propConnectionMode = 'loose',
   } = props;
 
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string; edgeId?: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   // Enhanced drag & drop states
   const [isDragOver, setIsDragOver] = useState(false);
@@ -739,7 +740,11 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         }}
         onEdgeClick={onEdgeClick}
         onEdgeDoubleClick={onEdgeDoubleClick}
-        onEdgeContextMenu={onEdgeContextMenu}
+        onEdgeContextMenu={(event, edge) => {
+          event.preventDefault();
+          setContextMenu({ x: event.clientX, y: event.clientY, edgeId: edge.id });
+          onEdgeContextMenu?.(event, edge);
+        }}
         onSelectionChange={onSelectionChange}
         onSelectionDragStart={onSelectionDragStart}
         onSelectionDrag={onSelectionDrag}
@@ -874,72 +879,47 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         </div>
       )}
 
-      {/* Enhanced Context Menu */}
+      {/* Canvas Context Menu */}
       {contextMenu && (
-        <div
-          className="fixed bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 min-w-[160px]"
-          style={{
-            top: contextMenu.y,
-            left: contextMenu.x,
+        <CanvasContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          selectedNodes={selectedNodes}
+          selectedEdges={selectedEdges}
+          contextNode={contextMenu.nodeId ? nodes.find(n => n.id === contextMenu.nodeId) : undefined}
+          contextEdge={contextMenu.edgeId ? edges.find(e => e.id === contextMenu.edgeId) : undefined}
+          onDelete={() => {
+            if (contextMenu.nodeId) {
+              handleDeleteNodes([contextMenu.nodeId]);
+            } else if (contextMenu.edgeId) {
+              const updatedEdges = edges.filter(e => e.id !== contextMenu.edgeId);
+              onEdgesChange(updatedEdges);
+            } else if (selectedNodes.length > 0) {
+              handleDeleteNodes(selectedNodes.map(n => n.id));
+            } else if (selectedEdges.length > 0) {
+              const selectedEdgeIds = selectedEdges.map(e => e.id);
+              const updatedEdges = edges.filter(e => !selectedEdgeIds.includes(e.id));
+              onEdgesChange(updatedEdges);
+            }
           }}
-        >
-          {contextMenu.nodeId ? (
-            <>
-              <div
-                onClick={() => handleContextMenuAction('duplicate', contextMenu.nodeId)}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>Duplicate</span>
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('delete', contextMenu.nodeId)}
-                className="px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-2"
-              >
-                <span>Delete</span>
-              </div>
-            </>
-          ) : selectedNodes.length > 1 ? (
-            <>
-              <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b border-gray-200">
-                {selectedNodes.length} items selected
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('bulk-duplicate')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>Duplicate All</span>
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('bulk-delete')}
-                className="px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-2"
-              >
-                <span>Delete All</span>
-              </div>
-              <div className="border-t border-gray-200 my-1"></div>
-              <div
-                onClick={() => handleContextMenuAction('toggle-snap')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>{snapToGrid ? '✓' : ''} Snap to Grid</span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div
-                onClick={() => handleContextMenuAction('toggle-snap')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>{snapToGrid ? '✓' : ''} Snap to Grid</span>
-              </div>
-              <div
-                onClick={() => handleContextMenuAction('toggle-connection-mode')}
-                className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-              >
-                <span>Connection: {connectionMode}</span>
-              </div>
-            </>
-          )}
-        </div>
+          onUpdateEdgeStyle={(edgeId, styleUpdates) => {
+            const updatedEdges = edges.map(edge =>
+              edge.id === edgeId
+                ? { ...edge, type: styleUpdates.type || edge.type }
+                : edge
+            );
+            onEdgesChange(updatedEdges);
+          }}
+          onUpdateEdgeLabel={(edgeId, label) => {
+            const updatedEdges = edges.map(edge =>
+              edge.id === edgeId
+                ? { ...edge, label }
+                : edge
+            );
+            onEdgesChange(updatedEdges);
+          }}
+        />
       )}
     </div>
   );
