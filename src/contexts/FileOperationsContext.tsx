@@ -75,13 +75,14 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
       // Get viewport from flow ref
       const viewport = flowRef.current?.getViewport() || { x: 0, y: 0, zoom: 1 };
 
-      // Use saveDiagramToFile with layers
+      // Use saveDiagramToFile with layers and diagram settings
       await diagramPersistence.saveDiagramToFile(
         nodes,
         edges,
         viewport,
         layers,
         activeLayerId,
+        diagramSettings,
         {
           title: 'OpenChart Diagram',
           createdWith: 'OpenChart',
@@ -90,7 +91,7 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
     } catch (error) {
       console.error('Error saving diagram:', error);
     }
-  }, [nodes, edges, layers, activeLayerId, flowRef]);
+  }, [nodes, edges, layers, activeLayerId, diagramSettings, flowRef]);
 
   const handleLoadDiagram = useCallback(async (file?: File) => {
     // If no file provided, trigger file input
@@ -115,6 +116,11 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
       setLayers(imported.layers);
       setActiveLayerId(imported.activeLayerId);
 
+      // Restore diagram settings if available
+      if (imported.diagramSettings) {
+        setDiagramSettings(imported.diagramSettings);
+      }
+
       // Set viewport after loading
       if (flowRef.current && imported.viewport) {
         flowRef.current.setViewport(imported.viewport);
@@ -128,7 +134,7 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
       console.error('Error loading diagram:', error);
       alert('Failed to load diagram. Please check the file format.');
     }
-  }, [setNodes, setEdges, setLayers, setActiveLayerId, flowRef, fileInputRef]);
+  }, [setNodes, setEdges, setLayers, setActiveLayerId, setDiagramSettings, flowRef, fileInputRef]);
 
   const handleExportPNG = useCallback(async () => {
     try {

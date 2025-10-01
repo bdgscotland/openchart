@@ -28,6 +28,7 @@ class DiagramPersistence {
     layers?: Layer[],
     activeLayerId?: string,
     metadata?: DiagramMetadata,
+    diagramSettings?: any,
     options: ExportOptions = {}
   ): Promise<DiagramData> {
     // Get all property panel data if requested (default: true)
@@ -55,6 +56,7 @@ class DiagramPersistence {
       propertyPanelData,
       layers: layers || [DEFAULT_LAYER],
       activeLayerId: activeLayerId || DEFAULT_LAYER.id,
+      diagramSettings,
     };
 
     return diagram;
@@ -72,6 +74,7 @@ class DiagramPersistence {
     viewport: Viewport;
     layers: Layer[];
     activeLayerId: string;
+    diagramSettings?: any;
     restoredFeatures: string[];
   }> {
     // Validate data first
@@ -131,6 +134,7 @@ class DiagramPersistence {
       viewport: diagramData.viewport,
       layers,
       activeLayerId,
+      diagramSettings: diagramData.diagramSettings,
       restoredFeatures,
     };
   }
@@ -144,9 +148,10 @@ class DiagramPersistence {
     viewport: Viewport,
     layers?: Layer[],
     activeLayerId?: string,
+    diagramSettings?: any,
     metadata?: DiagramMetadata
   ): Promise<void> {
-    const diagram = await this.exportDiagram(nodes, edges, viewport, layers, activeLayerId, metadata);
+    const diagram = await this.exportDiagram(nodes, edges, viewport, layers, activeLayerId, metadata, diagramSettings);
     const dataStr = JSON.stringify(diagram, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);

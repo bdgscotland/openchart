@@ -19,6 +19,7 @@ export interface DiagramData {
   propertyPanelData?: PropertyPanelData;
   layers?: Layer[];
   activeLayerId?: string;
+  diagramSettings?: any; // DiagramSettings from diagram.ts
 }
 
 /**
