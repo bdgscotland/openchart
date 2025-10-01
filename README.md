@@ -20,19 +20,23 @@ OpenChart aims to become a modern, open-source alternative to commercial diagram
 ### ⚠️ Known Issues
 - **Shape resizing**: Shape resize handles may not work reliably in all scenarios
 - **Export quality**: Export functions are basic and may fail
-- **Limited undo/redo**: History management is incomplete
+- **Undo/redo scope**: Currently limited to shape creation (editing, deletion not yet supported)
 - **Performance**: May slow down with very complex diagrams (100+ shapes)
 
 ### ✅ What Currently Works Well
 - **Shape Placement**: All 61 shapes render correctly from categorized sidebar
 - **Shape Interactions**: Drag, drop, select, multi-select operations work reliably
 - **Connection Tools**: Edge creation with multiple styles (straight, curved, step)
-- **Property Panel**: Styling controls with real-time updates
+- **Property Panel**: Diagram and Style tabs with real-time updates
+- **Grid Customization**: Choose between dots, lines, or crosshatch with custom colors
+- **Background Colors**: Persistent canvas background color settings
+- **Undo/Redo**: Command pattern implementation for shape operations
+- **Layer Management**: Z-ordering controls and layer panel
 - **Color Picker**: Multi-tab color picker with palette, transparency, and theme options
 - **Zoom & Pan**: Smooth canvas navigation with minimap and controls
 - **Edge Positioning**: Accurate connection points on all shape types
 - **UI Polish**: Consistent icons, proper hover states, and visual feedback
-- **Auto-save**: Diagrams automatically saved as you work
+- **File Persistence**: Save/load diagrams with all settings preserved
 
 ### 🔬 Stable Features
 - **Shape Library**: 61 shapes across 6 categories
@@ -62,8 +66,19 @@ Open http://localhost:5173
 
 ## 🔨 Recent Development Work
 
-### Latest Iteration (v0.2.2-alpha)
-**Focus: UI polish and core functionality stabilization**
+### Latest Iteration (v0.3.0-alpha)
+**Focus: Diagram settings persistence and grid customization**
+
+- ✅ **Diagram Settings Persistence** - Grid, background, and canvas settings now save/load with diagrams
+- ✅ **Dynamic Grid Styling** - Grid style (dots/lines/crosshatch) and color fully customizable
+- ✅ **Background Color Control** - Canvas background color persists across sessions
+- ✅ **Undo/Redo System** - Comprehensive command pattern for shape creation and editing
+- ✅ **Layer System** - Z-ordering with layer management for complex diagrams
+- ✅ **Context Menus** - Right-click menus for shapes and canvas operations
+- ✅ **Property Panel Enhancements** - Diagram tab with grid/background controls working
+
+### Previous Iteration (v0.2.2-alpha)
+**UI polish and core functionality stabilization**
 
 - ✅ **Fixed edge positioning** - Resolved React Flow zoom scaling issues affecting all shapes
 - ✅ **Enhanced connection tools** - Working dropdown for edge styles (straight, curved, step)
@@ -71,10 +86,10 @@ Open http://localhost:5173
 - ✅ **UI consistency fixes** - Proper icon states, hover effects, and visual feedback
 - ✅ **PropertyPanel improvements** - Fixed collapsed state positioning and expand/contract icons
 - ✅ **Minimap contrast** - Enhanced viewport visibility with blue highlighting
-- ✅ **Multi-select operations** - Verified copy/paste/duplicate functionality works correctly
 
 ### Recent Quality Improvements
-- Significantly reduced known UI bugs and inconsistencies
+- Diagram settings now persist in JSON file format
+- Grid customization with multiple styles and colors
 - Improved visual feedback and user experience
 - Enhanced stability of core diagramming operations
 - Better React Flow integration and zoom handling
@@ -235,4 +250,4 @@ MIT - See LICENSE file for details
 
 ---
 
-**OpenChart v0.2.1-alpha**: Early development prototype. Not ready for real-world use. Expect bugs, incomplete features, and breaking changes.
+**OpenChart v0.3.0-alpha**: Early development prototype with improved persistence and customization. Not ready for production use. Expect bugs, incomplete features, and breaking changes.
