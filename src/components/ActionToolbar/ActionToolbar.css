@@ -284,3 +284,41 @@
   transform: none;
   box-shadow: none;
 }
+
+/* Phase Switcher Group - Event Storm specific styling */
+.phase-switcher-group {
+  gap: 4px;
+}
+
+.phase-switcher-group .toolbar-button {
+  padding: 3px 8px;
+  min-width: auto;
+}
+
+.phase-switcher-group .toolbar-button.active {
+  background: #FFB84D;
+  border-color: #FF9800;
+  color: white;
+  font-weight: 600;
+}
+
+.phase-switcher-group .toolbar-button.active:hover {
+  background: #FFA726;
+  border-color: #F57C00;
+}
+
+.phase-switcher-group .toolbar-text {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Responsive: Hide phase labels on small screens */
+@media (max-width: 768px) {
+  .phase-switcher-group .toolbar-text {
+    display: none;
+  }
+
+  .phase-switcher-group .toolbar-button {
+    min-width: 24px;
+  }
+}

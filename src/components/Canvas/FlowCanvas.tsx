@@ -19,6 +19,10 @@ import './FlowCanvas.css';
 import './ConnectionFeedback.css';
 
 import ShapeNode from './ShapeNode';
+import EventStormNode from './eventStorm/EventStormNode';
+import BoundedContextContainer from './eventStorm/BoundedContextContainer';
+import TimelineGuide from './eventStorm/TimelineGuide';
+import EventStormLegend from './eventStorm/EventStormLegend';
 import useShapeHandlers from './hooks/useShapeHandlers';
 import { useConnectionPool } from '../../hooks/useConnectionPool';
 import { useConnectionTools } from '../../hooks/useConnectionTools';
@@ -31,6 +35,19 @@ import CanvasContextMenu from './ContextMenu/CanvasContextMenu';
 // Memoized node types registry - defined outside component to avoid re-creation
 const nodeTypes = {
   shape: ShapeNode,
+  // Event Storm sticky note types - all use the same EventStormNode component
+  'es-event': EventStormNode,
+  'es-actor': EventStormNode,
+  'es-question': EventStormNode,
+  'es-command': EventStormNode,
+  'es-policy': EventStormNode,
+  'es-readmodel': EventStormNode,
+  'es-aggregate': EventStormNode,
+  'es-external': EventStormNode,
+  'es-ui': EventStormNode,
+  'es-hotspot': EventStormNode,
+  // Event Storm container for bounded contexts
+  'es-context': BoundedContextContainer,
 };
 
 // Memoized default edge options - defined outside component to avoid re-creation
@@ -63,6 +80,9 @@ export interface FlowCanvasProps {
   showRulers?: boolean;
   snapToGrid?: boolean;
   connectionMode?: 'loose' | 'strict';
+  mode?: 'diagram' | 'eventStorm';
+  eventStormPhase?: 'big-picture' | 'process-modeling' | 'software-design';
+  onEventStormPhaseChange?: (phase: 'big-picture' | 'process-modeling' | 'software-design') => void;
   // Enhanced connection features
   selectedConnectionTool?: string;
   onConnectionToolChange?: (toolId: string) => void;
@@ -94,6 +114,9 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     showRulers = false,
     snapToGrid: propSnapToGrid = true,
     connectionMode: propConnectionMode = 'loose',
+    mode = 'diagram',
+    eventStormPhase = 'big-picture',
+    onEventStormPhaseChange,
   } = props;
 
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId?: string; edgeId?: string } | null>(null);
@@ -273,6 +296,80 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
     // Get the active layer
     const activeLayer = getActiveLayer();
+
+    // Check if this is an Event Storm sticky type
+    const isEventStormSticky = shapeType.startsWith('es-');
+
+    if (isEventStormSticky) {
+      // Handle Event Storm elements (stickies and containers)
+      console.log('🎯 Creating Event Storm element:', shapeType);
+
+      // Special handling for bounded context container
+      if (shapeType === 'es-context') {
+        const newNode = {
+          id: `node-${Date.now()}`,
+          type: 'es-context',
+          position,
+          draggable: true,
+          selectable: true,
+          width: 500,
+          height: 400,
+          measured: { width: 500, height: 400 },
+          data: {
+            label: 'Bounded Context',
+            description: '',
+            color: '#E8F4FD',
+            layerId: activeLayer.id,
+          },
+        };
+
+        console.log('🎯 New bounded context container created:', newNode);
+        const updatedNodes = nodes.concat(newNode);
+        onNodesChange(updatedNodes);
+        return;
+      }
+
+      // Import sticky definitions to get color and metadata for regular stickies
+      import('../Toolbar/eventStormDefinitions').then(({ getStickyDefinition }) => {
+        const stickyDef = getStickyDefinition(shapeType.replace('es-', ''));
+
+        if (!stickyDef) {
+          console.warn(`❌ Invalid Event Storm sticky type: ${shapeType}`);
+          return;
+        }
+
+        console.log('✅ Sticky definition found:', stickyDef);
+
+        const newNode = {
+          id: `node-${Date.now()}`,
+          type: shapeType,  // 'es-event', 'es-actor', etc.
+          position,
+          draggable: true,
+          selectable: true,
+          width: 180,
+          height: 120,
+          measured: { width: 180, height: 120 },
+          data: {
+            label: '',  // Empty label initially - user will double-click to edit
+            stickyType: stickyDef.stickyType,
+            color: stickyDef.color,
+            phase: stickyDef.phase,
+            layerId: activeLayer.id,
+          },
+        };
+
+        console.log('🎯 New Event Storm node created:', newNode);
+
+        // Add new node to the parent's state
+        const updatedNodes = nodes.concat(newNode);
+        console.log('🎯 Calling external onNodesChange with:', updatedNodes);
+        onNodesChange(updatedNodes);
+      }).catch((error) => {
+        console.error('❌ Error importing Event Storm definitions:', error);
+      });
+
+      return;  // Early return for Event Storm elements
+    }
 
     // Import the shape factory at runtime to avoid circular imports
     import('./shapes').then(({ createShapeNode, isValidShapeType }) => {
@@ -930,6 +1027,14 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
             onEdgesChange(updatedEdges);
           }}
         />
+      )}
+
+      {/* Event Storm Workshop Components - only visible in Event Storm mode */}
+      {mode === 'eventStorm' && (
+        <>
+          <TimelineGuide />
+          <EventStormLegend phase={eventStormPhase} />
+        </>
       )}
     </div>
   );

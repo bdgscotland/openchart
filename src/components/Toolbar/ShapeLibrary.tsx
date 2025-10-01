@@ -1,7 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Search, ChevronDown, ChevronRight, X, ChevronLeft, PanelLeftClose } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, X, ChevronLeft, PanelLeftClose, Calendar, User, HelpCircle, Box, Zap, GitBranch, Database, Server, Monitor, AlertCircle } from 'lucide-react';
 import type { DrawingTool, ShapeDefinition, ShapeCategory, SearchResult, ShapeLibraryState } from '../../types/shapes';
+import type { CanvasMode } from '../../types/diagram';
+import type { EventStormPhase, DiagramSettings } from '../../types';
 import { shapeCategories, allShapes, searchShapes } from './shapeDefinitions';
+import { getStickiesForPhase } from './eventStormDefinitions';
 import './ShapeLibrary.css';
 
 interface ShapeLibraryProps {
@@ -9,6 +12,8 @@ interface ShapeLibraryProps {
   onToolSelect: (tool: DrawingTool) => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  mode?: CanvasMode;
+  eventStormPhase?: EventStormPhase; // Add phase prop
 }
 
 interface ShapeButtonProps {
@@ -194,7 +199,9 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
   selectedTool,
   onToolSelect,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
+  mode = 'diagram', // Default to diagram mode
+  eventStormPhase = 'big-picture' // Default to big-picture phase
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
@@ -302,6 +309,204 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
                 isCompact={true}
               />
             ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show Event Storm sticky library when in event storm mode
+  if (mode === 'eventStorm') {
+    const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>> = {
+      // Big Picture
+      'Calendar': Calendar,
+      'User': User,
+      'HelpCircle': HelpCircle,
+      // Process Modeling
+      'Zap': Zap,
+      'GitBranch': GitBranch,
+      'Database': Database,
+      // Software Design
+      'Box': Box,
+      'Server': Server,
+      'Monitor': Monitor,
+      'AlertCircle': AlertCircle,
+    };
+
+    return (
+      <div className="shape-library shape-library-expanded" role="toolbar" aria-label="Event Storm Sticky Library">
+        {/* Header */}
+        <div className="library-header">
+          <div className="library-header-content">
+            <div className="mode-indicator" style={{ padding: '8px 12px', background: '#FFB84D20', borderRadius: '4px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <strong style={{ fontSize: '13px' }}>🎯 Event Storm Mode</strong>
+              {onToggleCollapse && (
+                <button
+                  className="collapse-toggle"
+                  onClick={onToggleCollapse}
+                  aria-label="Collapse Sticky Library"
+                  title="Collapse Sticky Library"
+                  style={{ marginLeft: '8px' }}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky buttons */}
+        <div className="library-content">
+          <div style={{ padding: '12px' }}>
+            <h3 style={{ fontSize: '12px', fontWeight: 600, color: '#666', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {eventStormPhase === 'big-picture' && 'Big Picture Phase'}
+              {eventStormPhase === 'process-modeling' && 'Process Modeling Phase'}
+              {eventStormPhase === 'software-design' && 'Software Design Phase'}
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {getStickiesForPhase(eventStormPhase).map((sticky) => {
+                const IconComponent = iconMap[sticky.icon || ''] || Calendar;
+                return (
+                  <button
+                    key={sticky.id}
+                    className="shape-button"
+                    draggable={true}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('shapeTool', sticky.id);
+                      e.dataTransfer.effectAllowed = 'copy';
+
+                      // Create drag ghost image
+                      const dragIcon = e.currentTarget.cloneNode(true) as HTMLElement;
+                      dragIcon.style.opacity = '0.7';
+                      dragIcon.style.transform = 'scale(1.1)';
+                      document.body.appendChild(dragIcon);
+                      e.dataTransfer.setDragImage(dragIcon, 90, 60);
+
+                      setTimeout(() => {
+                        if (document.body.contains(dragIcon)) {
+                          document.body.removeChild(dragIcon);
+                        }
+                      }, 0);
+                    }}
+                    onClick={() => onToolSelect(sticky.id as DrawingTool)}
+                    title={sticky.description}
+                    style={{
+                      backgroundColor: sticky.color,
+                      border: '2px solid rgba(0,0,0,0.1)',
+                      borderRadius: '6px',
+                      padding: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      cursor: 'grab',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    }}
+                  >
+                    <IconComponent size={20} style={{ flexShrink: 0 }} />
+                    <div style={{ textAlign: 'left', flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '2px' }}>
+                        {sticky.name}
+                      </div>
+                      <div style={{ fontSize: '11px', opacity: 0.8, lineHeight: '1.3' }}>
+                        {sticky.description}
+                      </div>
+                    </div>
+                    <kbd style={{
+                      fontSize: '10px',
+                      padding: '2px 6px',
+                      background: 'rgba(0,0,0,0.1)',
+                      borderRadius: '3px',
+                      fontWeight: 600,
+                    }}>
+                      {sticky.hotkey}
+                    </kbd>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Bounded Context Container */}
+            <h3 style={{ fontSize: '12px', fontWeight: 600, color: '#666', marginTop: '20px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Containers
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                key="es-context"
+                className="shape-button"
+                draggable={true}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('shapeTool', 'es-context');
+                  e.dataTransfer.effectAllowed = 'copy';
+
+                  const dragIcon = e.currentTarget.cloneNode(true) as HTMLElement;
+                  dragIcon.style.opacity = '0.7';
+                  dragIcon.style.transform = 'scale(1.1)';
+                  document.body.appendChild(dragIcon);
+                  e.dataTransfer.setDragImage(dragIcon, 90, 60);
+
+                  setTimeout(() => {
+                    if (document.body.contains(dragIcon)) {
+                      document.body.removeChild(dragIcon);
+                    }
+                  }, 0);
+                }}
+                onClick={() => onToolSelect('es-context' as DrawingTool)}
+                title="Create a bounded context container to group related stickies"
+                style={{
+                  backgroundColor: '#E8F4FD',
+                  border: '3px dashed rgba(59, 130, 246, 0.6)',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  cursor: 'grab',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                }}
+              >
+                <Box size={20} style={{ flexShrink: 0, color: '#3B82F6' }} />
+                <div style={{ textAlign: 'left', flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '2px', color: '#1E40AF' }}>
+                    Bounded Context
+                  </div>
+                  <div style={{ fontSize: '11px', opacity: 0.8, lineHeight: '1.3', color: '#475569' }}>
+                    Container for grouping related stickies
+                  </div>
+                </div>
+                <kbd style={{
+                  fontSize: '10px',
+                  padding: '2px 6px',
+                  background: 'rgba(59, 130, 246, 0.2)',
+                  borderRadius: '3px',
+                  fontWeight: 600,
+                  color: '#1E40AF',
+                }}>
+                  C
+                </kbd>
+              </button>
+            </div>
+
+            <p style={{ fontSize: '11px', marginTop: '16px', color: '#999', textAlign: 'center' }}>
+              Drag stickies onto the canvas or click to select
+            </p>
           </div>
         </div>
       </div>

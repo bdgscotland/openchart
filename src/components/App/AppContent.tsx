@@ -95,6 +95,54 @@ const AppContent: React.FC<AppContentProps> = ({
     });
   }, []);
 
+  // Mode change handler
+  const handleModeChange = useCallback((mode: 'diagram' | 'eventStorm') => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      mode,
+      // Initialize event storm settings when switching to event storm mode
+      eventStormSettings: mode === 'eventStorm' && !prev.eventStormSettings
+        ? {
+            phase: 'big-picture',
+            showTimeline: true,
+            autoArrangeEnabled: false,
+            timelineOrientation: 'horizontal',
+            showTimestamps: false,
+            showAggregateNames: true,
+            groupByAggregate: false,
+            groupByBoundedContext: false,
+            validationEnabled: true,
+            strictMode: false,
+            workshopMode: false,
+            participantCursors: false,
+          }
+        : prev.eventStormSettings,
+    }));
+  }, [setDiagramSettings]);
+
+  // Event Storm phase change handler
+  const handlePhaseChange = useCallback((phase: 'big-picture' | 'process-modeling' | 'software-design') => {
+    setDiagramSettings(prev => ({
+      ...prev,
+      eventStormSettings: prev.eventStormSettings
+        ? { ...prev.eventStormSettings, phase }
+        : {
+            phase,
+            showTimeline: true,
+            autoArrangeEnabled: false,
+            timelineOrientation: 'horizontal',
+            showTimestamps: false,
+            showAggregateNames: true,
+            groupByAggregate: false,
+            groupByBoundedContext: false,
+            validationEnabled: true,
+            strictMode: false,
+            workshopMode: false,
+            participantCursors: false,
+          },
+    }));
+  }, [setDiagramSettings]);
+
   // Diagram settings handlers
   const handleGridSettingsChange = useCallback((updates: Partial<typeof diagramSettings.grid>) => {
     setDiagramSettings(prev => ({
@@ -261,6 +309,9 @@ const AppContent: React.FC<AppContentProps> = ({
         canUndo={canvasOps.actionToolbar.canUndo}
         canRedo={canvasOps.actionToolbar.canRedo}
 
+        // Mode switching
+        onModeChange={handleModeChange}
+
         // View operations
         onToggleGrid={viewOps.handleToggleGrid}
         onToggleRulers={viewOps.handleToggleRulers}
@@ -335,6 +386,11 @@ const AppContent: React.FC<AppContentProps> = ({
         onToggleSnapToGrid={viewOps.handleToggleGrid}
         connectionMode="loose" // This will be managed by the context
         onToggleConnectionMode={() => {}} // TODO: Implement connection mode toggle
+
+        // Event Storm settings
+        mode={diagramSettings.mode}
+        eventStormPhase={diagramSettings.eventStormSettings?.phase}
+        onEventStormPhaseChange={handlePhaseChange}
       />
 
       <main className="app-main">
@@ -343,6 +399,8 @@ const AppContent: React.FC<AppContentProps> = ({
           isCollapsed={isLeftSidebarCollapsed}
           selectedTool={selectedTool}
           onToolSelect={setSelectedTool}
+          mode={diagramSettings.mode}
+          eventStormPhase={diagramSettings.eventStormSettings?.phase}
         />
 
         <div className="canvas-area">
@@ -377,6 +435,9 @@ const AppContent: React.FC<AppContentProps> = ({
               backgroundColor={diagramSettings.background.color}
               showRulers={diagramSettings.rulers.enabled}
               snapToGrid={diagramSettings.grid.snapToGrid}
+              mode={diagramSettings.mode}
+              eventStormPhase={diagramSettings.eventStormSettings?.phase}
+              onEventStormPhaseChange={handlePhaseChange}
             />
           </div>
         </div>

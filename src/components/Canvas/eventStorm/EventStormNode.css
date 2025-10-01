@@ -1,0 +1,206 @@
+/* Event Storm Sticky Note Styles */
+
+.event-storm-sticky {
+  min-width: 120px;
+  min-height: 100px;
+  max-width: 180px;
+  padding: 12px;
+  border-radius: 2px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-storm-sticky:hover {
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.event-storm-sticky.selected {
+  box-shadow: 0 0 0 3px #4A90E2, 2px 2px 8px rgba(0, 0, 0, 0.3);
+  transform: rotate(0deg) !important;
+  z-index: 20;
+}
+
+/* Sticky Type Icon */
+.sticky-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0.5;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Label */
+.sticky-label {
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  color: #333;
+  text-align: center;
+  margin-top: 4px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.sticky-label-input {
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 4px;
+  resize: none;
+  font-family: inherit;
+  text-align: center;
+}
+
+.sticky-label-input:focus {
+  outline: none;
+  border-color: #4A90E2;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Footer Metadata */
+.sticky-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: auto;
+}
+
+.sticky-aggregate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.sticky-sequence {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Confidence Indicators */
+.confidence-low {
+  opacity: 0.6;
+  border: 2px dashed rgba(0, 0, 0, 0.3);
+}
+
+.confidence-medium {
+  opacity: 0.8;
+}
+
+.confidence-high {
+  opacity: 1;
+}
+
+/* Status Indicators */
+.sticky-status {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.status-proposed {
+  background: #FFC107;
+}
+
+.status-validated {
+  background: #4CAF50;
+}
+
+.status-implemented {
+  background: #2196F3;
+}
+
+/* Concerns Badge (for questions) */
+.sticky-concerns-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  color: rgba(0, 0, 0, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Specific Sticky Type Styles */
+.sticky-event {
+  /* Orange - Domain Events */
+  box-shadow: 2px 2px 4px rgba(255, 184, 77, 0.4);
+}
+
+.sticky-actor {
+  /* Light Yellow - Actors */
+  box-shadow: 2px 2px 4px rgba(255, 224, 102, 0.4);
+}
+
+.sticky-question {
+  /* Purple - Questions */
+  box-shadow: 2px 2px 4px rgba(204, 153, 255, 0.4);
+}
+
+.sticky-command {
+  /* Blue - Commands */
+  box-shadow: 2px 2px 4px rgba(109, 179, 242, 0.4);
+}
+
+.sticky-policy {
+  /* Lavender - Policies */
+  box-shadow: 2px 2px 4px rgba(212, 181, 232, 0.4);
+}
+
+.sticky-readmodel {
+  /* Green - Read Models */
+  box-shadow: 2px 2px 4px rgba(144, 238, 144, 0.4);
+}
+
+.sticky-aggregate {
+  /* Yellow - Aggregates */
+  box-shadow: 2px 2px 4px rgba(255, 236, 139, 0.4);
+}
+
+.sticky-external {
+  /* Pink - External Systems */
+  box-shadow: 2px 2px 4px rgba(255, 182, 193, 0.4);
+}
+
+.sticky-ui {
+  /* White - UI/Mockup */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid #ddd;
+}
+
+.sticky-hotspot {
+  /* Red - Hotspots */
+  box-shadow: 2px 2px 4px rgba(255, 107, 107, 0.4);
+}
+
+/* React Flow Handle Visibility */
+.event-storm-sticky:hover .react-flow__handle {
+  opacity: 0.3;
+}
+
+.event-storm-sticky.selected .react-flow__handle {
+  opacity: 0.6;
+}

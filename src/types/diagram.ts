@@ -1,4 +1,10 @@
 // OpenChart Diagram Schema Types
+import type { EventStormSettings } from './eventStorm';
+
+/**
+ * Canvas mode type
+ */
+export type CanvasMode = 'diagram' | 'eventStorm';
 
 export interface DiagramMetadata {
   id: string;
@@ -134,6 +140,10 @@ export interface ViewSettings {
 }
 
 export interface DiagramSettings {
+  // Canvas mode
+  mode: CanvasMode;
+
+  // Diagram mode settings
   grid: GridSettings;
   background: BackgroundSettings;
   paper: PaperSettings;
@@ -143,6 +153,9 @@ export interface DiagramSettings {
   display: DisplaySettings;
   connectionVisualization: ConnectionVisualizationSettings;
   view: ViewSettings;
+
+  // Event Storm mode settings (optional, only when mode === 'eventStorm')
+  eventStormSettings?: EventStormSettings;
 }
 
 export interface Point {
@@ -343,6 +356,7 @@ export const DEFAULT_VIEW_SETTINGS: ViewSettings = {
   scale: 100,               // 100% scale by default
 };
 export const DEFAULT_DIAGRAM_SETTINGS: DiagramSettings = {
+  mode: 'diagram', // Default to diagram mode
   grid: DEFAULT_GRID_SETTINGS,
   background: DEFAULT_BACKGROUND_SETTINGS,
   paper: DEFAULT_PAPER_SETTINGS,
@@ -352,6 +366,7 @@ export const DEFAULT_DIAGRAM_SETTINGS: DiagramSettings = {
   display: DEFAULT_DISPLAY_SETTINGS,
   connectionVisualization: DEFAULT_CONNECTION_VISUALIZATION_SETTINGS,
   view: DEFAULT_VIEW_SETTINGS,
+  // eventStormSettings will be initialized when switching to event storm mode
 };
 
 // Paper size presets in pixels (at 96 DPI)

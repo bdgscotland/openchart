@@ -1,0 +1,45 @@
+.timeline-guide {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+  user-select: none;
+}
+
+.timeline-guide-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: rgba(255, 184, 77, 0.15);
+  border: 2px solid rgba(255, 184, 77, 0.3);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #8B5A00;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.timeline-arrow {
+  color: #FFB84D;
+  animation: pulse-arrow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-arrow {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(8px);
+    opacity: 0.7;
+  }
+}

@@ -16,6 +16,9 @@ export interface MenuBarProps {
   canUndo: boolean;
   canRedo: boolean;
 
+  // Mode switching
+  onModeChange?: (mode: 'diagram' | 'eventStorm') => void;
+
   // Legacy view toggles (keeping for backward compatibility)
   onToggleGrid?: () => void;
   onToggleRulers?: () => void;
@@ -81,6 +84,9 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   canUndo,
   canRedo,
 
+  // Mode switching
+  onModeChange,
+
   // Legacy view toggles
   onToggleGrid,
   onToggleRulers,
@@ -144,6 +150,20 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           { label: 'Export as SVG', onClick: onExportSVG },
           { label: 'Export as PDF', onClick: onExportPDF },
         ]
+      },
+    ],
+    mode: [
+      {
+        label: 'Diagram Mode',
+        onClick: () => onModeChange?.('diagram'),
+        shortcut: 'Ctrl+M',
+        checked: diagramSettings?.mode === 'diagram',
+      },
+      {
+        label: 'Event Storm Mode',
+        onClick: () => onModeChange?.('eventStorm'),
+        shortcut: 'Ctrl+Shift+M',
+        checked: diagramSettings?.mode === 'eventStorm',
       },
     ],
     examples: [

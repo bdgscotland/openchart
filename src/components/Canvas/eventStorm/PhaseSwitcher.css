@@ -1,0 +1,109 @@
+.phase-switcher {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.phase-switcher-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.phase-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.phase-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.phase-button:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.phase-button.active {
+  background: #FFB84D;
+  border-color: #FF9800;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 184, 77, 0.3);
+}
+
+.phase-button.active:hover {
+  background: #FFA726;
+  border-color: #F57C00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 184, 77, 0.4);
+}
+
+.phase-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.phase-button.active .phase-number {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.phase-label {
+  font-size: 13px;
+}
+
+/* Responsive: Stack on small screens */
+@media (max-width: 768px) {
+  .phase-switcher {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .phase-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .phase-button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

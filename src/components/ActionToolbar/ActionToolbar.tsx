@@ -52,6 +52,11 @@ export interface ActionToolbarProps {
   connectionMode: 'loose' | 'strict';
   onToggleConnectionMode: () => void;
 
+  // Event Storm settings
+  mode?: 'diagram' | 'eventStorm';
+  eventStormPhase?: 'big-picture' | 'process-modeling' | 'software-design';
+  onEventStormPhaseChange?: (phase: 'big-picture' | 'process-modeling' | 'software-design') => void;
+
   // Optional props for responsive design
   isCompact?: boolean;
 }
@@ -77,6 +82,9 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
   onToggleSnapToGrid,
   connectionMode,
   onToggleConnectionMode,
+  mode,
+  eventStormPhase = 'big-picture',
+  onEventStormPhaseChange,
   isCompact = false,
 }) => {
   const [showEdgeStyleMenu, setShowEdgeStyleMenu] = useState(false);
@@ -393,6 +401,43 @@ const ActionToolbar: React.FC<ActionToolbarProps> = ({
           <Maximize2 className="w-1.5 h-1.5" />
         </button>
       </div>
+
+      {/* Event Storm Phase Switcher - only visible in Event Storm mode */}
+      {mode === 'eventStorm' && onEventStormPhaseChange && (
+        <>
+          <div className="toolbar-separator" />
+
+          <div className="toolbar-group phase-switcher-group">
+            <span className="toolbar-text" style={{ marginRight: '8px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>
+              Phase:
+            </span>
+            <button
+              className={`toolbar-button ${eventStormPhase === 'big-picture' ? 'active' : ''}`}
+              onClick={() => onEventStormPhaseChange('big-picture')}
+              title="Big Picture: Explore the domain with events and actors"
+              aria-label="Switch to Big Picture phase"
+            >
+              <span className="toolbar-text">1. Big Picture</span>
+            </button>
+            <button
+              className={`toolbar-button ${eventStormPhase === 'process-modeling' ? 'active' : ''}`}
+              onClick={() => onEventStormPhaseChange('process-modeling')}
+              title="Process Modeling: Add commands, policies, and read models"
+              aria-label="Switch to Process Modeling phase"
+            >
+              <span className="toolbar-text">2. Process Modeling</span>
+            </button>
+            <button
+              className={`toolbar-button ${eventStormPhase === 'software-design' ? 'active' : ''}`}
+              onClick={() => onEventStormPhaseChange('software-design')}
+              title="Software Design: Define aggregates and bounded contexts"
+              aria-label="Switch to Software Design phase"
+            >
+              <span className="toolbar-text">3. Software Design</span>
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
