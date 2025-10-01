@@ -641,6 +641,88 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         console.log('🎯 Ctrl+D: Duplicated', selectedNodes.length, 'selected nodes');
         return;
       }
+
+      // Event Storm Mode: Keyboard shortcuts for quick sticky creation
+      // Only active when in Event Storm mode and not typing in an input
+      if (mode === 'eventStorm' &&
+          !(event.target instanceof HTMLInputElement ||
+            event.target instanceof HTMLTextAreaElement ||
+            (event.target as HTMLElement).contentEditable === 'true')) {
+
+        // Prevent shortcuts when modifier keys are pressed (except for the key itself)
+        if (event.ctrlKey || event.metaKey || event.altKey) {
+          return;
+        }
+
+        let stickyType: string | null = null;
+
+        // Map keys to sticky types
+        switch (event.key.toLowerCase()) {
+          // Big Picture Phase
+          case 'e': stickyType = 'event'; break;
+          case 'a': stickyType = 'actor'; break;
+          case 'q': stickyType = 'question'; break;
+          // Process Modeling Phase
+          case 'c': stickyType = 'command'; break;
+          case 'p': stickyType = 'policy'; break;
+          case 'r': stickyType = 'readmodel'; break;
+          // Software Design Phase
+          case 'g': stickyType = 'aggregate'; break;
+          case 'x': stickyType = 'external'; break;
+          case 'u': stickyType = 'ui'; break;
+          case 'h': stickyType = 'hotspot'; break;
+        }
+
+        if (stickyType) {
+          event.preventDefault();
+
+          // Check if this sticky type is available in the current phase
+          import('../Toolbar/eventStormDefinitions').then(({ getStickyDefinition, getStickiesForPhase }) => {
+            const availableStickies = getStickiesForPhase(eventStormPhase);
+            const stickyDef = getStickyDefinition(stickyType!);
+
+            if (!stickyDef || !availableStickies.find(s => s.id === stickyType)) {
+              console.log(`⚠️ Sticky type "${stickyType}" not available in ${eventStormPhase} phase`);
+              return;
+            }
+
+            // Get viewport center for placement
+            const viewport = getViewport();
+            const centerX = (-viewport.x + (reactFlowWrapper.current?.clientWidth || 800) / 2) / viewport.zoom;
+            const centerY = (-viewport.y + (reactFlowWrapper.current?.clientHeight || 600) / 2) / viewport.zoom;
+
+            const position = snapToGridPosition({ x: centerX, y: centerY });
+            const activeLayer = getActiveLayer();
+
+            const newNode = {
+              id: `node-${Date.now()}`,
+              type: `es-${stickyType}`,
+              position,
+              draggable: true,
+              selectable: true,
+              width: 180,
+              height: 120,
+              measured: { width: 180, height: 120 },
+              data: {
+                label: '',  // Empty - user will fill in
+                stickyType: stickyDef.stickyType,
+                color: stickyDef.color,
+                phase: stickyDef.phase,
+                layerId: activeLayer.id,
+              },
+            };
+
+            console.log(`✨ Created ${stickyType} sticky via keyboard shortcut (${event.key.toUpperCase()})`);
+
+            const updatedNodes = nodes.concat(newNode);
+            onNodesChange(updatedNodes);
+          }).catch((error) => {
+            console.error('❌ Error creating sticky via keyboard:', error);
+          });
+
+          return;
+        }
+      }
     };
 
     // Add event listener to document
@@ -650,7 +732,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedNodes, selectedEdges, nodes, edges, onNodesChange, onEdgesChange, handleDeleteNodes, handleDuplicateNodes]);
+  }, [selectedNodes, selectedEdges, nodes, edges, onNodesChange, onEdgesChange, handleDeleteNodes, handleDuplicateNodes, mode, eventStormPhase, snapToGridPosition, getViewport, getActiveLayer]);
 
   // Handle context menu actions
   const handleContextMenuAction = useCallback((action: string, nodeId?: string) => {

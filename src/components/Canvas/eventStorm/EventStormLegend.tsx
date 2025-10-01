@@ -22,6 +22,20 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
   'AlertCircle': AlertCircle,
 };
 
+// Keyboard shortcuts for each sticky type
+const keyboardShortcuts: Record<string, string> = {
+  'event': 'E',
+  'actor': 'A',
+  'question': 'Q',
+  'command': 'C',
+  'policy': 'P',
+  'readmodel': 'R',
+  'aggregate': 'G',
+  'external': 'X',
+  'ui': 'U',
+  'hotspot': 'H',
+};
+
 /**
  * Event Storm Color Legend
  * Shows what each sticky color means for the current phase
@@ -88,6 +102,7 @@ export const EventStormLegend: React.FC<EventStormLegendProps> = ({
       <div className="legend-content">
         {stickies.map((sticky) => {
           const IconComponent = iconMap[sticky.icon || ''] || Calendar;
+          const shortcut = keyboardShortcuts[sticky.id];
           return (
             <div key={sticky.id} className="legend-item">
               <div className="legend-color" style={{ backgroundColor: sticky.color }}>
@@ -97,13 +112,21 @@ export const EventStormLegend: React.FC<EventStormLegendProps> = ({
                 <strong>{sticky.name}</strong>
                 <span>{sticky.description}</span>
               </div>
+              {shortcut && (
+                <kbd className="legend-shortcut" title={`Press ${shortcut} to create`}>
+                  {shortcut}
+                </kbd>
+              )}
             </div>
           );
         })}
       </div>
 
       <div className="legend-footer">
-        Arrange stickies left → right chronologically
+        <span>📌 Arrange stickies left → right chronologically</span>
+        <span style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
+          💡 Press letter keys (E, A, Q, etc.) to quickly create stickies
+        </span>
       </div>
     </div>
   );
