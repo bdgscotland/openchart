@@ -42,9 +42,30 @@ function getStickyIcon(stickyType: string): React.ReactNode {
  * Event Storm Sticky Note Node Component
  */
 export function EventStormNode({ data, selected, id }: NodeProps<EventStormNodeData>) {
-  const [isEditing, setIsEditing] = useState(false);
+  // Start in editing mode if this is a newly created sticky (autoEdit flag)
+  const [isEditing, setIsEditing] = useState(data.autoEdit === true);
   const [label, setLabel] = useState(data.label);
   const { setNodes } = useReactFlow();
+
+  // Clear the autoEdit flag once we've used it
+  React.useEffect(() => {
+    if (data.autoEdit) {
+      setNodes((nodes) =>
+        nodes.map((node) => {
+          if (node.id === id && node.data.autoEdit) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                autoEdit: false,
+              },
+            };
+          }
+          return node;
+        })
+      );
+    }
+  }, [data.autoEdit, id, setNodes]);
 
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
@@ -73,16 +94,56 @@ export function EventStormNode({ data, selected, id }: NodeProps<EventStormNodeD
   }, [label, updateNodeLabel]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && e.shiftKey) {
+      // Shift+Enter: Save current and create another sticky of same type
       e.preventDefault();
       setIsEditing(false);
       updateNodeLabel(label);
-    }
-    if (e.key === 'Escape') {
+
+      // Create a new sticky of the same type slightly offset
+      setTimeout(() => {
+        setNodes((nodes) => {
+          const currentNode = nodes.find(n => n.id === id);
+          if (!currentNode) return nodes;
+
+          // Calculate offset position (slightly down and right)
+          const offsetX = 20;
+          const offsetY = 140; // Height of sticky + gap
+
+          const newNode = {
+            id: `node-${Date.now()}`,
+            type: currentNode.type,
+            position: {
+              x: currentNode.position.x + offsetX,
+              y: currentNode.position.y + offsetY,
+            },
+            draggable: true,
+            selectable: true,
+            selected: true,
+            width: 180,
+            height: 120,
+            measured: { width: 180, height: 120 },
+            data: {
+              ...data,
+              label: '',
+              autoEdit: true,
+            },
+          };
+
+          // Deselect all and add new sticky
+          return nodes.map(n => ({ ...n, selected: false })).concat(newNode);
+        });
+      }, 100);
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      // Enter: Just save and close
+      e.preventDefault();
+      setIsEditing(false);
+      updateNodeLabel(label);
+    } else if (e.key === 'Escape') {
       setLabel(data.label); // Reset to original
       setIsEditing(false);
     }
-  }, [data.label, label, updateNodeLabel]);
+  }, [data, label, updateNodeLabel, id, setNodes]);
 
   // Calculate rotation (slight random tilt for sticky note effect)
   const rotation = data.sequenceNumber

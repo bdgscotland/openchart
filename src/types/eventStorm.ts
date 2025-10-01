@@ -66,6 +66,9 @@ export interface EventStormNodeData {
   status?: 'proposed' | 'validated' | 'implemented';
   tags?: string[];
 
+  // UI flags
+  autoEdit?: boolean; // Auto-open editing mode when created
+
   // Layer support (inherited from base)
   layerId?: string;
 }

@@ -700,6 +700,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
               position,
               draggable: true,
               selectable: true,
+              selected: true,  // Auto-select the new sticky
               width: 180,
               height: 120,
               measured: { width: 180, height: 120 },
@@ -709,12 +710,14 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
                 color: stickyDef.color,
                 phase: stickyDef.phase,
                 layerId: activeLayer.id,
+                autoEdit: true,  // Auto-open editing mode
               },
             };
 
             console.log(`✨ Created ${stickyType} sticky via keyboard shortcut (${event.key.toUpperCase()})`);
 
-            const updatedNodes = nodes.concat(newNode);
+            // Deselect all other nodes and add the new one
+            const updatedNodes = nodes.map(n => ({ ...n, selected: false })).concat(newNode);
             onNodesChange(updatedNodes);
           }).catch((error) => {
             console.error('❌ Error creating sticky via keyboard:', error);
