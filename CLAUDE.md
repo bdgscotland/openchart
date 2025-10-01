@@ -18,36 +18,12 @@ OpenChart is an open-source, git-backed diagramming platform built with React + 
 - **Context7 MCP**: ALWAYS use for up-to-date third-party library documentation
 - **Sequential Thinking MCP**: ALWAYS use for any decision-making processes
 - **Playwright MCP**: ALWAYS use for frontend testing and browser automation
-- **openchart-data-persistence Agent**: ALWAYS use when:
-  - Adding new features that need to be saved/loaded
-  - Modifying node or edge properties
-  - Debugging save/load issues
-  - Changing the canvas state management
-  - Testing diagram persistence
-  - Updating React Flow integration
 - **openchart-pmo Agent**: ALWAYS use when:
   - Creating or managing GitHub issues
   - Tracking project progress
   - Organizing development tasks
   - Managing bug reports and feature requests
   - Coordinating project boards
-
-### Data Persistence Agent Usage
-
-**MUST use openchart-data-persistence agent for:**
-- ANY changes to node/edge structure or properties
-- Before merging features that add new visual elements
-- When React Flow is updated or reconfigured
-- If save/load functionality appears broken
-- Adding new shape types or connection types
-- Implementing features like layers, groups, or templates
-
-**The agent will:**
-- Ensure all new properties are serialized
-- Test save/load round-trip integrity
-- Update JSON schema documentation
-- Verify React Flow state synchronization
-- Add migration logic if schema changes
 
 ### PMO Agent Usage
 
@@ -63,7 +39,6 @@ OpenChart is an open-source, git-backed diagramming platform built with React + 
 - Organize work by priority (P1: Canvas, P2: File Ops, P3: Git)
 - Track completion rates and identify development blockers
 - Ensure quality gates are met (testing, documentation, performance)
-- Coordinate with other specialized agents for project management
 - Generate actionable project insights and recommendations
 
 ### Technology Stack
