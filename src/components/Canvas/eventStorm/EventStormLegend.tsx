@@ -125,7 +125,7 @@ export const EventStormLegend: React.FC<EventStormLegendProps> = ({
       <div className="legend-footer">
         <span>📌 Arrange stickies left → right chronologically</span>
         <span style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
-          💡 Press letter keys (E, A, Q, etc.) to quickly create stickies
+          💡 Press letter keys (E, A, Q, etc.) to create stickies · Press L to connect stickies
         </span>
       </div>
     </div>

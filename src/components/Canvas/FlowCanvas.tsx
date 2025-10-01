@@ -23,6 +23,7 @@ import EventStormNode from './eventStorm/EventStormNode';
 import BoundedContextContainer from './eventStorm/BoundedContextContainer';
 import TimelineGuide from './eventStorm/TimelineGuide';
 import EventStormLegend from './eventStorm/EventStormLegend';
+import ConnectionModeIndicator from './eventStorm/ConnectionModeIndicator';
 import useShapeHandlers from './hooks/useShapeHandlers';
 import { useConnectionPool } from '../../hooks/useConnectionPool';
 import { useConnectionTools } from '../../hooks/useConnectionTools';
@@ -129,6 +130,10 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const [selectedEdges, setSelectedEdges] = useState<Edge[]>([]);
   const snapToGrid = propSnapToGrid;
   const connectionMode = propConnectionMode;
+
+  // Quick connection mode state (Event Storm)
+  const [quickConnectionMode, setQuickConnectionMode] = useState(false);
+  const [connectionSource, setConnectionSource] = useState<string | null>(null);
 
   // Map grid style to BackgroundVariant
   const gridVariant = gridStyle === 'lines' ? BackgroundVariant.Lines
@@ -614,6 +619,43 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     layerOps.sendToBack(selectedIds);
   }, [selectedNodes, layerOps]);
 
+  // Quick connection node click handler
+  const handleQuickConnectionClick = useCallback((event: React.MouseEvent, node: Node) => {
+    if (!quickConnectionMode || mode !== 'eventStorm') {
+      // Pass through to original handler
+      onNodeClick?.(event, node);
+      return;
+    }
+
+    if (!connectionSource) {
+      // First click: set source
+      setConnectionSource(node.id);
+      console.log('🔗 Connection source:', node.data.label || node.id);
+    } else {
+      // Second click: create connection
+      if (connectionSource === node.id) {
+        console.log('⚠️ Cannot connect node to itself');
+        return;
+      }
+
+      const newEdge: Edge = {
+        id: `edge-${Date.now()}`,
+        source: connectionSource,
+        target: node.id,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: '#FFB84D', strokeWidth: 2 },
+      };
+
+      onEdgesChange([...edges, newEdge]);
+      console.log('🔗 Connected:', connectionSource, '→', node.id);
+
+      // Reset connection state
+      setConnectionSource(null);
+      setQuickConnectionMode(false);
+    }
+  }, [quickConnectionMode, connectionSource, mode, onNodeClick, onEdgesChange, edges]);
+
   // Keyboard shortcuts for selection operations
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -626,14 +668,35 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         return;
       }
 
-      // Escape - Clear selection
+      // Escape - Exit connection mode or clear selection
       if (event.key === 'Escape') {
         event.preventDefault();
+        // Priority 1: Exit quick connection mode
+        if (quickConnectionMode) {
+          setQuickConnectionMode(false);
+          setConnectionSource(null);
+          console.log('🎯 Escape: Exited quick connection mode');
+          return;
+        }
+        // Priority 2: Clear selections
         const updatedNodes = nodes.map((node) => ({ ...node, selected: false }));
         const updatedEdges = edges.map((edge) => ({ ...edge, selected: false }));
         onNodesChange(updatedNodes);
         onEdgesChange(updatedEdges);
         console.log('🎯 Escape: Cleared all selections');
+        return;
+      }
+
+      // L - Toggle quick connection mode (Event Storm)
+      if (event.key.toLowerCase() === 'l' && mode === 'eventStorm' &&
+          !(event.target instanceof HTMLInputElement ||
+            event.target instanceof HTMLTextAreaElement ||
+            (event.target as HTMLElement).contentEditable === 'true')) {
+        event.preventDefault();
+        const newMode = !quickConnectionMode;
+        setQuickConnectionMode(newMode);
+        setConnectionSource(null);
+        console.log(newMode ? '🔗 Quick connection mode ON - Click two stickies to connect' : '🔗 Quick connection mode OFF');
         return;
       }
 
@@ -910,7 +973,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
-        onNodeClick={onNodeClick}
+        onNodeClick={handleQuickConnectionClick}
         onNodeDoubleClick={onNodeDoubleClick}
         onNodeDragStart={(event, node) => {
           setIsDragging(true);
@@ -1132,6 +1195,10 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         <>
           <TimelineGuide />
           <EventStormLegend phase={eventStormPhase} />
+          <ConnectionModeIndicator
+            active={quickConnectionMode}
+            hasSource={connectionSource !== null}
+          />
         </>
       )}
     </div>
