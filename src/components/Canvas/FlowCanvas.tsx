@@ -215,14 +215,27 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     onEdgesChange,
   });
 
-  // Helper function to snap position to grid
+  // Helper function to snap position to grid or timeline
   const snapToGridPosition = useCallback((position: { x: number; y: number }) => {
     if (!snapToGrid) return position;
+
+    // Event Storm mode: snap to timeline swim lanes (horizontal rows)
+    if (mode === 'eventStorm') {
+      const timelineLaneHeight = 180; // Height of each swim lane
+      const horizontalSnapSize = 20; // Finer horizontal snapping for timeline
+
+      return {
+        x: Math.round(position.x / horizontalSnapSize) * horizontalSnapSize,
+        y: Math.round(position.y / timelineLaneHeight) * timelineLaneHeight,
+      };
+    }
+
+    // Standard grid snapping for diagram mode
     return {
       x: Math.round(position.x / gridSize) * gridSize,
       y: Math.round(position.y / gridSize) * gridSize,
     };
-  }, [snapToGrid, gridSize]);
+  }, [snapToGrid, gridSize, mode]);
 
   // Wrapper to convert React Flow's NodeChange[] events to Node[] for parent callback
   const handleNodesChange = useCallback((changes: NodeChange[]) => {
