@@ -373,6 +373,7 @@ const AppContent: React.FC<AppContentProps> = ({
               showGrid={diagramSettings.grid.enabled}
               gridSize={diagramSettings.grid.size}
               gridColor={diagramSettings.grid.color}
+              gridStyle={diagramSettings.grid.style}
               backgroundColor={diagramSettings.background.color}
               showRulers={diagramSettings.rulers.enabled}
               snapToGrid={diagramSettings.grid.snapToGrid}

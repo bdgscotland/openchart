@@ -56,6 +56,7 @@ export interface FlowCanvasProps {
   showGrid?: boolean;
   gridSize?: number;
   gridColor?: string;
+  gridStyle?: 'dots' | 'lines' | 'cross';
   backgroundColor?: string;
   showMiniMap?: boolean;
   showControls?: boolean;
@@ -86,6 +87,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
     showGrid = true,
     gridSize = 20,
     gridColor = '#e0e0e0',
+    gridStyle = 'dots',
     backgroundColor = '#ffffff',
     showMiniMap = true,
     showControls = true,
@@ -104,6 +106,11 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
   const [selectedEdges, setSelectedEdges] = useState<Edge[]>([]);
   const snapToGrid = propSnapToGrid;
   const connectionMode = propConnectionMode;
+
+  // Map grid style to BackgroundVariant
+  const gridVariant = gridStyle === 'lines' ? BackgroundVariant.Lines
+    : gridStyle === 'cross' ? BackgroundVariant.Cross
+    : BackgroundVariant.Dots;
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { fitView, getViewport, setViewport, screenToFlowPosition } = useReactFlow();
@@ -786,7 +793,7 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
             zoomable={true}
           />
         )}
-        {showGrid && <Background variant={BackgroundVariant.Dots} gap={gridSize} color={gridColor} />}
+        {showGrid && <Background variant={gridVariant} gap={gridSize} color={gridColor} />}
 
 
         {/* Enhanced Rulers with mm/cm markings */}
