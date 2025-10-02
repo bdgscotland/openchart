@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 import type { Node, Edge } from '@xyflow/react';
+import { PasteNodesCommand } from '../core/commands/PasteNodesCommand';
+import type { ReactFlowCommand } from '../core/commands/ReactFlowCommand';
 
 export interface ClipboardData {
   nodes: Node[];
@@ -12,6 +14,7 @@ export interface UseClipboardOptions {
   edges: Edge[];
   onNodesChange: (nodes: Node[]) => void;
   onEdgesChange: (edges: Edge[]) => void;
+  executeCommand?: (command: ReactFlowCommand) => void; // Optional for undo/redo integration
 }
 
 export const useClipboard = ({
@@ -19,6 +22,7 @@ export const useClipboard = ({
   edges,
   onNodesChange,
   onEdgesChange,
+  executeCommand,
 }: UseClipboardOptions) => {
   const [clipboardData, setClipboardData] = useState<ClipboardData | null>(null);
 
@@ -154,21 +158,26 @@ export const useClipboard = ({
       };
     }).filter((edge): edge is Edge => edge !== null);
 
-    // Clear selection on existing nodes and add pasted nodes
-    const updatedNodes = [
-      ...nodes.map(node => ({ ...node, selected: false })),
-      ...pastedNodes,
-    ];
+    // Use command pattern if executeCommand is available (enables undo/redo)
+    if (executeCommand) {
+      const command = new PasteNodesCommand(pastedNodes, pastedEdges, `Paste ${pastedNodes.length} node(s)`);
+      executeCommand(command);
+    } else {
+      // Fallback: direct state mutation (no undo/redo)
+      const updatedNodes = [
+        ...nodes.map(node => ({ ...node, selected: false })),
+        ...pastedNodes,
+      ];
+      const updatedEdges = [...edges, ...pastedEdges];
 
-    // Add pasted edges to existing edges
-    const updatedEdges = [...edges, ...pastedEdges];
+      onNodesChange(updatedNodes);
+      onEdgesChange(updatedEdges);
 
-    onNodesChange(updatedNodes);
-    onEdgesChange(updatedEdges);
+      console.log(`📋 Pasted ${pastedNodes.length} nodes and ${pastedEdges.length} edges with offset ${offset}px`);
+    }
 
-    console.log(`📋 Pasted ${pastedNodes.length} nodes and ${pastedEdges.length} edges with offset ${offset}px`);
     return true;
-  }, [clipboardData, nodes, edges, onNodesChange, onEdgesChange, calculateSmartOffset, generatePasteIds]);
+  }, [clipboardData, nodes, edges, onNodesChange, onEdgesChange, executeCommand, calculateSmartOffset, generatePasteIds]);
 
   /**
    * Duplicate selected elements (copy + paste in one operation)

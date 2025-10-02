@@ -1,6 +1,8 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import { globalCommandManager } from '../core/commands/CommandManager';
+import { DeleteNodesCommand } from '../core/commands/DeleteNodesCommand';
+import type { ReactFlowCommand } from '../core/commands/ReactFlowCommand';
 
 export interface UseActionToolbarProps {
   nodes: Node[];
@@ -12,6 +14,7 @@ export interface UseActionToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   flowCanvasRef?: React.RefObject<any>;
+  executeCommand?: (command: ReactFlowCommand) => void; // Optional for undo/redo integration
 }
 
 export interface UseActionToolbarReturn {
@@ -46,6 +49,7 @@ export const useActionToolbar = ({
   onUndo,
   onRedo,
   flowCanvasRef,
+  executeCommand,
 }: UseActionToolbarProps): UseActionToolbarReturn => {
   const [edgeStyle, setEdgeStyle] = useState<'straight' | 'curved' | 'step'>('curved');
   const [zoom, setZoom] = useState(1);
@@ -77,24 +81,31 @@ export const useActionToolbar = ({
     const selectedNodeIds = selectedNodes.map(node => node.id);
     const selectedEdgeIds = selectedEdges.map(edge => edge.id);
 
-    // Remove selected nodes
-    if (selectedNodeIds.length > 0) {
-      const newNodes = nodes.filter(node => !selectedNodeIds.includes(node.id));
-      onNodesChange(newNodes);
+    // Use command pattern if executeCommand is available (enables undo/redo)
+    if (executeCommand && selectedNodeIds.length > 0) {
+      const command = new DeleteNodesCommand(selectedNodeIds, `Delete ${selectedNodeIds.length} node(s)`);
+      executeCommand(command);
+    } else {
+      // Fallback: direct state mutation (no undo/redo)
+      // Remove selected nodes
+      if (selectedNodeIds.length > 0) {
+        const newNodes = nodes.filter(node => !selectedNodeIds.includes(node.id));
+        onNodesChange(newNodes);
 
-      // Also remove edges connected to deleted nodes
-      const newEdges = edges.filter(edge =>
-        !selectedNodeIds.includes(edge.source) &&
-        !selectedNodeIds.includes(edge.target) &&
-        !selectedEdgeIds.includes(edge.id)
-      );
-      onEdgesChange(newEdges);
-    } else if (selectedEdgeIds.length > 0) {
-      // Remove only selected edges
-      const newEdges = edges.filter(edge => !selectedEdgeIds.includes(edge.id));
-      onEdgesChange(newEdges);
+        // Also remove edges connected to deleted nodes
+        const newEdges = edges.filter(edge =>
+          !selectedNodeIds.includes(edge.source) &&
+          !selectedNodeIds.includes(edge.target) &&
+          !selectedEdgeIds.includes(edge.id)
+        );
+        onEdgesChange(newEdges);
+      } else if (selectedEdgeIds.length > 0) {
+        // Remove only selected edges
+        const newEdges = edges.filter(edge => !selectedEdgeIds.includes(edge.id));
+        onEdgesChange(newEdges);
+      }
     }
-  }, [hasSelection, selectedNodes, selectedEdges, nodes, edges, onNodesChange, onEdgesChange]);
+  }, [hasSelection, selectedNodes, selectedEdges, nodes, edges, onNodesChange, onEdgesChange, executeCommand]);
 
   // Bring selected elements to front
   const handleBringToFront = useCallback(() => {

@@ -9,6 +9,8 @@ export * from './BulkStyleCommand';
 export * from './ReactFlowCommand';
 export * from './CreateNodeCommand';
 export * from './DeleteNodeCommand';
+export * from './DeleteNodesCommand';
+export * from './PasteNodesCommand';
 export * from './MoveNodeCommand';
 export * from './ResizeNodeCommand';
 export * from './UpdateStyleCommand';

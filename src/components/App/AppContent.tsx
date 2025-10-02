@@ -191,6 +191,21 @@ const AppContent: React.FC<AppContentProps> = ({
         return;
       }
 
+      // Undo (Ctrl+Z / Cmd+Z)
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+        e.preventDefault();
+        canvasOps.handleUndo();
+        return;
+      }
+
+      // Redo (Ctrl+Y or Ctrl+Shift+Z / Cmd+Y or Cmd+Shift+Z)
+      if (((e.ctrlKey || e.metaKey) && e.key === 'y') ||
+          ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        canvasOps.handleRedo();
+        return;
+      }
+
       // Copy (Ctrl+C / Cmd+C)
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         e.preventDefault();

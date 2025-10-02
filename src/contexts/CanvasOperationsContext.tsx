@@ -85,6 +85,7 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
     edges,
     onNodesChange: setNodes,
     onEdgesChange: setEdges,
+    executeCommand: undoRedo.executeCommand,
   });
 
   // Action toolbar functionality
@@ -98,6 +99,7 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
     onUndo: undoRedo.undo,
     onRedo: undoRedo.redo,
     flowCanvasRef: flowRef,
+    executeCommand: undoRedo.executeCommand,
   });
 
   // Enhanced pane click handler that handles both shape creation and deselection
