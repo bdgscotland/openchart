@@ -7,6 +7,7 @@ import type {
   DiamondElement,
   ArrowElement,
   TextElement,
+  IconElement,
   Connection,
   Point,
   Size,
@@ -140,6 +141,34 @@ export function createTextElement(
     size,
     text,
     style: { ...DEFAULT_ELEMENT_STYLE, ...style },
+    visible: true,
+    zIndex: 1,
+  };
+}
+
+
+/**
+ * Creates a new icon element
+ */
+export function createIcon(
+  position: Point,
+  iconName: string,
+  size?: Size,
+  style?: Partial<ElementStyle>
+): IconElement {
+  return {
+    id: uuidv4(),
+    type: 'icon',
+    position,
+    size: size || { width: 48, height: 48 },
+    iconName,
+    style: {
+      fill: 'none',
+      stroke: style?.stroke || '#000000',
+      strokeWidth: style?.strokeWidth || 2,
+      opacity: style?.opacity || 1,
+      ...style,
+    },
     visible: true,
     zIndex: 1,
   };

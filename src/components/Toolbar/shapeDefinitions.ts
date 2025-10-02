@@ -1,7 +1,7 @@
 // Comprehensive Shape Definitions for OpenChart Shape Library
 import {
   // Basic shapes
-  MousePointer2, Square, Circle, Triangle, Diamond, Pentagon, Hexagon, Star, Minus, Plus, X, Type, Heart, MoreHorizontal,
+  MousePointer2, Square, Circle, Triangle, Diamond, Pentagon, Hexagon, Star, Minus, Plus, X, Type, Heart, MoreHorizontal, Smile,
   // Flowchart shapes
   RectangleHorizontal, Octagon, Cylinder, FileText, File, Settings, Database, Monitor, Clock, Zap as LogicGate,
   // Arrows and connectors
@@ -143,6 +143,15 @@ const basicShapes: ShapeDefinition[] = [
     category: 'basic',
     tags: ['heart', 'love', 'favorite', 'emotion', 'basic'],
     defaultSize: { width: 80, height: 80 }
+  },
+  {
+    id: 'icon',
+    name: 'Icon',
+    description: 'Lucide icon shape',
+    icon: Smile,
+    category: 'basic',
+    tags: ['icon', 'lucide', 'symbol', 'emoji', 'basic'],
+    defaultSize: { width: 48, height: 48 }
   }
 ];
 

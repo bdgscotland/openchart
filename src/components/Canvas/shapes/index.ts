@@ -13,6 +13,7 @@ import { StartEndShape } from './StartEndShape';
 import { DocumentShape } from './DocumentShape';
 import { DataShape } from './DataShape';
 import { GenericShape } from './GenericShape';
+import { IconShape } from './IconShape';
 
 export type ShapeType =
   // Basic shapes
@@ -30,6 +31,7 @@ export type ShapeType =
   | 'trapezoid'
   | 'octagon'
   | 'heart'
+  | 'icon'
   // Flowchart shapes
   | 'process'
   | 'decision'
@@ -349,6 +351,12 @@ const SHAPE_REGISTRY: Record<ShapeType, ShapeRegistryEntry> = {
   'speech-bubble': {
     component: createGenericShapeComponent('speech-bubble'),
     defaultProps: { width: 120, height: 80 },
+  },
+
+  // Icon shape
+  icon: {
+    component: IconShape,
+    defaultProps: { width: 48, height: 48 },
   },
 };
 

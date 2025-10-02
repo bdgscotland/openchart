@@ -5,6 +5,7 @@ import type { CanvasMode } from '../../types/diagram';
 import type { EventStormPhase, DiagramSettings } from '../../types';
 import { shapeCategories, allShapes, searchShapes } from './shapeDefinitions';
 import { getStickiesForPhase } from './eventStormDefinitions';
+import { IconPicker } from '../IconPicker';
 import './ShapeLibrary.css';
 
 interface ShapeLibraryProps {
@@ -22,10 +23,11 @@ interface ShapeButtonProps {
   onSelect: (tool: DrawingTool) => void;
   searchTerm?: string;
   isCompact?: boolean;
+  onIconShapeClick?: () => void;
 }
 
 // Individual Shape Button Component
-const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, searchTerm, isCompact = false }) => {
+const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, searchTerm, isCompact = false, onIconShapeClick }) => {
   const IconComponent = shape.icon;
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
@@ -52,8 +54,12 @@ const ShapeButton: React.FC<ShapeButtonProps> = ({ shape, isSelected, onSelect, 
   }, [shape.id]);
 
   const handleClick = useCallback(() => {
-    onSelect(shape.id);
-  }, [shape.id, onSelect]);
+    if (shape.id === 'icon' && onIconShapeClick) {
+      onIconShapeClick();
+    } else {
+      onSelect(shape.id);
+    }
+  }, [shape.id, onSelect, onIconShapeClick]);
 
   return (
     <button
@@ -85,6 +91,7 @@ interface CategorySectionProps {
   onToolSelect: (tool: DrawingTool) => void;
   searchTerm?: string;
   isCompact?: boolean;
+  onIconShapeClick?: () => void;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -94,7 +101,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   selectedTool,
   onToolSelect,
   searchTerm,
-  isCompact = false
+  isCompact = false,
+  onIconShapeClick
 }) => {
   const IconComponent = category.icon || ChevronRight;
   const ChevronIcon = isExpanded ? ChevronDown : ChevronRight;
@@ -111,6 +119,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             onSelect={onToolSelect}
             searchTerm={searchTerm}
             isCompact={true}
+            onIconShapeClick={onIconShapeClick}
           />
         ))}
       </div>
@@ -147,6 +156,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 onSelect={onToolSelect}
                 searchTerm={searchTerm}
                 isCompact={false}
+                onIconShapeClick={onIconShapeClick}
               />
             ))}
           </div>
@@ -207,6 +217,20 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(shapeCategories.filter(cat => cat.defaultExpanded).map(cat => cat.id))
   );
+  const [showIconPicker, setShowIconPicker] = useState(false);
+  const [selectedIconName, setSelectedIconName] = useState<string>('Heart');
+
+  // Handle icon shape button click - open icon picker
+  const handleIconShapeClick = useCallback(() => {
+    setShowIconPicker(true);
+    onToolSelect('icon');
+  }, [onToolSelect]);
+
+  // Handle icon selection from picker
+  const handleIconSelect = useCallback((iconName: string) => {
+    setSelectedIconName(iconName);
+    onToolSelect('icon');
+  }, [onToolSelect]);
 
   // Toggle category expansion
   const toggleCategory = useCallback((categoryId: string) => {
@@ -307,6 +331,7 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
                 isSelected={selectedTool === shape.id}
                 onSelect={onToolSelect}
                 isCompact={true}
+                onIconShapeClick={handleIconShapeClick}
               />
             ))}
           </div>
@@ -564,6 +589,7 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
                     onToolSelect={onToolSelect}
                     searchTerm={searchTerm}
                     isCompact={false}
+                    onIconShapeClick={handleIconShapeClick}
                   />
                 ))}
               </>
@@ -581,6 +607,7 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
                 selectedTool={selectedTool}
                 onToolSelect={onToolSelect}
                 isCompact={false}
+                onIconShapeClick={handleIconShapeClick}
               />
             ))}
           </div>
@@ -593,6 +620,15 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
           {allShapes.length - 1} shapes in {shapeCategories.length} categories
         </span>
       </div>
+
+      {/* Icon Picker Modal */}
+      {showIconPicker && (
+        <IconPicker
+          onSelect={handleIconSelect}
+          onClose={() => setShowIconPicker(false)}
+          selectedIcon={selectedIconName}
+        />
+      )}
     </div>
   );
 };

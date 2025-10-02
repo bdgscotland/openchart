@@ -289,8 +289,10 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
 
     const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
     const shapeType = event.dataTransfer.getData('shapeTool');
+    const iconName = event.dataTransfer.getData('iconName'); // Get icon name for icon shapes
 
     console.log('🎯 Shape type:', shapeType);
+    console.log('🎯 Icon name:', iconName);
     console.log('🎯 React Flow bounds:', reactFlowBounds);
 
     // Reset drag state
@@ -415,10 +417,11 @@ const FlowCanvasContent = forwardRef<any, FlowCanvasProps>((props, ref) => {
         },
       });
 
-      // Add layerId to the node's data
+      // Add layerId and iconName (if icon shape) to the node's data
       newNode.data = {
         ...newNode.data,
         layerId: activeLayer.id,
+        ...(shapeType === 'icon' && iconName ? { iconName } : {}),
       };
 
       console.log('🎯 New node created:', newNode);

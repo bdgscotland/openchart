@@ -221,12 +221,18 @@ export interface TextElement extends ElementBase {
   type: 'text';
 }
 
+export interface IconElement extends ElementBase {
+  type: 'icon';
+  iconName: string; // Lucide icon name (e.g., 'Heart', 'User', 'Settings')
+}
+
 export type DiagramElement = 
   | RectangleElement 
   | CircleElement 
   | DiamondElement 
   | ArrowElement 
-  | TextElement;
+  | TextElement
+  | IconElement;
 
 export interface ConnectionPoint {
   elementId: string;
@@ -397,6 +403,18 @@ export const DEFAULT_ELEMENT_STYLE: ElementStyle = {
   color: '#000000',
 };
 
+export const DEFAULT_ICON_STYLE: ElementStyle = {
+  ...DEFAULT_ELEMENT_STYLE,
+  fill: 'none', // Icons typically don't have fill
+  stroke: '#000000', // Icon color
+  strokeWidth: 2, // Icon line weight
+};
+
+export const DEFAULT_ICON_SIZE: Size = {
+  width: 48,
+  height: 48, // Square aspect ratio for icons
+};
+
 export const DEFAULT_CONNECTION_STYLE = {
   stroke: '#000000',
   strokeWidth: 2,
@@ -404,3 +422,31 @@ export const DEFAULT_CONNECTION_STYLE = {
   arrowStart: false,
   arrowEnd: true,
 };
+
+
+/**
+ * Type guards for diagram elements
+ */
+export function isIconElement(element: DiagramElement): element is IconElement {
+  return element.type === 'icon';
+}
+
+export function isRectangleElement(element: DiagramElement): element is RectangleElement {
+  return element.type === 'rectangle';
+}
+
+export function isCircleElement(element: DiagramElement): element is CircleElement {
+  return element.type === 'circle';
+}
+
+export function isDiamondElement(element: DiagramElement): element is DiamondElement {
+  return element.type === 'diamond';
+}
+
+export function isArrowElement(element: DiagramElement): element is ArrowElement {
+  return element.type === 'arrow';
+}
+
+export function isTextElement(element: DiagramElement): element is TextElement {
+  return element.type === 'text';
+}

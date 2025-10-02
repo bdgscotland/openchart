@@ -1,0 +1,237 @@
+.icon-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.icon-picker-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.icon-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.icon-picker-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.icon-picker-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: #6b7280;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-picker-close:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.icon-picker-search {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.search-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #111827;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.clear-search {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.clear-search:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.icon-picker-info {
+  padding: 12px 24px;
+  font-size: 14px;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.icon-picker-grid-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  height: 500px;
+}
+
+.icon-picker-grid {
+  position: relative;
+}
+
+.icon-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  margin: 4px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: grab;
+  transition: all 0.2s;
+  font-size: 9px;
+  color: #6b7280;
+  box-sizing: border-box;
+}
+
+.icon-picker-item:active {
+  cursor: grabbing;
+}
+
+.icon-picker-item:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+  color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.icon-picker-item.selected {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+  color: white;
+}
+
+.icon-picker-item.selected:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.icon-name {
+  text-align: center;
+  word-break: break-word;
+  max-width: 100%;
+  line-height: 1.2;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Scrollbar styling for virtual grid */
+.icon-picker-grid-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.icon-picker-grid-container::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.icon-picker-grid-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.icon-picker-grid-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Keyboard navigation focus styles */
+.icon-picker-item:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .icon-picker-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .icon-picker-grid-container {
+    padding: 8px;
+  }
+}
