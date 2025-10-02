@@ -5,10 +5,11 @@ export function createSimpleFlowchartExample() {
   const nodes = [
     {
       id: 'start-node',
-      type: 'circle',
+      type: 'shape',
       position: { x: 100, y: 100 },
       data: {
         label: 'Start',
+        shape: 'circle',
         width: 120,
         height: 120,
         style: {
@@ -22,10 +23,11 @@ export function createSimpleFlowchartExample() {
     },
     {
       id: 'process-node',
-      type: 'rectangle',
+      type: 'shape',
       position: { x: 300, y: 80 },
       data: {
         label: 'Process Data',
+        shape: 'rectangle',
         width: 180,
         height: 100,
         style: {
@@ -39,10 +41,11 @@ export function createSimpleFlowchartExample() {
     },
     {
       id: 'decision-node',
-      type: 'diamond',
+      type: 'shape',
       position: { x: 550, y: 60 },
       data: {
         label: 'Valid?',
+        shape: 'diamond',
         width: 140,
         height: 140,
         style: {
@@ -56,10 +59,11 @@ export function createSimpleFlowchartExample() {
     },
     {
       id: 'end-node',
-      type: 'circle',
+      type: 'shape',
       position: { x: 750, y: 100 },
       data: {
         label: 'End',
+        shape: 'circle',
         width: 120,
         height: 120,
         style: {
