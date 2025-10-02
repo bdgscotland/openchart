@@ -20,6 +20,7 @@ import './App.css';
 function App() {
   // Core state management
   const [selectedTool, setSelectedTool] = useState<DrawingTool>('select');
+  const [selectedIconName, setSelectedIconName] = useState<string>('Star');
   const [nodes, setNodesInternal] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [diagramSettings, setDiagramSettings] = useState<DiagramSettings>(DEFAULT_DIAGRAM_SETTINGS);
@@ -142,6 +143,7 @@ function App() {
                 setNodes={setNodes}
                 setEdges={setEdges}
                 selectedTool={selectedTool}
+                selectedIconName={selectedIconName}
                 canvasState={canvasState}
                 flowRef={flowRef}
               >
@@ -154,6 +156,8 @@ function App() {
                   setDiagramSettings={setDiagramSettings}
                   selectedTool={selectedTool}
                   setSelectedTool={setSelectedTool}
+                  selectedIconName={selectedIconName}
+                  setSelectedIconName={setSelectedIconName}
                 />
               </CanvasOperationsProvider>
             </LayerOperationsProvider>

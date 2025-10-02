@@ -51,6 +51,7 @@ interface CanvasOperationsProviderProps {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   selectedTool: string;
+  selectedIconName?: string;
   canvasState: any;
   flowRef: React.RefObject<any>;
 }
@@ -64,6 +65,7 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
   setNodes,
   setEdges,
   selectedTool,
+  selectedIconName,
   canvasState,
   flowRef,
 }) => {
@@ -73,6 +75,7 @@ export const CanvasOperationsProvider: React.FC<CanvasOperationsProviderProps> =
   // Shape creation hook
   const { handleCanvasClick } = useShapeCreation({
     selectedTool,
+    selectedIconName,
     onNodesChange: setNodes,
   });
 

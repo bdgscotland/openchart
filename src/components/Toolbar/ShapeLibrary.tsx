@@ -11,6 +11,8 @@ import './ShapeLibrary.css';
 interface ShapeLibraryProps {
   selectedTool: DrawingTool;
   onToolSelect: (tool: DrawingTool) => void;
+  selectedIconName?: string;
+  onIconNameChange?: (iconName: string) => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
   mode?: CanvasMode;
@@ -208,6 +210,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
 export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
   selectedTool,
   onToolSelect,
+  selectedIconName: propSelectedIconName,
+  onIconNameChange,
   isCollapsed = false,
   onToggleCollapse,
   mode = 'diagram', // Default to diagram mode
@@ -218,7 +222,9 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
     new Set(shapeCategories.filter(cat => cat.defaultExpanded).map(cat => cat.id))
   );
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const [selectedIconName, setSelectedIconName] = useState<string>('Heart');
+
+  // Use prop if provided, otherwise use local state
+  const selectedIconName = propSelectedIconName || 'Star';
 
   // Handle icon shape button click - open icon picker
   const handleIconShapeClick = useCallback(() => {
@@ -228,9 +234,9 @@ export const ShapeLibrary: React.FC<ShapeLibraryProps> = ({
 
   // Handle icon selection from picker
   const handleIconSelect = useCallback((iconName: string) => {
-    setSelectedIconName(iconName);
+    onIconNameChange?.(iconName);
     onToolSelect('icon');
-  }, [onToolSelect]);
+  }, [onToolSelect, onIconNameChange]);
 
   // Toggle category expansion
   const toggleCategory = useCallback((categoryId: string) => {

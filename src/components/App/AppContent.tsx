@@ -24,6 +24,8 @@ interface AppContentProps {
   setDiagramSettings: React.Dispatch<React.SetStateAction<DiagramSettings>>;
   selectedTool: DrawingTool;
   setSelectedTool: React.Dispatch<React.SetStateAction<DrawingTool>>;
+  selectedIconName: string;
+  setSelectedIconName: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const AppContent: React.FC<AppContentProps> = ({
@@ -34,7 +36,9 @@ const AppContent: React.FC<AppContentProps> = ({
   diagramSettings,
   setDiagramSettings,
   selectedTool,
-  setSelectedTool
+  setSelectedTool,
+  selectedIconName,
+  setSelectedIconName
 }) => {
 
   // Get all operations from contexts
@@ -400,6 +404,8 @@ const AppContent: React.FC<AppContentProps> = ({
           isCollapsed={isLeftSidebarCollapsed}
           selectedTool={selectedTool}
           onToolSelect={setSelectedTool}
+          selectedIconName={selectedIconName}
+          onIconNameChange={setSelectedIconName}
           mode={diagramSettings.mode}
           eventStormPhase={diagramSettings.eventStormSettings?.phase}
         />

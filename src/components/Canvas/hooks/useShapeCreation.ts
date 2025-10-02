@@ -8,10 +8,11 @@ import { CreateNodeCommand } from '../../../core/commands/CreateNodeCommand';
 
 interface UseShapeCreationOptions {
   selectedTool: DrawingTool;
+  selectedIconName?: string;
   onNodesChange: (callback: (nodes: Node[]) => Node[]) => void;
 }
 
-export const useShapeCreation = ({ selectedTool, onNodesChange }: UseShapeCreationOptions) => {
+export const useShapeCreation = ({ selectedTool, selectedIconName, onNodesChange }: UseShapeCreationOptions) => {
   const { getActiveLayer } = useLayers();
   const { executeCommand } = useUndoRedo();
 
@@ -56,16 +57,17 @@ export const useShapeCreation = ({ selectedTool, onNodesChange }: UseShapeCreati
       }
     });
 
-    // Add layerId to the node's data
+    // Add layerId and iconName (if icon shape) to the node's data
     newNode.data = {
       ...newNode.data,
       layerId: activeLayer.id,
+      ...(selectedTool === 'icon' && selectedIconName ? { iconName: selectedIconName } : {}),
     };
 
     // Add the new node to the canvas using CreateNodeCommand for undo/redo support
     const command = new CreateNodeCommand(newNode);
     executeCommand(command);
-  }, [selectedTool, onNodesChange, getActiveLayer, executeCommand]);
+  }, [selectedTool, selectedIconName, onNodesChange, getActiveLayer, executeCommand]);
 
   return {
     handleCanvasClick,
