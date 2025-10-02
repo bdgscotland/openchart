@@ -187,3 +187,380 @@ export function getAllExamples(): Array<{ name: string; diagram: DiagramSchema }
     { name: 'Network Diagram', diagram: createNetworkDiagramExample() },
   ];
 }
+
+/**
+ * Creates an E-Commerce Order Flow Event Storm example
+ */
+export function createEventStormEcommerceExample() {
+  const nodes = [
+    // Events
+    {
+      id: 'event-1',
+      type: 'eventStormNode',
+      position: { x: 100, y: 100 },
+      data: {
+        label: 'Order Placed',
+        stickyType: 'event',
+        color: '#FFB84D',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'event-2',
+      type: 'eventStormNode',
+      position: { x: 500, y: 100 },
+      data: {
+        label: 'Payment Processed',
+        stickyType: 'event',
+        color: '#FFB84D',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'event-3',
+      type: 'eventStormNode',
+      position: { x: 900, y: 100 },
+      data: {
+        label: 'Order Shipped',
+        stickyType: 'event',
+        color: '#FFB84D',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'event-4',
+      type: 'eventStormNode',
+      position: { x: 1300, y: 100 },
+      data: {
+        label: 'Order Delivered',
+        stickyType: 'event',
+        color: '#FFB84D',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    // Actors
+    {
+      id: 'actor-1',
+      type: 'eventStormNode',
+      position: { x: 100, y: 280 },
+      data: {
+        label: 'Customer',
+        stickyType: 'actor',
+        color: '#FFE066',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'actor-2',
+      type: 'eventStormNode',
+      position: { x: 500, y: 280 },
+      data: {
+        label: 'Payment Gateway',
+        stickyType: 'actor',
+        color: '#FFE066',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'actor-3',
+      type: 'eventStormNode',
+      position: { x: 900, y: 280 },
+      data: {
+        label: 'Warehouse Staff',
+        stickyType: 'actor',
+        color: '#FFE066',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    // Commands
+    {
+      id: 'command-1',
+      type: 'eventStormNode',
+      position: { x: 300, y: 100 },
+      data: {
+        label: 'Process Payment',
+        stickyType: 'command',
+        color: '#6DB3F2',
+        phase: 'process-modeling',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'command-2',
+      type: 'eventStormNode',
+      position: { x: 700, y: 100 },
+      data: {
+        label: 'Ship Order',
+        stickyType: 'command',
+        color: '#6DB3F2',
+        phase: 'process-modeling',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    }
+  ];
+
+  const edges = [
+    {
+      id: 'edge-1',
+      source: 'event-1',
+      target: 'command-1',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    },
+    {
+      id: 'edge-2',
+      source: 'command-1',
+      target: 'event-2',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    },
+    {
+      id: 'edge-3',
+      source: 'event-2',
+      target: 'command-2',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    },
+    {
+      id: 'edge-4',
+      source: 'command-2',
+      target: 'event-3',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    },
+    {
+      id: 'edge-5',
+      source: 'event-3',
+      target: 'event-4',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    }
+  ];
+
+  return {
+    nodes,
+    edges,
+    viewport: { x: 0, y: 0, zoom: 0.8 },
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    layers: [
+      {
+        id: 'default',
+        name: 'Default Layer',
+        visible: true,
+        locked: false,
+        opacity: 1
+      }
+    ],
+    activeLayerId: 'default',
+    diagramSettings: {
+      mode: 'eventStorm',
+      eventStormPhase: 'big-picture'
+    }
+  };
+}
+
+/**
+ * Creates a User Registration Event Storm example
+ */
+export function createEventStormRegistrationExample() {
+  const nodes = [
+    {
+      id: 'event-1',
+      type: 'eventStormNode',
+      position: { x: 100, y: 100 },
+      data: {
+        label: 'Registration Started',
+        stickyType: 'event',
+        color: '#FFB84D',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'event-2',
+      type: 'eventStormNode',
+      position: { x: 500, y: 100 },
+      data: {
+        label: 'Email Verified',
+        stickyType: 'event',
+        color: '#FFB84D',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'event-3',
+      type: 'eventStormNode',
+      position: { x: 900, y: 100 },
+      data: {
+        label: 'Account Created',
+        stickyType: 'event',
+        color: '#FFB84D',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'actor-1',
+      type: 'eventStormNode',
+      position: { x: 100, y: 280 },
+      data: {
+        label: 'New User',
+        stickyType: 'actor',
+        color: '#FFE066',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'command-1',
+      type: 'eventStormNode',
+      position: { x: 300, y: 100 },
+      data: {
+        label: 'Verify Email',
+        stickyType: 'command',
+        color: '#6DB3F2',
+        phase: 'process-modeling',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'command-2',
+      type: 'eventStormNode',
+      position: { x: 700, y: 100 },
+      data: {
+        label: 'Create Account',
+        stickyType: 'command',
+        color: '#6DB3F2',
+        phase: 'process-modeling',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    },
+    {
+      id: 'question-1',
+      type: 'eventStormNode',
+      position: { x: 500, y: 280 },
+      data: {
+        label: 'What if email verification fails?',
+        stickyType: 'question',
+        color: '#CC99FF',
+        phase: 'big-picture',
+        zIndex: 0,
+        layerId: 'default'
+      }
+    }
+  ];
+
+  const edges = [
+    {
+      id: 'edge-1',
+      source: 'event-1',
+      target: 'command-1',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    },
+    {
+      id: 'edge-2',
+      source: 'command-1',
+      target: 'event-2',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    },
+    {
+      id: 'edge-3',
+      source: 'event-2',
+      target: 'command-2',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    },
+    {
+      id: 'edge-4',
+      source: 'command-2',
+      target: 'event-3',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#FFB84D', strokeWidth: 2 },
+      data: { layerId: 'default' }
+    }
+  ];
+
+  return {
+    nodes,
+    edges,
+    viewport: { x: 0, y: 0, zoom: 0.9 },
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    layers: [
+      {
+        id: 'default',
+        name: 'Default Layer',
+        visible: true,
+        locked: false,
+        opacity: 1
+      }
+    ],
+    activeLayerId: 'default',
+    diagramSettings: {
+      mode: 'eventStorm',
+      eventStormPhase: 'big-picture'
+    }
+  };
+}
+
+/**
+ * Gets Event Storm example by name
+ */
+export function getEventStormExample(name: string) {
+  switch (name) {
+    case 'event-storm-ecommerce':
+      return createEventStormEcommerceExample();
+    case 'event-storm-registration':
+      return createEventStormRegistrationExample();
+    case 'event-storm-payment':
+    case 'event-storm-shipping':
+    case 'event-storm-inventory':
+      // Return ecommerce as fallback for now
+      return createEventStormEcommerceExample();
+    default:
+      return null;
+  }
+}

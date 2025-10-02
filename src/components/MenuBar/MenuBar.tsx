@@ -10,6 +10,7 @@ export interface MenuBarProps {
   onExportWebP: () => void;
   onExportSVG: () => void;
   onExportPDF: () => void;
+  onExportMarkdown: () => void;
   onLoadExample: (exampleName: string) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -78,6 +79,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onExportWebP,
   onExportSVG,
   onExportPDF,
+  onExportMarkdown,
   onLoadExample,
   onUndo,
   onRedo,
@@ -149,6 +151,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           { label: 'Export as WebP', onClick: onExportWebP },
           { label: 'Export as SVG', onClick: onExportSVG },
           { label: 'Export as PDF', onClick: onExportPDF },
+          { separator: true, label: '' },
+          { label: 'Export as Markdown (Event Storm)', onClick: onExportMarkdown },
         ]
       },
     ],
@@ -166,7 +170,13 @@ export const MenuBar: React.FC<MenuBarProps> = ({
         checked: diagramSettings?.mode === 'eventStorm',
       },
     ],
-    examples: [
+    examples: diagramSettings?.mode === 'eventStorm' ? [
+      { label: 'E-Commerce Order Flow', onClick: () => onLoadExample('event-storm-ecommerce') },
+      { label: 'User Registration', onClick: () => onLoadExample('event-storm-registration') },
+      { label: 'Payment Processing', onClick: () => onLoadExample('event-storm-payment') },
+      { label: 'Shipping & Delivery', onClick: () => onLoadExample('event-storm-shipping') },
+      { label: 'Inventory Management', onClick: () => onLoadExample('event-storm-inventory') },
+    ] : [
       { label: 'Basic Flowchart', onClick: () => onLoadExample('flowchart') },
       { label: 'Org Chart', onClick: () => onLoadExample('orgchart') },
       { label: 'Process Flow', onClick: () => onLoadExample('process') },

@@ -14,6 +14,7 @@ interface FileOperationsContextType {
   handleExportWebP: () => Promise<void>;
   handleExportSVG: () => Promise<void>;
   handleExportPDF: () => Promise<void>;
+  handleExportMarkdown: () => Promise<void>;
   handleLoadExample: (exampleName: string) => void;
   flowRef: React.RefObject<any>;
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -176,10 +177,62 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
     }
   }, [flowRef]);
 
-  const handleLoadExample = useCallback((exampleName: string) => {
-    // TODO: Implement example loading logic
-    console.log('Loading example:', exampleName);
-  }, []);
+  const handleExportMarkdown = useCallback(async () => {
+    try {
+      await diagramPersistence.exportToMarkdown(
+        nodes,
+        edges,
+        diagramSettings,
+        {
+          title: 'Event Storm Workshop',
+          createdWith: 'OpenChart',
+        }
+      );
+    } catch (error) {
+      console.error('Error exporting to Markdown:', error);
+      if (error instanceof Error) {
+        alert(error.message);
+      }
+    }
+  }, [nodes, edges, diagramSettings]);
+
+  const handleLoadExample = useCallback(async (exampleName: string) => {
+    try {
+      // Dynamically import the example factory
+      const { getExampleByName } = await import('../core/schema/examples/index');
+      const exampleData = getExampleByName(exampleName);
+
+      if (!exampleData) {
+        console.warn(`Example "${exampleName}" not found`);
+        alert(`Example "${exampleName}" is not available yet.`);
+        return;
+      }
+
+      // Load the example as if it were a diagram file
+      const imported = await diagramPersistence.importDiagram(exampleData);
+
+      // Update all state
+      setNodes(imported.nodes);
+      setEdges(imported.edges);
+      setLayers(imported.layers);
+      setActiveLayerId(imported.activeLayerId);
+
+      // Restore diagram settings if available
+      if (imported.diagramSettings) {
+        setDiagramSettings(imported.diagramSettings);
+      }
+
+      // Set viewport after loading
+      if (flowRef.current && imported.viewport) {
+        flowRef.current.setViewport(imported.viewport);
+      }
+
+      console.log(`Loaded example: ${exampleName}`);
+    } catch (error) {
+      console.error('Error loading example:', error);
+      alert('Failed to load example diagram.');
+    }
+  }, [setNodes, setEdges, setLayers, setActiveLayerId, setDiagramSettings, flowRef]);
 
   const contextValue: FileOperationsContextType = {
     handleNewDiagram,
@@ -190,6 +243,7 @@ export const FileOperationsProvider: React.FC<FileOperationsProviderProps> = ({
     handleExportWebP,
     handleExportSVG,
     handleExportPDF,
+    handleExportMarkdown,
     handleLoadExample,
     flowRef,
     fileInputRef,

@@ -301,6 +301,7 @@ const AppContent: React.FC<AppContentProps> = ({
         onExportWebP={fileOps.handleExportWebP}
         onExportSVG={fileOps.handleExportSVG}
         onExportPDF={fileOps.handleExportPDF}
+        onExportMarkdown={fileOps.handleExportMarkdown}
         onLoadExample={fileOps.handleLoadExample}
 
         // Canvas operations

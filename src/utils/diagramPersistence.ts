@@ -403,6 +403,222 @@ class DiagramPersistence {
       warnings,
     };
   }
+
+  /**
+   * Export Event Storm diagram to Markdown format
+   * Organizes stickies by phase and type, includes connections
+   */
+  async exportToMarkdown(
+    nodes: Node[],
+    edges: Edge[],
+    diagramSettings?: any,
+    metadata?: DiagramMetadata
+  ): Promise<void> {
+    // Validate this is an Event Storm diagram
+    if (diagramSettings?.mode !== 'eventStorm') {
+      throw new Error('Markdown export is only available for Event Storm diagrams');
+    }
+
+    // Import Event Storm types
+    type StickyType = 'event' | 'actor' | 'question' | 'command' | 'policy' | 'readmodel' | 'aggregate' | 'external' | 'ui' | 'hotspot';
+    type EventStormPhase = 'big-picture' | 'process-modeling' | 'software-design';
+
+    interface EventStormNodeData {
+      label: string;
+      stickyType: StickyType;
+      phase: EventStormPhase;
+      description?: string;
+      notes?: string;
+      aggregateName?: string;
+    }
+
+    // Filter Event Storm nodes
+    const eventStormNodes = nodes.filter(node => node.type === 'eventStormNode');
+
+    // Group nodes by phase and sticky type
+    const groupedNodes: Record<EventStormPhase, Record<StickyType, Node[]>> = {
+      'big-picture': {} as Record<StickyType, Node[]>,
+      'process-modeling': {} as Record<StickyType, Node[]>,
+      'software-design': {} as Record<StickyType, Node[]>,
+    };
+
+    eventStormNodes.forEach(node => {
+      const data = node.data as EventStormNodeData;
+      const phase = data.phase || 'big-picture';
+      const stickyType = data.stickyType;
+
+      if (!groupedNodes[phase][stickyType]) {
+        groupedNodes[phase][stickyType] = [];
+      }
+      groupedNodes[phase][stickyType].push(node);
+    });
+
+    // Sort nodes by x position (chronological left-to-right)
+    Object.keys(groupedNodes).forEach(phaseKey => {
+      const phase = phaseKey as EventStormPhase;
+      Object.keys(groupedNodes[phase]).forEach(typeKey => {
+        const type = typeKey as StickyType;
+        groupedNodes[phase][type].sort((a, b) => a.position.x - b.position.x);
+      });
+    });
+
+    // Create markdown content
+    const lines: string[] = [];
+    const timestamp = new Date().toISOString().split('T')[0];
+    const diagramName = metadata?.name || 'Event Storm Workshop';
+
+    // Header
+    lines.push(`# ${diagramName}`);
+    lines.push('');
+    lines.push(`**Date:** ${timestamp}`);
+    lines.push(`**Phase:** ${diagramSettings.eventStormPhase || 'big-picture'}`);
+    lines.push('');
+    lines.push('> Generated from OpenChart Event Storm Mode');
+    lines.push('');
+
+    // Sticky type labels and colors
+    const stickyTypeLabels: Record<StickyType, string> = {
+      event: 'Domain Events 🟠',
+      actor: 'Actors 🟡',
+      question: 'Questions/Concerns 🟣',
+      command: 'Commands 🔵',
+      policy: 'Policies 🟪',
+      readmodel: 'Read Models 🟢',
+      aggregate: 'Aggregates 🟨',
+      external: 'External Systems 🩷',
+      ui: 'UI/Mockups ⚪',
+      hotspot: 'Hotspots 🔴',
+    };
+
+    // Function to render a group of stickies
+    const renderStickyGroup = (nodes: Node[], label: string) => {
+      if (nodes.length === 0) return;
+
+      lines.push(`### ${label}`);
+      lines.push('');
+
+      nodes.forEach((node, index) => {
+        const data = node.data as EventStormNodeData;
+        lines.push(`${index + 1}. **${data.label}**`);
+
+        if (data.description) {
+          lines.push(`   - Description: ${data.description}`);
+        }
+        if (data.notes) {
+          lines.push(`   - Notes: ${data.notes}`);
+        }
+        if (data.aggregateName) {
+          lines.push(`   - Aggregate: ${data.aggregateName}`);
+        }
+      });
+
+      lines.push('');
+    };
+
+    // Big Picture Phase
+    lines.push('## 📍 Big Picture Phase');
+    lines.push('');
+    lines.push('*Initial domain exploration focusing on domain events and actors*');
+    lines.push('');
+
+    renderStickyGroup(groupedNodes['big-picture']['event'] || [], stickyTypeLabels.event);
+    renderStickyGroup(groupedNodes['big-picture']['actor'] || [], stickyTypeLabels.actor);
+    renderStickyGroup(groupedNodes['big-picture']['question'] || [], stickyTypeLabels.question);
+
+    // Process Modeling Phase
+    const processModelingTypes: StickyType[] = ['command', 'policy', 'readmodel'];
+    const hasProcessModeling = processModelingTypes.some(type => 
+      (groupedNodes['process-modeling'][type] || []).length > 0
+    );
+
+    if (hasProcessModeling) {
+      lines.push('## 🔄 Process Modeling Phase');
+      lines.push('');
+      lines.push('*Adding commands, policies, and read models to understand system behavior*');
+      lines.push('');
+
+      renderStickyGroup(groupedNodes['process-modeling']['command'] || [], stickyTypeLabels.command);
+      renderStickyGroup(groupedNodes['process-modeling']['policy'] || [], stickyTypeLabels.policy);
+      renderStickyGroup(groupedNodes['process-modeling']['readmodel'] || [], stickyTypeLabels.readmodel);
+    }
+
+    // Software Design Phase
+    const softwareDesignTypes: StickyType[] = ['aggregate', 'external', 'ui', 'hotspot'];
+    const hasSoftwareDesign = softwareDesignTypes.some(type =>
+      (groupedNodes['software-design'][type] || []).length > 0
+    );
+
+    if (hasSoftwareDesign) {
+      lines.push('## 🏗️ Software Design Phase');
+      lines.push('');
+      lines.push('*Defining aggregates, bounded contexts, and system boundaries*');
+      lines.push('');
+
+      renderStickyGroup(groupedNodes['software-design']['aggregate'] || [], stickyTypeLabels.aggregate);
+      renderStickyGroup(groupedNodes['software-design']['external'] || [], stickyTypeLabels.external);
+      renderStickyGroup(groupedNodes['software-design']['ui'] || [], stickyTypeLabels.ui);
+      renderStickyGroup(groupedNodes['software-design']['hotspot'] || [], stickyTypeLabels.hotspot);
+    }
+
+    // Connections
+    if (edges.length > 0) {
+      lines.push('## 🔗 Connections');
+      lines.push('');
+      lines.push('*Relationships between stickies showing causation and workflow*');
+      lines.push('');
+
+      // Create a map of node IDs to labels
+      const nodeLabels = new Map<string, string>();
+      eventStormNodes.forEach(node => {
+        const data = node.data as EventStormNodeData;
+        nodeLabels.set(node.id, data.label);
+      });
+
+      edges.forEach((edge, index) => {
+        const sourceLabel = nodeLabels.get(edge.source) || edge.source;
+        const targetLabel = nodeLabels.get(edge.target) || edge.target;
+        lines.push(`${index + 1}. **${sourceLabel}** → **${targetLabel}**`);
+      });
+
+      lines.push('');
+    }
+
+    // Statistics
+    lines.push('## 📊 Statistics');
+    lines.push('');
+    lines.push(`- **Total Stickies:** ${eventStormNodes.length}`);
+    lines.push(`- **Total Connections:** ${edges.length}`);
+
+    const typeCount: Record<string, number> = {};
+    eventStormNodes.forEach(node => {
+      const data = node.data as EventStormNodeData;
+      typeCount[data.stickyType] = (typeCount[data.stickyType] || 0) + 1;
+    });
+
+    Object.entries(typeCount).forEach(([type, count]) => {
+      const label = stickyTypeLabels[type as StickyType] || type;
+      lines.push(`- **${label}:** ${count}`);
+    });
+
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+    lines.push('*Generated by [OpenChart](https://github.com/anthropics/openchart) - Open Source Event Storming Tool*');
+
+    // Create the markdown content
+    const markdownContent = lines.join('\n');
+
+    // Trigger download
+    const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `event-storm-${timestamp}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    console.log('Event Storm diagram exported to Markdown');
+  }
 }
 
 export const diagramPersistence = new DiagramPersistence();

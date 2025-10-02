@@ -37,6 +37,8 @@ OpenChart aims to become a modern, open-source alternative to commercial diagram
 - **Edge Positioning**: Accurate connection points on all shape types
 - **UI Polish**: Consistent icons, proper hover states, and visual feedback
 - **File Persistence**: Save/load diagrams with all settings preserved
+- **Event Storm Mode**: Full DDD Event Storming workshop support with specialized stickies
+- **Mode-Aware Examples**: Context-specific example diagrams for each mode
 
 ### 🔬 Stable Features
 - **Shape Library**: 61 shapes across 6 categories
@@ -66,7 +68,28 @@ Open http://localhost:5173
 
 ## 🔨 Recent Development Work
 
-### Latest Iteration (v0.3.0-alpha)
+### Latest Iteration (v0.4.0-alpha)
+**Focus: Event Storm mode and workshop facilitation tools**
+
+- ✅ **Event Storm Mode** - Full DDD Event Storming workshop support
+  - 10 specialized sticky types (events, actors, commands, policies, aggregates, etc.)
+  - Phase-based workflow (Big Picture → Process Modeling → Software Design)
+  - Timeline-based horizontal layout with swim lane snapping
+  - Visual legend and phase indicators
+  - Keyboard shortcuts for rapid sticky creation (E, A, C, Q, etc.)
+  - Quick connection mode (press L to connect stickies)
+- ✅ **Workshop Features** - Collaborative facilitation tools
+  - Timeline guide showing event flow direction
+  - Color-coded stickies matching Event Storming conventions
+  - Phase selector for workshop progression
+  - Bounded Context containers for software design phase
+- ✅ **Markdown Export** - Event Storm diagrams export to structured markdown
+- ✅ **Mode-Aware Examples** - Context-specific examples
+  - Event Storm: E-Commerce Order Flow, User Registration examples
+  - Diagram Mode: Flowchart, Org Chart, Network examples
+  - Examples factory pattern for easy maintenance
+
+### Previous Iteration (v0.3.0-alpha)
 **Focus: Diagram settings persistence and grid customization**
 
 - ✅ **Diagram Settings Persistence** - Grid, background, and canvas settings now save/load with diagrams
